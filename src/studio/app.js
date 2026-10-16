@@ -263,6 +263,8 @@ async function loadServerState(isBackground = false) {
         renderSceneList();
         renderDeckGrid();
         updateSceneInspector();
+      } else if (!isUserTyping) {
+        renderDeckGrid();
       }
     }
   } catch (e) {
@@ -753,7 +755,7 @@ function renderDeckGrid() {
   const activeKeys = currentProfile?.keys || {};
 
   for (let slot = 0; slot < 15; slot++) {
-    const keyData = activeKeys[slot];
+    const keyData = activeKeys[slot] !== undefined ? activeKeys[slot] : (activeKeys[slot + 1] !== undefined ? activeKeys[slot + 1] : activeKeys[String(slot + 1)]);
     const keyEl = document.createElement('div');
     keyEl.className = `deck-key-slot ${slot === state.selectedSlot ? 'selected' : ''}`;
     keyEl.dataset.slot = slot;
@@ -1093,7 +1095,7 @@ function selectKey(slot) {
   });
 
   const activeKeys = state.profiles[state.activeProfile]?.keys || {};
-  let keyData = activeKeys[slot];
+  let keyData = activeKeys[slot] !== undefined ? activeKeys[slot] : (activeKeys[slot + 1] !== undefined ? activeKeys[slot + 1] : activeKeys[String(slot + 1)]);
 
   const emptyState = document.getElementById('inspectorEmptyState');
   const activeContent = document.getElementById('inspectorActiveContent');

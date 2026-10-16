@@ -905,7 +905,10 @@ class D6Engine:
 
     def render_empty_key_image(self) -> Image.Image:
         """Gera imagem de tecla inativa/vazia completamente preta e limpa (LCD desligado)."""
-        return Image.new("RGB", self.KEY_SIZE, color="#000000")
+        img = Image.new("RGB", self.KEY_SIZE, color="#000000")
+        draw = ImageDraw.Draw(img)
+        draw.rectangle([(0, 0), (self.KEY_SIZE[0] - 1, self.KEY_SIZE[1] - 1)], outline="#000000", width=1)
+        return img
 
     @staticmethod
     def _resolve_font(family: str = "Helvetica", size: int = 14, bold: bool = False, italic: bool = False) -> ImageFont.ImageFont:
@@ -1226,7 +1229,7 @@ class D6Engine:
         }
         return fifine_official_rev.get(hw_key, hw_key)
 
-    def sync_key(self, key_num: int, force: bool = False, is_pressed: bool = False, page_id: Optional[str] = None):
+    def sync_key(self, key_num: int, force: bool = False, is_pressed: bool = False, page_id: Optional[str] = None, refresh_now: bool = True):
         """Envia a tecla atualizada diretamente para a tela LCD física com Dirty Checking ultra-rápido."""
         if not self.device or not (1 <= key_num <= 18):
             return
@@ -1244,20 +1247,14 @@ class D6Engine:
             else:
                 img = self.render_empty_key_image()
 
-            # Rotação base física do hardware Fifine D6 (180° com transposição exata de matriz, sem artefatos)
+            # Rotação base física de 180° do hardware Fifine D6
             rot = int(self.config.get("rotation", 0))
             total_rot = (180 + rot) % 360
-            if total_rot == 180:
-                img = img.transpose(Image.ROTATE_180)
-            elif total_rot == 90:
-                img = img.transpose(Image.ROTATE_90)
-            elif total_rot == 270:
-                img = img.transpose(Image.ROTATE_270)
-            elif total_rot != 0:
+            if total_rot != 0:
                 img = img.rotate(total_rot)
 
-            # Salva JPEG baseline YUV 4:2:0 nativo com preenchimento 100% até o último pixel (sem mancha verde)
-            img.save(temp_path, "JPEG", quality=95, progressive=False, optimize=False)
+            # Salva JPEG baseline com qualidade 92 idêntica ao SDK oficial (sem mancha verde, 100% preenchido)
+            img.save(temp_path, "JPEG", quality=92, progressive=False, optimize=False)
 
             # Dirty Checking com Hash MD5: se a imagem for idêntica ao que já está no LCD, pula transmissão USB
             import hashlib
@@ -1275,7 +1272,7 @@ class D6Engine:
                 else:
                     res = -1
 
-                if hasattr(self.device, "refresh"):
+                if refresh_now and hasattr(self.device, "refresh"):
                     self.device.refresh()
             
             self._displayed_key_hashes[hw_key] = img_hash
@@ -1290,10 +1287,10 @@ class D6Engine:
         def _press_thread():
             try:
                 # 1. Envia frame de botão pressionado (tamanho reduzido para 82x82 com borda de toque)
-                self.sync_key(slot_num, force=True, is_pressed=True)
+                self.sync_key(slot_num, force=True, is_pressed=True, refresh_now=True)
                 time.sleep(duration)
                 # 2. Retorna ao tamanho original normal
-                self.sync_key(slot_num, force=True, is_pressed=False)
+                self.sync_key(slot_num, force=True, is_pressed=False, refresh_now=True)
             except Exception as e:
                 print(f"[Engine] Erro na micro-animação da tecla {slot_num}: {e}")
 
@@ -1306,11 +1303,10 @@ class D6Engine:
 
         active_page = self.config.get("active_page", "principal")
         for k in range(1, 16):
-            self.sync_key(k, force=force, page_id=active_page)
-            # Intervalo mínimo seguro (8ms) para o microcontrolador do 293S
-            time.sleep(0.008)
+            self.sync_key(k, force=force, page_id=active_page, refresh_now=False)
+            time.sleep(0.01)
 
-        # Atualiza o display no hardware se suportado
+        # Atualiza o display no hardware ao final do lote completo
         if hasattr(self.device, "refresh"):
             with self.lock:
                 self.device.refresh()

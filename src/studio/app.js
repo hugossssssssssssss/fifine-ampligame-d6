@@ -950,37 +950,75 @@ function duplicateKey(slot) {
   showToast(`✓ Tecla duplicada no slot ${targetSlot + 1}`);
 }
 
-// Excluir tecla (⌫)
-function deleteKey(slot) {
-  const profile = state.profiles[state.activeProfile];
-  if (!profile || !profile.keys[slot]) return;
+// Recupera com segurança os dados de uma tecla em qualquer formato de chave (0-based ou 1-based, número ou string)
+function getKeyData(profileId, slot) {
+  const profile = state.profiles[profileId || state.activeProfile];
+  if (!profile || !profile.keys) return null;
+  const k = profile.keys;
+  if (k[slot] !== undefined) return k[slot];
+  if (k[String(slot)] !== undefined) return k[String(slot)];
+  if (k[slot + 1] !== undefined) return k[slot + 1];
+  if (k[String(slot + 1)] !== undefined) return k[String(slot + 1)];
+  return null;
+}
 
-  const keyData = profile.keys[slot];
+// Excluir / Limpar Tecla (Lixeira e Atalho ⌫)
+function deleteKey(slot) {
+  if (slot === null || slot === undefined) return;
+  const profile = state.profiles[state.activeProfile];
+  if (!profile || !profile.keys) return;
+
+  const keyData = getKeyData(state.activeProfile, slot);
 
   // 1. Impede exclusão da tecla VOLTAR em Slot 0 dentro de uma pasta
-  if (profile.isFolder && slot === 0 && (keyData.actionType === 'backtoparent' || keyData.actionUuid?.includes('backtoparent'))) {
+  if (profile.isFolder && slot === 0 && keyData && (keyData.actionType === 'backtoparent' || keyData.actionUuid?.includes('backtoparent'))) {
     showToast('A tecla "VOLTAR" é essencial para navegar e não pode ser excluída.');
     return;
   }
 
   // 2. Se a tecla for uma Pasta, limpa a sub-página associada
-  const targetFolderId = keyData.target || keyData.folderId;
-  if ((keyData.actionType === 'folder' || keyData.actionUuid?.includes('openchild')) && targetFolderId) {
-    if (state.profiles[targetFolderId]) {
-      delete state.profiles[targetFolderId];
+  if (keyData) {
+    const targetFolderId = keyData.target || keyData.folderId;
+    if ((keyData.actionType === 'folder' || keyData.actionUuid?.includes('openchild')) && targetFolderId) {
+      if (state.profiles[targetFolderId]) {
+        delete state.profiles[targetFolderId];
+      }
+      fetch('/api/page/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: targetFolderId })
+      }).catch(() => {});
     }
-    fetch('/api/page/delete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: targetFolderId })
-    }).catch(() => {});
   }
 
+  // Deleta todas as variantes de indexação do slot
   delete profile.keys[slot];
-  renderDeckGrid();
-  selectKey(slot);
+  delete profile.keys[String(slot)];
+  delete profile.keys[slot + 1];
+  delete profile.keys[String(slot + 1)];
+
+  // Atualiza visual do slot e preview imediatamente para estado limpo
+  updateSlotVisual(slot, null);
+
+  // Sincroniza apagamento físico no hardware Fifine D6 (data: null)
   syncKeyToHardware(slot, null);
-  showToast(`✓ Ação do slot ${slot + 1} excluída`);
+
+  // Re-renderiza a grade de teclas
+  renderDeckGrid();
+
+  // Limpa campos de input do Inspector se este slot estiver selecionado
+  if (slot === state.selectedSlot) {
+    const inputTitle = document.getElementById('inputKeyTitle');
+    if (inputTitle) inputTitle.value = '';
+    const inputSubtitle = document.getElementById('inputKeySubtitle');
+    if (inputSubtitle) inputSubtitle.value = '';
+    const catTitle = document.getElementById('inspectorActionCategory');
+    if (catTitle) catTitle.innerText = 'Caixa de Ferramentas : Tecla Vazia';
+    const previewCard = document.getElementById('keyPreviewCard');
+    if (previewCard) renderKeyVisualContent(previewCard, null, true);
+  }
+
+  showToast(`✓ Tecla ${slot + 1} limpa com sucesso`);
 }
 
 // Exibe menu de contexto flutuante com botão direito
@@ -2360,9 +2398,10 @@ function bindEvents() {
   const btnApplyAll = document.getElementById('btnApplyColorToAll');
   if (btnApplyAll) {
     btnApplyAll.onclick = () => {
-      const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
+      const keyData = getKeyData(state.activeProfile, state.selectedSlot);
       const curColor = keyData?.bg || (document.getElementById('customColorPicker')?.value) || '#18181b';
-      applyKeyColor(curColor, true);
+      applySceneColor(curColor);
+      showToast(`✓ Cor ${curColor} aplicada a todas as 15 telas LCD`);
     };
   }
 
@@ -2395,13 +2434,7 @@ function bindEvents() {
   const btnDelKey = document.getElementById('btnDeleteKeyAction');
   if (btnDelKey) {
     btnDelKey.onclick = () => {
-      const profile = state.profiles[state.activeProfile];
-      if (profile && profile.keys[state.selectedSlot]) {
-        delete profile.keys[state.selectedSlot];
-        renderDeckGrid();
-        selectKey(state.selectedSlot);
-        syncKeyToHardware(state.selectedSlot, null);
-      }
+      deleteKey(state.selectedSlot);
     };
   }
 
@@ -2734,6 +2767,137 @@ function bindEvents() {
     };
   }
 
+  // Botão de Opções da Cena (btnSceneMenu com menu suspenso completo)
+  const btnSceneMenu = document.getElementById('btnSceneMenu');
+  const sceneMenu = document.getElementById('sceneOptionsMenu');
+  if (btnSceneMenu && sceneMenu) {
+    btnSceneMenu.onclick = (e) => {
+      e.stopPropagation();
+      const isVisible = sceneMenu.style.display === 'flex';
+      sceneMenu.style.display = isVisible ? 'none' : 'flex';
+    };
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#sceneOptionsMenu') && !e.target.closest('#btnSceneMenu')) {
+        sceneMenu.style.display = 'none';
+      }
+    });
+
+    // 1. Renomear Cena
+    const optRename = document.getElementById('sceneMenuRename');
+    if (optRename) {
+      optRename.onclick = async () => {
+        sceneMenu.style.display = 'none';
+        const currentProfile = state.profiles[state.activeProfile];
+        const oldName = currentProfile?.name || 'Cena';
+        const newName = prompt('Renomear cena:', oldName);
+        if (newName && newName.trim() && newName.trim() !== oldName) {
+          const clean = newName.trim();
+          showToast(`Renomeando cena para "${clean}"...`);
+          try {
+            await fetch('/api/page/create', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: state.activeProfile, name: clean })
+            });
+            await loadServerState();
+            showToast(`✓ Cena renomeada para "${clean}"`);
+          } catch (e) {
+            showToast('Erro ao renomear cena');
+          }
+        }
+      };
+    }
+
+    // 2. Duplicar Cena
+    const optDup = document.getElementById('sceneMenuDuplicate');
+    if (optDup) {
+      optDup.onclick = async () => {
+        sceneMenu.style.display = 'none';
+        const currentProfile = state.profiles[state.activeProfile];
+        const baseName = currentProfile?.name || 'Cena';
+        const dupName = `${baseName} (Cópia)`;
+        const newId = 'cena_' + Date.now();
+        showToast(`Duplicando cena "${baseName}"...`);
+        try {
+          await fetch('/api/page/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: newId, name: dupName })
+          });
+          const keys = currentProfile?.keys || {};
+          for (const k in keys) {
+            const slotInt = parseInt(k);
+            if (!isNaN(slotInt)) {
+              await fetch('/api/key/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  page: newId,
+                  key: slotInt + 1,
+                  data: keys[k]
+                })
+              });
+            }
+          }
+          await loadServerState();
+          switchProfile(newId);
+          showToast(`✓ Cena "${dupName}" criada e pronta!`);
+        } catch (e) {
+          showToast('Erro ao duplicar cena');
+        }
+      };
+    }
+
+    // 3. Vincular Aplicativo (Auto-Switch)
+    const optLink = document.getElementById('sceneMenuLinkApp');
+    if (optLink) {
+      optLink.onclick = () => {
+        sceneMenu.style.display = 'none';
+        openLinkAppModal(state.activeProfile);
+      };
+    }
+
+    // 4. Limpar Todas as Teclas da Cena
+    const optClear = document.getElementById('sceneMenuClearAll');
+    if (optClear) {
+      optClear.onclick = async () => {
+        sceneMenu.style.display = 'none';
+        const currentProfile = state.profiles[state.activeProfile];
+        const sceneName = currentProfile?.name || 'Cena Atual';
+        if (confirm(`Tem certeza de que deseja limpar TODAS as 15 teclas da cena "${sceneName}"?`)) {
+          showToast(`Limpando as 15 telas LCD...`);
+          currentProfile.keys = {};
+          for (let s = 0; s < 15; s++) {
+            updateSlotVisual(s, null);
+            syncKeyToHardware(s, null);
+          }
+          renderDeckGrid();
+          if (state.selectedSlot !== null) {
+            selectKey(state.selectedSlot);
+          }
+          showToast(`✓ Todas as teclas de "${sceneName}" foram limpas`);
+        }
+      };
+    }
+  }
+
+  // Pílula de Página (Alternância Cíclica Rápida de Páginas / Cenas)
+  const pagePill = document.getElementById('currentPagePill');
+  if (pagePill) {
+    pagePill.onclick = () => {
+      const sceneKeys = Object.keys(state.profiles);
+      if (sceneKeys.length <= 1) {
+        showToast('Página 1 ativa. Clique no "+" ao lado para adicionar novas páginas.');
+        return;
+      }
+      const currentIdx = sceneKeys.indexOf(state.activeProfile);
+      const nextIdx = (currentIdx + 1) % sceneKeys.length;
+      switchProfile(sceneKeys[nextIdx]);
+      showToast(`▶ Página: ${state.profiles[sceneKeys[nextIdx]]?.name || sceneKeys[nextIdx]}`);
+    };
+  }
+
   // Botão Adicionar Página
   const btnAddPage = document.getElementById('btnAddPage');
   if (btnAddPage) {
@@ -2759,7 +2923,39 @@ function bindEvents() {
     };
   }
 
-  // Botão Conectar Hardware (Status Header)
+  // Pílula USB no Header (Clique para Forçar Reconexão / Re-sync USB)
+  const usbPill = document.getElementById('headerUsbStatusPill');
+  if (usbPill) {
+    usbPill.onclick = async () => {
+      showToast('🔄 Re-sincronizando hardware USB StreamDock 293S...');
+      try {
+        const res = await fetch('/api/connect');
+        const data = await res.json();
+        if (data.connected) {
+          await loadServerState();
+          showToast('✓ Hardware Fifine AmpliGame D6 sincronizado e ativo!');
+        } else {
+          showToast('Tentando re-enumerar dispositivo USB...');
+        }
+      } catch (e) {
+        showToast('Erro de comunicação USB');
+      }
+    };
+  }
+
+  // Pílula de Cena no Header (Clique para Propriedades da Cena)
+  const scenePill = document.getElementById('headerSceneStatusPill');
+  if (scenePill) {
+    scenePill.onclick = () => {
+      switchRightTab('tabPaneInspector');
+      state.selectedSlot = null;
+      document.querySelectorAll('.deck-key-slot').forEach(el => el.classList.remove('selected'));
+      updateSceneInspector();
+      showToast(`Propriedades da cena "${state.profiles[state.activeProfile]?.name || 'Padrão'}"`);
+    };
+  }
+
+  // Botão Conectar Hardware (Status Header alternativo)
   const btnConnect = document.getElementById('btnConnectDevice');
   if (btnConnect) {
     btnConnect.onclick = async () => {
@@ -2854,14 +3050,24 @@ function bindGlobalShortcutsAndContextMenu() {
   });
 }
 
-// Vincula abertura, abas e ações de todos os painéis e modais
 function bindModalEvents() {
-  // Vincula cliques nas abas da direita
+  // Vincula cliques nas abas da direita por classe e por ID
   document.querySelectorAll('.side-tab-btn').forEach(btn => {
     btn.onclick = () => {
       const tabId = btn.dataset.tab;
       if (tabId) switchRightTab(tabId);
     };
+  });
+  const tabIdMap = {
+    tabBtnInspector: 'tabPaneInspector',
+    tabBtnActions: 'tabPaneActions',
+    tabBtnStore: 'tabPaneStore',
+    tabBtnSkins: 'tabPaneSkins',
+    tabBtnSettings: 'tabPaneSettings'
+  };
+  Object.entries(tabIdMap).forEach(([btnId, tabPaneId]) => {
+    const el = document.getElementById(btnId);
+    if (el) el.onclick = () => switchRightTab(tabPaneId);
   });
 
   // Botão de Toggle da barra lateral (mobile/telas menores)
@@ -4136,6 +4342,16 @@ function initThemeManager() {
       const choice = btn.dataset.themeVal || 'dark';
       applyTheme(choice, true);
     };
+  });
+
+  const themeIdMap = {
+    btnThemeDark: 'dark',
+    btnThemeLight: 'light',
+    btnThemeAuto: 'auto'
+  };
+  Object.entries(themeIdMap).forEach(([btnId, themeVal]) => {
+    const el = document.getElementById(btnId);
+    if (el) el.onclick = () => applyTheme(themeVal, true);
   });
 
   // Bind no botão de atalho rápido no header

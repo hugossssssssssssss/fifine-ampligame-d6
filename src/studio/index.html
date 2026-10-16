@@ -25,7 +25,7 @@
 
       <div class="header-center-zone">
         <!-- Status USB do Dispositivo -->
-        <div class="header-status-pill usb-status" title="Hardware USB StreamDock 293S conectado via HID nativo">
+        <div class="header-status-pill usb-status" id="headerUsbStatusPill" style="cursor: pointer;" title="Hardware USB StreamDock 293S - Clique para re-sincronizar">
           <span class="pulse-indicator"></span>
           <span class="status-name">D6_1494</span>
           <span class="status-sub">Conectado</span>
@@ -39,7 +39,7 @@
         </div>
 
         <!-- Cena / Perfil em Tempo Real -->
-        <div class="header-status-pill scene-status">
+        <div class="header-status-pill scene-status" id="headerSceneStatusPill" style="cursor: pointer;" title="Cena Ativa - Clique para ver propriedades da cena">
           <span class="scene-dot"></span>
           <span class="status-sub">Cena:</span>
           <strong class="status-name" id="headerCurrentSceneName">Nitro</strong>
@@ -85,12 +85,27 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
             <span class="section-title">Cenas & Perfis</span>
           </div>
-          <div class="scene-header-actions">
+          <div class="scene-header-actions" style="position: relative;">
             <button class="scene-action-btn" id="btnAddScene" title="Nova Cena">+</button>
             <button class="scene-action-btn" id="btnDeleteScene" title="Excluir Cena">−</button>
             <button class="scene-action-btn" id="btnSceneMenu" title="Opções da Cena">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
             </button>
+            <div id="sceneOptionsMenu" class="slot-context-menu" style="display: none; position: absolute; top: calc(100% + 4px); right: 0; width: 210px; z-index: 100;">
+              <div class="slot-context-item" id="sceneMenuRename">
+                <span>✏️ Renomear Cena</span>
+              </div>
+              <div class="slot-context-item" id="sceneMenuDuplicate">
+                <span>📋 Duplicar Cena</span>
+              </div>
+              <div class="slot-context-item" id="sceneMenuLinkApp">
+                <span>🔗 Vincular Aplicativo</span>
+              </div>
+              <div class="slot-context-divider"></div>
+              <div class="slot-context-item danger" id="sceneMenuClearAll">
+                <span>🧹 Limpar Todas as Teclas</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1383,6 +1398,6 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=20261016_pixel_perfect_keys"></script>
+  <script type="module" src="app.js?v=20261016_functional_buttons"></script>
 </body>
 </html>

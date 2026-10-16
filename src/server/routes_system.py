@@ -32,9 +32,24 @@ def register_system_routes(router: Router):
             "rotation": engine.config.get("rotation", 0),
             "is_asleep": getattr(engine, "is_asleep", False),
             "idle_seconds": int(time.time() - getattr(engine, "_last_activity_time", time.time())),
+            "last_pressed_slot": getattr(engine, "_last_pressed_slot", None),
+            "last_pressed_ts": getattr(engine, "_last_pressed_ts", 0.0),
             "pages": engine.config.get("pages", {})
         }
         router.send_json(handler, 200, data)
+
+    @router.get("/api/press_events")
+    def get_press_events(handler, engine, query):
+        """Retorna eventos de toque em teclas físicas para animação sincronizada na Web UI."""
+        since = float(query.get("since", [0])[0]) if "since" in query else 0.0
+        last_ts = getattr(engine, "_last_pressed_ts", 0.0)
+        last_slot = getattr(engine, "_last_pressed_slot", None)
+        has_new = bool((last_ts > since) and (last_slot is not None))
+        router.send_json(handler, 200, {
+            "has_new": has_new,
+            "slot": last_slot if has_new else None,
+            "ts": last_ts
+        })
 
     @router.get("/api/connect")
     def connect_device(handler, engine, query):

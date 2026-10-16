@@ -272,6 +272,8 @@ class D6Engine:
         self._saved_brightness = self.config.get("brightness", 80)
         self._displayed_key_hashes = {}  # Dirty checking de alta velocidade para cada LCD físico
         self._audio_processes = []  # Processos de áudio ativos (Soundboard)
+        self._last_pressed_slot = None  # Último slot pressionado no hardware/UI para feedback tátil
+        self._last_pressed_ts = 0.0  # Timestamp do último clique para sincronização Web UI
 
         # 10. Cliente WebSocket Oficial para OBS Studio v5
         obs_cfg = self.config.get("obs", {})
@@ -961,8 +963,8 @@ class D6Engine:
         except Exception:
             return ImageFont.load_default()
 
-    def render_key_image(self, key_data: Dict[str, Any]) -> Image.Image:
-        """Gera a imagem de uma tecla LCD com tipografia rica (fontes, negrito, itálico, sublinhado, alinhamento e borda)."""
+    def render_key_image(self, key_data: Dict[str, Any], is_pressed: bool = False) -> Image.Image:
+        """Gera a imagem de uma tecla LCD com tipografia rica e micro-animação de pressão tátil."""
         bg = key_data.get("bg", "#18181b")
         text_color = key_data.get("textColor", "#ffffff")
         accent = key_data.get("accent", None)
@@ -1098,6 +1100,37 @@ class D6Engine:
                     bbox = draw.textbbox((cx, y_base), title, font=font_title, anchor="mm")
                     draw.line([(bbox[0], bbox[3] + 1), (bbox[2], bbox[3] + 1)], fill=text_color, width=1)
 
+        # Micro-animação tátil: compressão/afundamento da tecla com borda e escala reduzida
+        if is_pressed:
+            try:
+                scale_factor = 0.88  # Redução de tamanho sutil (~12% menor) para sensação mecânica de clique
+                target_w = max(10, int(self.KEY_SIZE[0] * scale_factor))
+                target_h = max(10, int(self.KEY_SIZE[1] * scale_factor))
+                scaled_img = img.resize((target_w, target_h), Image.Resampling.LANCZOS)
+
+                # Base profunda simulando a cavidade do switch da tecla
+                pressed_canvas = Image.new("RGB", self.KEY_SIZE, color="#09090b")
+                px = (self.KEY_SIZE[0] - target_w) // 2
+                py = (self.KEY_SIZE[1] - target_h) // 2
+
+                # Máscara com cantos suavemente arredondados
+                mask = Image.new("L", (target_w, target_h), 0)
+                mask_draw = ImageDraw.Draw(mask)
+                mask_draw.rounded_rectangle([(0, 0), (target_w - 1, target_h - 1)], radius=6, fill=255)
+
+                # Cola a tecla comprimida centralizada
+                pressed_canvas.paste(scaled_img, (px, py), mask)
+
+                # Desenha sutil borda de clique/contorno de luz mecânico
+                p_draw = ImageDraw.Draw(pressed_canvas)
+                highlight_color = accent if accent else "#3f3f46"
+                p_draw.rounded_rectangle([(px, py), (px + target_w - 1, py + target_h - 1)], radius=6, outline=highlight_color, width=1)
+
+                return pressed_canvas
+            except Exception as e:
+                print(f"[Engine] Erro ao renderizar estado pressionado da tecla: {e}")
+                return img
+
         return img
 
     def apply_wallpaper_mural(self, image_path: str, page_id: Optional[str] = None) -> bool:
@@ -1179,7 +1212,7 @@ class D6Engine:
         }
         return fifine_official_rev.get(hw_key, hw_key)
 
-    def sync_key(self, key_num: int, force: bool = False):
+    def sync_key(self, key_num: int, force: bool = False, is_pressed: bool = False):
         """Envia a tecla atualizada diretamente para a tela LCD física com Dirty Checking ultra-rápido."""
         if not self.device or not (1 <= key_num <= 18):
             return
@@ -1189,10 +1222,10 @@ class D6Engine:
         key_data = page.get("keys", {}).get(str(key_num))
 
         hw_key = self.get_hw_key_for_slot(key_num)
-        temp_path = f"/tmp/d6_key_{key_num}.jpg"
+        temp_path = f"/tmp/d6_key_{key_num}_{'p' if is_pressed else 'n'}.jpg"
         try:
             if key_data:
-                img = self.render_key_image(key_data)
+                img = self.render_key_image(key_data, is_pressed=is_pressed)
             else:
                 img = self.render_empty_key_image()
 
@@ -1224,6 +1257,23 @@ class D6Engine:
             self._displayed_key_hashes[hw_key] = img_hash
         except Exception as e:
             print(f"[Engine] Erro ao sincronizar tecla {key_num}: {e}")
+
+    def animate_key_press(self, slot_num: int, duration: float = 0.12):
+        """Micro-animação tátil de compressão (scale-down 88%) na tela LCD física."""
+        if not self.device or not (1 <= slot_num <= 15):
+            return
+
+        def _press_thread():
+            try:
+                # 1. Envia frame de botão pressionado (tamanho reduzido para 84x84 com borda de toque)
+                self.sync_key(slot_num, force=True, is_pressed=True)
+                time.sleep(duration)
+                # 2. Retorna ao tamanho original normal
+                self.sync_key(slot_num, force=True, is_pressed=False)
+            except Exception as e:
+                print(f"[Engine] Erro na micro-animação da tecla {slot_num}: {e}")
+
+        threading.Thread(target=_press_thread, daemon=True).start()
 
     def sync_all_keys(self, force: bool = False):
         """Atualiza todas as telas do deck físico com Dirty Checking inteligente (sem piscadas pretas)."""
@@ -1524,6 +1574,13 @@ class D6Engine:
                 target_slot = mapped_slot
 
             print(f"[Hardware Click] Tecla física {key_val} -> Slot visual resolvido {target_slot} na página '{page_id}'")
+
+            # Registra timestamp e slot para sincronização em tempo real com a Web UI
+            self._last_pressed_slot = target_slot
+            self._last_pressed_ts = time.time()
+
+            # Dispara micro-animação tátil de compressão (escala reduzida no LCD do hardware)
+            self.animate_key_press(target_slot)
 
             action = None
             if key_data:

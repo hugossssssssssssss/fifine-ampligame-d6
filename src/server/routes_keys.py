@@ -122,6 +122,14 @@ def register_keys_routes(router: Router):
             if key_data and "action" in key_data:
                 action = key_data["action"]
         if action:
+            if slot:
+                try:
+                    s_int = int(slot)
+                    engine._last_pressed_slot = s_int
+                    engine._last_pressed_ts = time.time()
+                    engine.animate_key_press(s_int)
+                except Exception:
+                    pass
             engine.execute_action(action, slot=slot)
         router.send_json(handler, 200, {"success": True})
 

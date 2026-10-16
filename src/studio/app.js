@@ -284,6 +284,24 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (curKey) updateObsContextPanel(curKey);
     }
   }, 3500);
+
+  // Monitor em tempo real de cliques no hardware físico (sincroniza a animação tátil de afundamento na tela)
+  let lastPhysicalPressTs = 0;
+  setInterval(async () => {
+    try {
+      const res = await fetch(`/api/press_events?since=${lastPhysicalPressTs}&_t=${Date.now()}`);
+      if (res.ok) {
+        const ev = await res.json();
+        if (ev.has_new && ev.slot !== null && ev.slot !== undefined) {
+          lastPhysicalPressTs = ev.ts;
+          const slotNum = parseInt(ev.slot, 10);
+          // O hardware envia 1-indexed (1 a 15); a UI do studio usa 0-indexed (0 a 14)
+          const uiSlot = slotNum >= 1 && slotNum <= 15 ? slotNum - 1 : slotNum;
+          triggerKeyAnimation(uiSlot);
+        }
+      }
+    } catch (_) {}
+  }, 120);
 });
 
 // Alterna as abas laterais direitas (Propriedades, Ações, Loja, Skins, Ajustes)
@@ -439,6 +457,17 @@ function showToast(msg) {
   t.style.display = 'flex';
   clearTimeout(t._timer);
   t._timer = setTimeout(() => { t.style.display = 'none'; }, 2500);
+}
+
+// Micro-animação tátil de afundamento e retorno (feedback visual de clique no slot)
+function triggerKeyAnimation(slotIndex) {
+  const el = document.querySelector(`.deck-key-slot[data-slot="${slotIndex}"]`);
+  if (el) {
+    el.classList.add('is-pressed');
+    setTimeout(() => {
+      el.classList.remove('is-pressed');
+    }, 130);
+  }
 }
 
 // Renderiza as 15 Teclas do Deck com Drag-and-Drop 1:1, Duplicação e Menu de Contexto
@@ -608,6 +637,13 @@ function renderDeckGrid() {
         keyEl.appendChild(textWrap);
       }
     }
+
+    // Feedback tátil imediato de clique / afundamento com o mouse
+    keyEl.onmousedown = (e) => {
+      if (e.button === 0) {
+        triggerKeyAnimation(slot);
+      }
+    };
 
     // Clique com botão esquerdo para selecionar
     keyEl.onclick = () => selectKey(slot);

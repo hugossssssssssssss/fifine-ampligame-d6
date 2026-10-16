@@ -954,9 +954,10 @@ html, body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.12s ease, border-color 0.12s ease, filter 0.12s ease;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  user-select: none;
 }
 
 .deck-key-slot:hover {
@@ -970,6 +971,23 @@ html, body {
   border: 2px solid var(--accent-blue);
   box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.35), 0 8px 20px rgba(0, 0, 0, 0.5);
   transform: translateY(-1px);
+}
+
+/* Micro-animação tátil de afundamento e compressão física ao pressionar */
+.deck-key-slot:active,
+.deck-key-slot.is-pressed {
+  transform: scale(0.90) translateY(2px) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6), inset 0 2px 5px rgba(0, 0, 0, 0.45) !important;
+  filter: brightness(0.92);
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  transition: transform 0.07s cubic-bezier(0.2, 0.9, 0.3, 1.2), box-shadow 0.07s ease, filter 0.07s ease !important;
+}
+
+.deck-key-slot.selected:active,
+.deck-key-slot.selected.is-pressed {
+  transform: scale(0.90) translateY(2px) !important;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.5), inset 0 2px 5px rgba(0, 0, 0, 0.45) !important;
+  border-color: var(--accent-blue) !important;
 }
 
 .key-inner-bg-cover {

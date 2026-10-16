@@ -32,45 +32,56 @@ class OpenAppCommand(ActionCommand):
         if not target:
             return False
 
-        # 1. Caminho existente diretamente no sistema de arquivos
-        expanded = os.path.expanduser(target)
-        if os.path.exists(expanded):
-            print(f"[OpenAppCommand] Abrindo caminho existente: '{expanded}'")
-            subprocess.Popen(["open", expanded])
-            return True
-
-        # 2. Extrai nome base do app (eliminando diretórios antigos e extensões .zip/.app)
+        # 1. Extrai nome base do app (eliminando diretórios antigos e extensões .zip/.app)
         raw_name = os.path.basename(target)
         clean_name = raw_name[:-4] if raw_name.lower().endswith(".zip") else raw_name
         clean_name = clean_name[:-4] if clean_name.lower().endswith(".app") else clean_name
 
-        # 3. Busca nas pastas padrão do macOS pelo nome limpo
+        # 2. Tenta ativação nativa via AppleScript (método mais rápido e confiável no macOS)
+        if clean_name and not target.startswith("http://") and not target.startswith("https://"):
+            try:
+                scpt = f'tell application "{clean_name}" to activate'
+                r = subprocess.run(["osascript", "-e", scpt], capture_output=True, text=True, timeout=3)
+                if r.returncode == 0:
+                    print(f"[OpenAppCommand] Aplicativo '{clean_name}' ativado com sucesso via AppleScript")
+                    return True
+            except Exception as e:
+                print(f"[OpenAppCommand] AppleScript aviso: {e}")
+
+        # 3. Caminho existente diretamente no sistema de arquivos
+        expanded = os.path.expanduser(target)
+        if os.path.exists(expanded) and not expanded.endswith(".zip"):
+            print(f"[OpenAppCommand] Abrindo caminho existente: '{expanded}'")
+            subprocess.Popen(["/usr/bin/open", expanded])
+            return True
+
+        # 4. Busca nas pastas padrão do macOS pelo nome limpo
         for app_dir in cls.APP_SEARCH_DIRS:
             if not os.path.exists(app_dir):
                 continue
             cand = os.path.join(app_dir, f"{clean_name}.app")
             if os.path.exists(cand):
                 print(f"[OpenAppCommand] Encontrado aplicativo em '{cand}' -> Abrindo")
-                subprocess.Popen(["open", cand])
+                subprocess.Popen(["/usr/bin/open", cand])
                 return True
 
-        # 4. Tenta 'open -a' pelo nome limpo do app (ex: 'open -a Safari', 'open -a ResetCamera')
+        # 5. Tenta 'open -a' pelo nome limpo do app (ex: 'open -a Safari', 'open -a ResetCamera')
         if clean_name:
             print(f"[OpenAppCommand] Tentando 'open -a \"{clean_name}\"'...")
-            r = subprocess.run(["open", "-a", clean_name], capture_output=True, text=True)
+            r = subprocess.run(["/usr/bin/open", "-a", clean_name], capture_output=True, text=True)
             if r.returncode == 0:
                 print(f"[OpenAppCommand] Sucesso ao abrir '{clean_name}' via 'open -a'")
                 return True
 
-        # 5. Tenta 'open -a' com o target original
-        r = subprocess.run(["open", "-a", target], capture_output=True, text=True)
+        # 6. Tenta 'open -a' com o target original
+        r = subprocess.run(["/usr/bin/open", "-a", target], capture_output=True, text=True)
         if r.returncode == 0:
             print(f"[OpenAppCommand] Sucesso ao abrir '{target}' via 'open -a'")
             return True
 
-        # 6. Fallback final genérico 'open' (para URLs ou arquivos padrão)
+        # 7. Fallback final genérico 'open' (para URLs ou arquivos padrão)
         print(f"[OpenAppCommand] Fallback genérico 'open \"{target}\"'...")
-        subprocess.Popen(["open", target])
+        subprocess.Popen(["/usr/bin/open", target])
         return True
 
 

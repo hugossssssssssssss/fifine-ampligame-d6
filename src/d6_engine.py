@@ -1485,24 +1485,51 @@ class D6Engine:
                 self.wake_device()
                 return  # Consome o primeiro clique como despertar (1:1 com StreamDeck oficial)
 
-            # Se vier do SDK (InputEvent com BUTTON), key_val já é o slot lógico 1 a 15.
-            # Se vier de chamada raw (args >= 3), passa pela conversão de hardware para slot.
-            if hasattr(event, "event_type"):
-                slot_num = key_val
-            else:
-                slot_num = self.get_slot_for_hw_key(key_val)
+            # Resolução resiliente de slot visual: testa o slot mapeado e o slot direto
+            mapped_slot = self.get_slot_for_hw_key(key_val)
+            candidates = [mapped_slot, key_val]
 
             page_id = self.config.get("active_page", "principal")
             page = self.config.get("pages", {}).get(page_id, {})
-            key_data = page.get("keys", {}).get(str(slot_num))
-            print(f"[Hardware Click] Tecla física {key_val} -> Slot visual {slot_num} na página '{page_id}'")
+            keys_dict = page.get("keys", {})
+
+            def has_executable_action(k_dict):
+                if not k_dict or not isinstance(k_dict, dict):
+                    return False
+                act = k_dict.get("action")
+                if isinstance(act, dict):
+                    t = str(act.get("type") or act.get("uuid") or "").lower()
+                    if t and t not in ("none", "action"):
+                        return True
+                    if act.get("target") or act.get("path") or act.get("url") or act.get("keys") or act.get("text") or act.get("command"):
+                        return True
+                at = str(k_dict.get("actionType") or k_dict.get("type") or k_dict.get("uuid") or "").lower()
+                if at and at not in ("none", "action"):
+                    return True
+                if k_dict.get("path") or k_dict.get("target") or k_dict.get("url") or k_dict.get("hotkey") or k_dict.get("textPayload"):
+                    return True
+                return False
+
+            key_data = None
+            target_slot = mapped_slot
+            for cand in candidates:
+                cand_data = keys_dict.get(str(cand))
+                if cand_data and has_executable_action(cand_data):
+                    key_data = cand_data
+                    target_slot = cand
+                    break
+
+            if key_data is None:
+                key_data = keys_dict.get(str(mapped_slot)) or keys_dict.get(str(key_val))
+                target_slot = mapped_slot
+
+            print(f"[Hardware Click] Tecla física {key_val} -> Slot visual resolvido {target_slot} na página '{page_id}'")
 
             action = None
             if key_data:
-                if "action" in key_data and key_data["action"]:
+                if "action" in key_data and key_data["action"] and isinstance(key_data["action"], dict):
                     action = key_data["action"]
                 else:
-                    # Extrai ação diretamente dos campos de key_data se não estiver aninhada
                     act_type = key_data.get("actionType") or key_data.get("type") or key_data.get("uuid")
                     if act_type and act_type != "none":
                         action = {
@@ -1516,8 +1543,10 @@ class D6Engine:
                         }
 
             if action:
-                print(f"[Hardware Action] Executando ação do slot {slot_num}: {action}")
-                threading.Thread(target=self.execute_action, args=(action, slot_num), daemon=True).start()
+                print(f"[Hardware Action] Executando ação do slot {target_slot}: {action}")
+                threading.Thread(target=self.execute_action, args=(action, target_slot), daemon=True).start()
+            else:
+                print(f"[Hardware Action] Nenhuma ação configurada no slot {target_slot}")
 
     def start_background_telemetry(self):
         """Loop de fundo para métricas dinâmicas (CPU, RAM), auto-troca de perfil e temporizador de inatividade."""

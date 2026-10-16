@@ -465,7 +465,25 @@ function triggerKeyAnimation(slotIndex) {
     el.classList.add('is-pressed');
     setTimeout(() => {
       el.classList.remove('is-pressed');
-    }, 130);
+    }, 180);
+  }
+}
+
+async function executeKeyActionOnMac(slot) {
+  const keyData = state.profiles[state.activeProfile]?.keys[slot];
+  if (!keyData) return;
+  triggerKeyAnimation(slot);
+  const act = buildActionPayload(keyData);
+  if (!act) return;
+  try {
+    await fetch('/api/key/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: act, slot: slot + 1, page: state.activeProfile })
+    });
+    showToast(`▶ Executando "${keyData.title || 'Ação'}" no Mac...`);
+  } catch (e) {
+    showToast('Erro ao disparar ação no Mac');
   }
 }
 
@@ -663,13 +681,15 @@ function renderDeckGrid() {
     // Clique com botão esquerdo para selecionar
     keyEl.onclick = () => selectKey(slot);
 
-    // Duplo clique para entrar na pasta ou voltar
+    // Duplo clique: se for pasta entra; se for ação, executa imediatamente no Mac!
     keyEl.ondblclick = () => {
       if (!keyData) return;
       if (keyData.actionType === 'folder' || keyData.uuid?.includes('openchild') || keyData.actionUuid?.includes('openchild') || keyData.target?.startsWith('folder_')) {
         openFolder(keyData.target || keyData.folderId);
       } else if (keyData.actionType === 'backtoparent' || keyData.uuid?.includes('backtoparent') || keyData.actionUuid?.includes('backtoparent')) {
         goBackParent();
+      } else {
+        executeKeyActionOnMac(slot);
       }
     };
 
@@ -1924,13 +1944,14 @@ function bindEvents() {
         return;
       }
       const act = buildActionPayload(keyData);
+      triggerKeyAnimation(state.selectedSlot);
       try {
         await fetch('/api/key/execute', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: act, slot: state.selectedSlot + 1, page: state.activeProfile })
         });
-        showToast(`▶ Testando "${keyData.title || 'Ação'}" no macOS...`);
+        showToast(`▶ Executando "${keyData.title || 'Ação'}" no macOS...`);
       } catch (e) {
         showToast('Erro ao disparar teste no Mac');
       }

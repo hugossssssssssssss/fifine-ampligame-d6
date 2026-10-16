@@ -1103,7 +1103,7 @@ class D6Engine:
         # Micro-animação tátil: compressão/afundamento da tecla com borda e escala reduzida
         if is_pressed:
             try:
-                scale_factor = 0.88  # Redução de tamanho sutil (~12% menor) para sensação mecânica de clique
+                scale_factor = 0.85  # Redução de tamanho perceptível (15% menor) para sensação mecânica de clique
                 target_w = max(10, int(self.KEY_SIZE[0] * scale_factor))
                 target_h = max(10, int(self.KEY_SIZE[1] * scale_factor))
                 scaled_img = img.resize((target_w, target_h), Image.Resampling.LANCZOS)
@@ -1262,14 +1262,14 @@ class D6Engine:
         except Exception as e:
             print(f"[Engine] Erro ao sincronizar tecla {key_num}: {e}")
 
-    def animate_key_press(self, slot_num: int, duration: float = 0.12):
-        """Micro-animação tátil de compressão (scale-down 88%) na tela LCD física."""
+    def animate_key_press(self, slot_num: int, duration: float = 0.18):
+        """Micro-animação tátil de compressão (scale-down 85%) na tela LCD física."""
         if not self.device or not (1 <= slot_num <= 15):
             return
 
         def _press_thread():
             try:
-                # 1. Envia frame de botão pressionado (tamanho reduzido para 84x84 com borda de toque)
+                # 1. Envia frame de botão pressionado (tamanho reduzido para 82x82 com borda de toque)
                 self.sync_key(slot_num, force=True, is_pressed=True)
                 time.sleep(duration)
                 # 2. Retorna ao tamanho original normal
@@ -1539,9 +1539,9 @@ class D6Engine:
                 self.wake_device()
                 return  # Consome o primeiro clique como despertar (1:1 com StreamDeck oficial)
 
-            # Resolução resiliente de slot visual: testa o slot mapeado e o slot direto
+            # Resolução resiliente de slot visual: prioriza o slot visual direto key_val
             mapped_slot = self.get_slot_for_hw_key(key_val)
-            candidates = [mapped_slot, key_val]
+            candidates = [key_val, mapped_slot]
 
             page_id = self.config.get("active_page", "principal")
             page = self.config.get("pages", {}).get(page_id, {})
@@ -1565,7 +1565,7 @@ class D6Engine:
                 return False
 
             key_data = None
-            target_slot = mapped_slot
+            target_slot = key_val
             for cand in candidates:
                 cand_data = keys_dict.get(str(cand))
                 if cand_data and has_executable_action(cand_data):
@@ -1574,8 +1574,8 @@ class D6Engine:
                     break
 
             if key_data is None:
-                key_data = keys_dict.get(str(mapped_slot)) or keys_dict.get(str(key_val))
-                target_slot = mapped_slot
+                key_data = keys_dict.get(str(key_val)) or keys_dict.get(str(mapped_slot))
+                target_slot = key_val
 
             print(f"[Hardware Click] Tecla física {key_val} -> Slot visual resolvido {target_slot} na página '{page_id}'")
 

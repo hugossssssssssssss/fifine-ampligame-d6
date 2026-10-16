@@ -976,18 +976,19 @@ html, body {
 /* Micro-animação tátil de afundamento e compressão física ao pressionar */
 .deck-key-slot:active,
 .deck-key-slot.is-pressed {
-  transform: scale(0.90) translateY(2px) !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6), inset 0 2px 5px rgba(0, 0, 0, 0.45) !important;
-  filter: brightness(0.92);
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  transition: transform 0.07s cubic-bezier(0.2, 0.9, 0.3, 1.2), box-shadow 0.07s ease, filter 0.07s ease !important;
+  transform: scale(0.86) translateY(3px) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), inset 0 3px 8px rgba(0, 0, 0, 0.5) !important;
+  filter: brightness(0.85);
+  border-color: rgba(255, 255, 255, 0.45) !important;
+  transition: transform 0.08s cubic-bezier(0.2, 0.9, 0.3, 1.2), box-shadow 0.08s ease, filter 0.08s ease !important;
 }
 
 .deck-key-slot.selected:active,
 .deck-key-slot.selected.is-pressed {
-  transform: scale(0.90) translateY(2px) !important;
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.5), inset 0 2px 5px rgba(0, 0, 0, 0.45) !important;
+  transform: scale(0.86) translateY(3px) !important;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.5), inset 0 3px 8px rgba(0, 0, 0, 0.5) !important;
   border-color: var(--accent-blue) !important;
+  transition: transform 0.08s cubic-bezier(0.2, 0.9, 0.3, 1.2), box-shadow 0.08s ease, filter 0.08s ease !important;
 }
 
 .key-inner-bg-cover {

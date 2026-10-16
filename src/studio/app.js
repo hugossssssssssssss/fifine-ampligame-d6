@@ -293,19 +293,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   initWallpaperMuralModal();
   initModals();
 
-  // Polling a cada 3.5 segundos para refletir novas cenas criadas fora da janela e telemetria OBS
+  // Polling a cada 4 segundos apenas se a aba estiver visível
   setInterval(() => {
+    if (document.hidden) return;
     loadServerState(true);
     const ctxObs = document.getElementById('fieldsContextObs');
     if (ctxObs && ctxObs.style.display !== 'none') {
       const curKey = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
       if (curKey) updateObsContextPanel(curKey);
     }
-  }, 3500);
+  }, 4000);
 
-  // Monitor em tempo real de cliques no hardware físico (sincroniza a animação tátil de afundamento na tela)
+  // Monitor de cliques no hardware físico (economiza CPU pausando quando aba oculta)
   let lastPhysicalPressTs = 0;
   setInterval(async () => {
+    if (document.hidden) return;
     try {
       const res = await fetch(`/api/press_events?since=${lastPhysicalPressTs}&_t=${Date.now()}`);
       if (res.ok) {
@@ -319,7 +321,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }
     } catch (_) {}
-  }, 120);
+  }, 500);
 });
 
 // Alterna as abas laterais direitas (Propriedades, Ações, Loja, Skins, Ajustes)

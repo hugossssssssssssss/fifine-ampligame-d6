@@ -1362,6 +1362,11 @@ class D6Engine:
         if not self.config.get("auto_switch_enabled", True):
             return
 
+        # Otimização zero-CPU: se nenhuma página tiver linked_app configurado, pula imediatamente sem criar subprocessos
+        has_any_link = any(bool(str(p.get("linked_app") or "").strip()) for p in self.config.get("pages", {}).values())
+        if not has_any_link:
+            return
+
         app_info = self.get_frontmost_app()
         if not app_info or not app_info.get("name"):
             return
@@ -1641,39 +1646,43 @@ class D6Engine:
                 try:
                     now = time.time()
 
-                    # 0. LED Seguir Modo de Suspensão do macOS (DisconnectOnScreenOff / LED Sleep Follow)
-                    follow_mac = self.config.get("led_sleep_follow", True)
-                    if follow_mac:
-                        mac_off = self.is_mac_screen_off_or_locked()
-                        if mac_off:
-                            if not self.is_asleep:
-                                self._slept_by_mac_display = True
-                                self.sleep_device(reason="macOS Tela Desligada / Bloqueada")
-                            time.sleep(0.35)
-                            continue
-                        else:
-                            if self.is_asleep and getattr(self, "_slept_by_mac_display", False):
-                                self._slept_by_mac_display = False
-                                self.wake_device(reason="macOS Tela Ligada / Desbloqueada")
+                    # 0. LED Seguir Modo de Suspensão do macOS (a cada 3.0s)
+                    if now - getattr(self, "_last_sleep_check_time", 0) >= 3.0:
+                        self._last_sleep_check_time = now
+                        follow_mac = self.config.get("led_sleep_follow", True)
+                        if follow_mac:
+                            mac_off = self.is_mac_screen_off_or_locked()
+                            if mac_off:
+                                if not self.is_asleep:
+                                    self._slept_by_mac_display = True
+                                    self.sleep_device(reason="macOS Tela Desligada / Bloqueada")
+                                time.sleep(1.0)
+                                continue
+                            else:
+                                if self.is_asleep and getattr(self, "_slept_by_mac_display", False):
+                                    self._slept_by_mac_display = False
+                                    self.wake_device(reason="macOS Tela Ligada / Desbloqueada")
 
-                    # 1. Temporizador de Inatividade / Economia de Energia (Sleep & Burn-in Protection)
-                    timeout = int(self.config.get("screen_off_seconds", 0))
-                    if timeout > 0:
-                        if not self.is_asleep and (now - self._last_activity_time >= timeout):
-                            self.sleep_device(reason=f"Inatividade de {timeout}s")
-                        elif self.is_asleep and not getattr(self, "_slept_by_mac_display", False):
-                            # Se o usuário voltou a interagir ativamente com o Mac (mouse/teclado < 1.5s)
-                            if self.get_mac_hid_idle_time() < 1.5:
-                                print("[Engine] Atividade recente de mouse/teclado no macOS -> Acordando teclado")
-                                self.wake_device(reason="Atividade no macOS")
+                    # 1. Temporizador de Inatividade / Economia de Energia (a cada 3.0s)
+                    if now - getattr(self, "_last_inactivity_check_time", 0) >= 3.0:
+                        self._last_inactivity_check_time = now
+                        timeout = int(self.config.get("screen_off_seconds", 0))
+                        if timeout > 0:
+                            if not self.is_asleep and (now - self._last_activity_time >= timeout):
+                                self.sleep_device(reason=f"Inatividade de {timeout}s")
+                            elif self.is_asleep and not getattr(self, "_slept_by_mac_display", False):
+                                # Se o usuário voltou a interagir ativamente com o Mac (mouse/teclado < 2.0s)
+                                if self.get_mac_hid_idle_time() < 2.0:
+                                    print("[Engine] Atividade recente de mouse/teclado no macOS -> Acordando teclado")
+                                    self.wake_device(reason="Atividade no macOS")
 
-                    # 2. Checagem de auto-troca de perfil pelo app ativo no macOS (a cada 0.7s)
-                    if not self.is_asleep and (now - self._last_app_check_time >= 0.7):
+                    # 2. Checagem de auto-troca de perfil pelo app ativo no macOS (a cada 2.5s)
+                    if not self.is_asleep and (now - self._last_app_check_time >= 2.5):
                         self._last_app_check_time = now
                         self.check_app_auto_switch()
 
-                    # 3. Métricas de CPU / RAM (a cada 3.0s, apenas se acordado)
-                    if not self.is_asleep and (now - self._last_stats_update >= 3.0):
+                    # 3. Métricas de CPU / RAM (a cada 5.0s, apenas se acordado)
+                    if not self.is_asleep and (now - self._last_stats_update >= 5.0):
                         self._last_stats_update = now
                         page_id = self.config.get("active_page", "principal")
                         page = self.config.get("pages", {}).get(page_id, {})
@@ -1685,7 +1694,7 @@ class D6Engine:
                         updated = False
                         for k_str, k_data in page.get("keys", {}).items():
                             act = k_data.get("action", {})
-                            if act.get("type") == "system_stats":
+                            if isinstance(act, dict) and act.get("type") == "system_stats":
                                 tgt = act.get("target")
                                 if tgt == "cpu":
                                     k_data["subtitle"] = f"{cpu_pct}%"
@@ -1697,7 +1706,7 @@ class D6Engine:
                                     updated = True
                 except Exception as err:
                     pass
-                time.sleep(0.35)
+                time.sleep(1.0)
 
         t = threading.Thread(target=loop, daemon=True)
         t.start()

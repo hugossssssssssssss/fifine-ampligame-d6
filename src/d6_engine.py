@@ -1108,8 +1108,8 @@ class D6Engine:
                 target_h = max(10, int(self.KEY_SIZE[1] * scale_factor))
                 scaled_img = img.resize((target_w, target_h), Image.Resampling.LANCZOS)
 
-                # Base profunda simulando a cavidade do switch da tecla
-                pressed_canvas = Image.new("RGB", self.KEY_SIZE, color="#09090b")
+                # Base preta profunda simulando a cavidade do switch mecânico
+                pressed_canvas = Image.new("RGB", self.KEY_SIZE, color="#000000")
                 px = (self.KEY_SIZE[0] - target_w) // 2
                 py = (self.KEY_SIZE[1] - target_h) // 2
 
@@ -1173,7 +1173,7 @@ class D6Engine:
                     tile = cropped.crop(box)
                     tile_filename = f"mural_{page_id}_{slot}_{ts}.jpg"
                     tile_path = out_dir / tile_filename
-                    tile.save(tile_path, "JPEG", quality=95, subsampling=0, optimize=False)
+                    tile.save(tile_path, "JPEG", quality=92, progressive=False, optimize=False)
 
                     slot_str = str(slot)
                     if slot_str not in page["keys"]:
@@ -1229,14 +1229,18 @@ class D6Engine:
             else:
                 img = self.render_empty_key_image()
 
+            # Borda de segurança de 1px preta (elimina 100% de qualquer bleeding de chroma nas bordas do LCD)
+            b_draw = ImageDraw.Draw(img)
+            b_draw.rectangle([(0, 0), (self.KEY_SIZE[0] - 1, self.KEY_SIZE[1] - 1)], outline="#000000", width=1)
+
             # Rotação base física do hardware Fifine D6 (180° para orientação vertical correta)
             rot = int(self.config.get("rotation", 0))
             total_rot = (180 + rot) % 360
             if total_rot != 0:
                 img = img.rotate(total_rot)
 
-            # Salva JPEG baseline YUV 4:4:4 ultra-nítido (subsampling=0 elimina linha verde/cinza no LCD)
-            img.save(temp_path, "JPEG", quality=95, subsampling=0, optimize=False)
+            # Salva JPEG baseline padrão YUV 4:2:0 nativo do firmware (elimina riscos rosa, vermelho, verde e cinza)
+            img.save(temp_path, "JPEG", quality=92, progressive=False, optimize=False)
 
             # Dirty Checking com Hash MD5: se a imagem for idêntica ao que já está no LCD, pula transmissão USB
             import hashlib

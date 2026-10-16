@@ -294,9 +294,14 @@ class D6Engine:
         keys = page.get("keys", {})
 
         obs_dir = Path("/Applications/fifine Control Deck.app/Contents/Resources/plugins/com.hotspot.streamdock.obsstudio.sdPlugin/Images/actions")
-
         for k_str, k_data in list(keys.items()):
-            act = k_data.get("action", {})
+            if not isinstance(k_data, dict):
+                continue
+            act = k_data.get("action")
+            if isinstance(act, str):
+                act = {"type": act}
+            elif not isinstance(act, dict):
+                act = {}
             act_type = str(act.get("uuid") or act.get("type") or "").lower()
             if "obsstudio" not in act_type and not act_type.startswith("obs_"):
                 continue
@@ -965,7 +970,7 @@ class D6Engine:
 
     def render_key_image(self, key_data: Dict[str, Any], is_pressed: bool = False) -> Image.Image:
         """Gera a imagem de uma tecla LCD com tipografia rica e micro-animação de pressão tátil."""
-        bg = key_data.get("bg", "#18181b")
+        bg = key_data.get("bg") or key_data.get("bg_color") or key_data.get("bgColor") or "#18181b"
         text_color = key_data.get("textColor", "#ffffff")
         accent = key_data.get("accent", None)
         title = key_data.get("title", "")
@@ -1083,6 +1088,13 @@ class D6Engine:
                 draw.line([(bbox[0], bbox[3] + 1), (bbox[2], bbox[3] + 1)], fill=text_color, width=1)
         elif title:
             lines = [l.strip() for l in title.split("\n") if l.strip()]
+            if len(lines) == 1 and (" " in lines[0] or "-" in lines[0]):
+                # Se for uma linha só mas tiver espaços e exceder o espaço da tecla, divide em 2 linhas
+                words = lines[0].split()
+                if len(words) >= 2:
+                    mid = len(words) // 2
+                    lines = [" ".join(words[:mid]), " ".join(words[mid:])]
+
             if len(lines) >= 2:
                 draw.text((cx + 1, y_base - 9), lines[0], fill="#000000", font=font_title, anchor="mm")
                 draw.text((cx, y_base - 10), lines[0], fill=text_color, font=font_title, anchor="mm")
@@ -1230,18 +1242,20 @@ class D6Engine:
             else:
                 img = self.render_empty_key_image()
 
-            # Borda de segurança de 1px preta (elimina 100% de qualquer bleeding de chroma nas bordas do LCD)
-            b_draw = ImageDraw.Draw(img)
-            b_draw.rectangle([(0, 0), (self.KEY_SIZE[0] - 1, self.KEY_SIZE[1] - 1)], outline="#000000", width=1)
-
-            # Rotação base física do hardware Fifine D6 (180° para orientação vertical correta)
+            # Rotação base física do hardware Fifine D6 (180° com transposição exata de matriz, sem artefatos)
             rot = int(self.config.get("rotation", 0))
             total_rot = (180 + rot) % 360
-            if total_rot != 0:
+            if total_rot == 180:
+                img = img.transpose(Image.ROTATE_180)
+            elif total_rot == 90:
+                img = img.transpose(Image.ROTATE_90)
+            elif total_rot == 270:
+                img = img.transpose(Image.ROTATE_270)
+            elif total_rot != 0:
                 img = img.rotate(total_rot)
 
-            # Salva JPEG baseline padrão YUV 4:2:0 nativo do firmware (elimina riscos rosa, vermelho, verde e cinza)
-            img.save(temp_path, "JPEG", quality=92, progressive=False, optimize=False)
+            # Salva JPEG baseline YUV 4:2:0 nativo com preenchimento 100% até o último pixel (sem mancha verde)
+            img.save(temp_path, "JPEG", quality=95, progressive=False, optimize=False)
 
             # Dirty Checking com Hash MD5: se a imagem for idêntica ao que já está no LCD, pula transmissão USB
             import hashlib

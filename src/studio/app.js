@@ -513,8 +513,8 @@ function renderKeyVisualContent(keyEl, keyData) {
   keyEl.classList.remove('is-folder', 'is-back-key', 'is-multiaction', 'is-obs');
 
   if (!keyData) {
-    keyEl.style.backgroundColor = '#18181b';
-    keyEl.style.border = '';
+    keyEl.style.backgroundColor = '#000000';
+    keyEl.style.border = '1px solid rgba(255, 255, 255, 0.04)';
     keyEl.draggable = false;
     return;
   }
@@ -531,7 +531,7 @@ function renderKeyVisualContent(keyEl, keyData) {
     keyEl.classList.add('is-obs');
   }
 
-  keyEl.style.backgroundColor = keyData.bg || '#18181b';
+  keyEl.style.backgroundColor = keyData.bg || keyData.bg_color || keyData.bgColor || '#18181b';
 
   if (keyData.borderWidth && keyData.borderWidth > 0) {
     keyEl.style.border = `${keyData.borderWidth}px solid ${keyData.borderColor || '#007aff'}`;
@@ -590,7 +590,15 @@ function renderKeyVisualContent(keyEl, keyData) {
     }
 
     if (keyData.title) {
-      const lines = String(keyData.title).split('\n').filter(l => l.trim().length > 0);
+      let lines = String(keyData.title).split('\n').filter(l => l.trim().length > 0);
+      if (lines.length === 1 && (lines[0].includes(' ') || lines[0].includes('-'))) {
+        const words = lines[0].split(/\s+/);
+        if (words.length >= 2) {
+          const mid = Math.floor(words.length / 2);
+          lines = [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
+        }
+      }
+
       if (lines.length > 1) {
         lines.forEach((lineText) => {
           const lineEl = document.createElement('span');
@@ -648,7 +656,7 @@ function updateSlotVisual(slot, keyData) {
   if (slot === state.selectedSlot && keyData) {
     const previewCard = document.getElementById('keyPreviewCard');
     if (previewCard) {
-      previewCard.style.backgroundColor = keyData.bg || '#18181b';
+      previewCard.style.backgroundColor = keyData.bg || keyData.bg_color || keyData.bgColor || '#18181b';
       if (keyData.borderWidth && keyData.borderWidth > 0) {
         previewCard.style.border = `${keyData.borderWidth}px solid ${keyData.borderColor || '#007aff'}`;
       } else {

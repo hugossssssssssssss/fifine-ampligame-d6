@@ -511,19 +511,34 @@ async function executeKeyActionOnMac(slot) {
 }
 
 // Renderiza o conteúdo visual (ícones, imagens, textos e estilos) em um elemento de tecla LCD
-function renderKeyVisualContent(keyEl, keyData) {
+function renderKeyVisualContent(keyEl, keyData, isPreview = false) {
   if (!keyEl) return;
   keyEl.innerHTML = '';
   keyEl.classList.remove('is-folder', 'is-back-key', 'is-multiaction', 'is-obs');
 
-  if (!keyData) {
-    keyEl.style.backgroundColor = '#000000';
-    keyEl.style.border = '1px solid rgba(255, 255, 255, 0.04)';
-    keyEl.draggable = false;
+  // Tecla vazia / não configurada
+  if (!keyData || (Object.keys(keyData).length === 0) || (keyData.actionType === 'none' && !keyData.title && !keyData.imagePath && !keyData.bg)) {
+    keyEl.style.backgroundColor = '#252528';
+    keyEl.style.border = '1.5px solid #45454b';
+    keyEl.style.boxShadow = '';
+    keyEl.draggable = !isPreview;
+
+    if (isPreview) {
+      const editBadge = document.createElement('div');
+      editBadge.className = 'preview-edit-badge';
+      editBadge.title = 'Configurar Visual / Imagem da Tecla';
+      editBadge.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#18181b" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`;
+      editBadge.onclick = (e) => {
+        e.stopPropagation();
+        const fileInp = document.getElementById('inputKeyImageFile');
+        if (fileInp) fileInp.click();
+      };
+      keyEl.appendChild(editBadge);
+    }
     return;
   }
 
-  keyEl.draggable = true;
+  keyEl.draggable = !isPreview;
 
   if (keyData.actionType === 'folder' || keyData.uuid?.includes('openchild') || keyData.actionUuid?.includes('openchild') || keyData.target?.startsWith('folder_')) {
     keyEl.classList.add('is-folder');
@@ -535,12 +550,15 @@ function renderKeyVisualContent(keyEl, keyData) {
     keyEl.classList.add('is-obs');
   }
 
-  keyEl.style.backgroundColor = keyData.bg || keyData.bg_color || keyData.bgColor || '#18181b';
+  const bgColor = keyData.bg || keyData.bg_color || keyData.bgColor || '#18181b';
+  keyEl.style.backgroundColor = bgColor;
 
   if (keyData.borderWidth && keyData.borderWidth > 0) {
     keyEl.style.border = `${keyData.borderWidth}px solid ${keyData.borderColor || '#007aff'}`;
+  } else if (bgColor !== '#18181b' && bgColor !== '#000000' && bgColor !== '#252528') {
+    keyEl.style.border = '1.5px solid rgba(255, 255, 255, 0.16)';
   } else {
-    keyEl.style.border = '';
+    keyEl.style.border = '1.5px solid #45454b';
   }
 
   if (keyData.imagePath) {
@@ -552,7 +570,7 @@ function renderKeyVisualContent(keyEl, keyData) {
     }
     img.src = '/api/image?path=' + encodeURIComponent(keyData.imagePath);
     keyEl.appendChild(img);
-  } else if (keyData.icon || keyData.actionType === 'multiaction' || keyData.actionType === 'obs') {
+  } else if (keyData.icon || keyData.actionType === 'multiaction' || keyData.actionType === 'obs' || keyData.actionType === 'folder' || keyData.actionType === 'backtoparent') {
     if (keyData.icon === 'arrow-left' || keyData.actionType === 'backtoparent') {
       const wrap = document.createElement('div');
       wrap.className = 'key-inner-icon-svg';
@@ -639,6 +657,20 @@ function renderKeyVisualContent(keyEl, keyData) {
 
     keyEl.appendChild(textWrap);
   }
+
+  // Se for o preview do Inspector, adiciona o badge de edição oficial de engrenagem
+  if (isPreview) {
+    const editBadge = document.createElement('div');
+    editBadge.className = 'preview-edit-badge';
+    editBadge.title = 'Alterar Imagem / Ícone da Tecla';
+    editBadge.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#18181b" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`;
+    editBadge.onclick = (e) => {
+      e.stopPropagation();
+      const fileInp = document.getElementById('inputKeyImageFile');
+      if (fileInp) fileInp.click();
+    };
+    keyEl.appendChild(editBadge);
+  }
 }
 
 // Atualiza cirurgicamente a tecla na grade e na miniatura do inspector em tempo real (0ms)
@@ -650,52 +682,17 @@ function updateSlotVisual(slot, keyData) {
     state.profiles[state.activeProfile].keys[slot] = keyData;
   }
 
-  // Atualiza div da grade
+  // Atualiza div da grade central
   const keyEl = document.querySelector(`.deck-key-slot[data-slot="${slot}"]`);
   if (keyEl) {
-    renderKeyVisualContent(keyEl, keyData);
+    renderKeyVisualContent(keyEl, keyData, false);
   }
 
-  // Se for o slot selecionado, atualiza também a miniatura e o preview do inspector
-  if (slot === state.selectedSlot && keyData) {
+  // Se for o slot atualmente selecionado, atualiza também a miniatura do inspector com renderização idêntica
+  if (slot === state.selectedSlot) {
     const previewCard = document.getElementById('keyPreviewCard');
     if (previewCard) {
-      previewCard.style.backgroundColor = keyData.bg || keyData.bg_color || keyData.bgColor || '#18181b';
-      if (keyData.borderWidth && keyData.borderWidth > 0) {
-        previewCard.style.border = `${keyData.borderWidth}px solid ${keyData.borderColor || '#007aff'}`;
-      } else {
-        previewCard.style.border = '1px solid var(--border-subtle)';
-      }
-
-      let imgPreview = previewCard.querySelector('.preview-card-img');
-      if (keyData.imagePath) {
-        if (!imgPreview) {
-          imgPreview = document.createElement('img');
-          imgPreview.className = 'preview-card-img';
-          previewCard.insertBefore(imgPreview, previewCard.firstChild);
-        }
-        imgPreview.src = '/api/image?path=' + encodeURIComponent(keyData.imagePath);
-        imgPreview.style.objectFit = keyData.imageFit || 'cover';
-        imgPreview.style.display = 'block';
-      } else if (imgPreview) {
-        imgPreview.style.display = 'none';
-      }
-    }
-
-    const prevLabel = document.getElementById('previewKeyLabel');
-    if (prevLabel) {
-      prevLabel.innerText = keyData.title || '';
-      prevLabel.style.display = keyData.showTitle === false ? 'none' : 'block';
-      if (keyData.fontFamily) prevLabel.style.fontFamily = keyData.fontFamily;
-      prevLabel.style.fontWeight = keyData.bold ? '700' : 'normal';
-      prevLabel.style.fontStyle = keyData.italic ? 'italic' : 'normal';
-      prevLabel.style.textDecoration = keyData.underline ? 'underline' : 'none';
-    }
-
-    const prevSub = document.getElementById('previewKeySub');
-    if (prevSub) {
-      prevSub.innerText = keyData.subtitle || '';
-      prevSub.style.display = (keyData.showTitle !== false && keyData.subtitle) ? 'block' : 'none';
+      renderKeyVisualContent(previewCard, keyData, true);
     }
   }
 }
@@ -1124,13 +1121,10 @@ function selectKey(slot) {
   const catTitle = document.getElementById('inspectorActionCategory');
   catTitle.innerText = `${keyData.category || 'Caixa de Ferramentas'} : ${keyData.actionName || 'Ação'}`;
 
-  // Miniatura
+  // Miniatura no Topo do Inspector (Espelho Rigoroso 1:1 da Tecla LCD)
   const previewCard = document.getElementById('keyPreviewCard');
-  previewCard.style.backgroundColor = keyData.bg || '#004481';
-  if (keyData.borderWidth && keyData.borderWidth > 0) {
-    previewCard.style.border = `${keyData.borderWidth}px solid ${keyData.borderColor || '#007aff'}`;
-  } else {
-    previewCard.style.border = '1px solid var(--border-subtle)';
+  if (previewCard) {
+    renderKeyVisualContent(previewCard, keyData, true);
   }
 
   // Sincroniza cor LCD e indicadores
@@ -1142,43 +1136,6 @@ function selectKey(slot) {
   if (cp) cp.value = curBg;
   const hexLbl = document.getElementById('currentColorHex');
   if (hexLbl) hexLbl.innerText = curBg;
-
-  let imgPreview = previewCard.querySelector('.preview-card-img');
-  if (keyData.imagePath) {
-    if (!imgPreview) {
-      imgPreview = document.createElement('img');
-      imgPreview.className = 'preview-card-img';
-      previewCard.insertBefore(imgPreview, previewCard.firstChild);
-    }
-    imgPreview.src = '/api/image?path=' + encodeURIComponent(keyData.imagePath);
-    imgPreview.style.objectFit = keyData.imageFit || 'cover';
-    imgPreview.style.display = 'block';
-  } else if (imgPreview) {
-    imgPreview.style.display = 'none';
-  }
-
-  const previewLabel = document.getElementById('previewKeyLabel');
-  const previewSub = document.getElementById('previewKeySub');
-  if (keyData.showTitle === false) {
-    previewLabel.style.display = 'none';
-    if (previewSub) previewSub.style.display = 'none';
-  } else {
-    previewLabel.style.display = 'block';
-    previewLabel.innerText = keyData.title || '';
-    previewLabel.style.fontFamily = keyData.fontFamily || 'Helvetica';
-    previewLabel.style.fontWeight = keyData.bold ? '700' : 'normal';
-    previewLabel.style.fontStyle = keyData.italic ? 'italic' : 'normal';
-    previewLabel.style.textDecoration = keyData.underline ? 'underline' : 'none';
-
-    if (previewSub) {
-      if (keyData.subtitle) {
-        previewSub.style.display = 'block';
-        previewSub.innerText = keyData.subtitle;
-      } else {
-        previewSub.style.display = 'none';
-      }
-    }
-  }
 
   // Campo Título
   const inputTitle = document.getElementById('inputKeyTitle');
@@ -2261,8 +2218,7 @@ function bindEvents() {
               keyData.title = file.name.split('.')[0].toUpperCase().slice(0, 10);
               const inpTitle = document.getElementById('inputKeyTitle');
               if (inpTitle) inpTitle.value = keyData.title;
-              const lbl = document.getElementById('previewKeyLabel');
-              if (lbl) lbl.innerText = keyData.title;
+              updateSlotVisual(state.selectedSlot, keyData);
             }
             renderDeckGrid();
             syncKeyToHardware(state.selectedSlot, keyData);
@@ -3553,16 +3509,6 @@ function applyKeyColor(color, applyToAll = false) {
   const hexLabel = document.getElementById('currentColorHex');
   if (hexLabel) hexLabel.innerText = color;
 
-  // Atualiza preview no card lateral
-  const previewCard = document.getElementById('keyPreviewCard');
-  if (previewCard) {
-    previewCard.style.backgroundColor = color;
-    const imgPreview = previewCard.querySelector('.preview-card-img');
-    if (imgPreview && (!keyData.imagePath || keyData.imagePath.includes('mural_'))) {
-      imgPreview.style.display = 'none';
-    }
-  }
-
   updateSlotVisual(state.selectedSlot, keyData);
   syncKeyToHardware(state.selectedSlot, keyData);
   showToast(`✓ Cor LCD definida: ${color}`);
@@ -3834,8 +3780,7 @@ async function updateObsContextPanel(keyData) {
           keyData.title = selectScene.value.toUpperCase().slice(0, 10);
           const titleInput = document.getElementById('inputKeyTitle');
           if (titleInput) titleInput.value = keyData.title;
-          const prevLabel = document.getElementById('previewKeyLabel');
-          if (prevLabel) prevLabel.innerText = keyData.title;
+          updateSlotVisual(state.selectedSlot, keyData);
           renderDeckGrid();
           syncKeyToHardware(state.selectedSlot, keyData);
         }
@@ -3872,8 +3817,7 @@ async function updateObsContextPanel(keyData) {
           keyData.title = selectAudio.value.toUpperCase().slice(0, 8);
           const titleInput = document.getElementById('inputKeyTitle');
           if (titleInput) titleInput.value = keyData.title;
-          const prevLabel = document.getElementById('previewKeyLabel');
-          if (prevLabel) prevLabel.innerText = keyData.title;
+          updateSlotVisual(state.selectedSlot, keyData);
           renderDeckGrid();
           syncKeyToHardware(state.selectedSlot, keyData);
         }

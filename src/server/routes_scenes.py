@@ -12,11 +12,19 @@ def register_scenes_routes(router: Router):
 
     @router.post("/api/page/select")
     def select_page(handler, engine, body):
-        page = body.get("page", "principal")
+        page = body.get("page") or body.get("id") or body.get("profile") or "principal"
         if page in engine.config.get("pages", {}):
             engine.config["active_page"] = page
             threading.Thread(target=lambda: engine.change_page(page), daemon=True).start()
         router.send_json(handler, 200, {"success": True, "active_page": page})
+
+    @router.post("/api/scene/select")
+    def select_scene_alias(handler, engine, body):
+        return select_page(handler, engine, body)
+
+    @router.post("/api/profile/select")
+    def select_profile_alias(handler, engine, body):
+        return select_page(handler, engine, body)
 
     @router.post("/api/page/create")
     def create_page(handler, engine, body):

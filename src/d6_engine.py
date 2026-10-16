@@ -773,6 +773,8 @@ class D6Engine:
             self.device.set_key_callback(self._on_hardware_key)
             self._is_open = True
             print("[Engine] AmpliGame D6 conectado e pronto.")
+            self._displayed_key_hashes.clear()
+            self.sync_all_keys(force=True)
             return True
         except Exception as e:
             print(f"[Engine] Falha ao conectar D6: {e}")
@@ -1297,13 +1299,14 @@ class D6Engine:
 
         threading.Thread(target=_press_thread, daemon=True).start()
 
-    def sync_all_keys(self, force: bool = False):
-        """Atualiza todas as telas do deck físico com Dirty Checking inteligente (sem piscadas pretas)."""
+    def sync_all_keys(self, force: bool = True):
+        """Atualiza todas as 15 telas do deck físico com retransmissão completa e segura."""
         if not self.device:
             return
 
+        active_page = self.config.get("active_page", "principal")
         for k in range(1, 16):
-            self.sync_key(k, force=force)
+            self.sync_key(k, force=force, page_id=active_page)
             # Intervalo mínimo seguro (8ms) para o microcontrolador do 293S
             time.sleep(0.008)
 
@@ -1319,7 +1322,9 @@ class D6Engine:
                 self._auto_switched = False
             self.config["active_page"] = page_id
             self.save_config()
-            self.sync_all_keys()
+            # Limpa hashes em memória para forçar a reescrita de todas as 15 telas no LCD físico
+            self._displayed_key_hashes.clear()
+            self.sync_all_keys(force=True)
             print(f"[Engine] Mudou para página: {page_id} (auto={is_auto})")
 
     def get_frontmost_app(self) -> Optional[Dict[str, str]]:

@@ -35,9 +35,13 @@ ENV/
 *.swp
 *~
 
-# Local configuration backups & user-specific temp uploads
+d6_profiles.json
+**/d6_profiles.json
 d6_profiles.json.bak
+generated_deck_icons/
+**/generated_deck_icons/
 /tmp/
 *.tmp
 .idea/
 .vscode/
+vendor/

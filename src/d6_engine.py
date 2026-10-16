@@ -1212,12 +1212,13 @@ class D6Engine:
         }
         return fifine_official_rev.get(hw_key, hw_key)
 
-    def sync_key(self, key_num: int, force: bool = False, is_pressed: bool = False):
+    def sync_key(self, key_num: int, force: bool = False, is_pressed: bool = False, page_id: Optional[str] = None):
         """Envia a tecla atualizada diretamente para a tela LCD física com Dirty Checking ultra-rápido."""
         if not self.device or not (1 <= key_num <= 18):
             return
 
-        page_id = self.config.get("active_page", "principal")
+        if not page_id:
+            page_id = self.config.get("active_page", "principal")
         page = self.config.get("pages", {}).get(page_id, {})
         key_data = page.get("keys", {}).get(str(key_num))
 
@@ -1257,6 +1258,9 @@ class D6Engine:
                     res = self.device.set_key_image(key_num, temp_path)
                 else:
                     res = -1
+
+                if hasattr(self.device, "refresh"):
+                    self.device.refresh()
             
             self._displayed_key_hashes[hw_key] = img_hash
         except Exception as e:

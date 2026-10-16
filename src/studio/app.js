@@ -192,6 +192,20 @@ async function loadServerState(isBackground = false) {
             });
           }
         });
+        // Se estiver em background, preserva a tecla que o usuário está ativamente editando no momento
+        if (isBackground && state.selectedSlot !== null && state.selectedSlot !== undefined) {
+          const curEditingKey = state.profiles[state.activeProfile]?.keys?.[state.selectedSlot];
+          if (curEditingKey && newProfiles[state.activeProfile]) {
+            if (!newProfiles[state.activeProfile].keys) {
+              newProfiles[state.activeProfile].keys = {};
+            }
+            newProfiles[state.activeProfile].keys[state.selectedSlot] = {
+              ...newProfiles[state.activeProfile].keys[state.selectedSlot],
+              ...curEditingKey
+            };
+          }
+        }
+
         state.profiles = newProfiles;
       }
 
@@ -231,19 +245,24 @@ async function loadServerState(isBackground = false) {
         }
       }
 
+      const isUserTyping = document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName);
       const pageChanged = (data.active_page && state.profiles[data.active_page] && state.activeProfile !== data.active_page);
-      if (data.active_page && state.profiles[data.active_page]) {
-        state.activeProfile = data.active_page;
-      } else if (!state.profiles[state.activeProfile]) {
-        state.activeProfile = Object.keys(state.profiles)[0] || 'principal';
-      }
 
-      // Evita reconstruir todo o DOM se nada mudou em segundo plano
-      if (!isBackground || pageChanged) {
+      if (!isBackground) {
+        if (data.active_page && state.profiles[data.active_page]) {
+          state.activeProfile = data.active_page;
+        } else if (!state.profiles[state.activeProfile]) {
+          state.activeProfile = Object.keys(state.profiles)[0] || 'principal';
+        }
         renderSceneList();
         renderDeckGrid();
         updateSceneInspector();
         selectKey(state.selectedSlot || 0);
+      } else if (pageChanged && !isUserTyping) {
+        state.activeProfile = data.active_page;
+        renderSceneList();
+        renderDeckGrid();
+        updateSceneInspector();
       }
     }
   } catch (e) {
@@ -487,6 +506,188 @@ async function executeKeyActionOnMac(slot) {
   }
 }
 
+// Renderiza o conteúdo visual (ícones, imagens, textos e estilos) em um elemento de tecla LCD
+function renderKeyVisualContent(keyEl, keyData) {
+  if (!keyEl) return;
+  keyEl.innerHTML = '';
+  keyEl.classList.remove('is-folder', 'is-back-key', 'is-multiaction', 'is-obs');
+
+  if (!keyData) {
+    keyEl.style.backgroundColor = '#18181b';
+    keyEl.style.border = '';
+    keyEl.draggable = false;
+    return;
+  }
+
+  keyEl.draggable = true;
+
+  if (keyData.actionType === 'folder' || keyData.uuid?.includes('openchild') || keyData.actionUuid?.includes('openchild') || keyData.target?.startsWith('folder_')) {
+    keyEl.classList.add('is-folder');
+  } else if (keyData.actionType === 'backtoparent' || keyData.uuid?.includes('backtoparent') || keyData.actionUuid?.includes('backtoparent')) {
+    keyEl.classList.add('is-back-key');
+  } else if (keyData.actionType === 'multiaction' || keyData.uuid?.includes('routine') || keyData.actionUuid?.includes('routine')) {
+    keyEl.classList.add('is-multiaction');
+  } else if (keyData.actionType === 'obs' || keyData.uuid?.includes('obsstudio') || keyData.actionUuid?.includes('obsstudio')) {
+    keyEl.classList.add('is-obs');
+  }
+
+  keyEl.style.backgroundColor = keyData.bg || '#18181b';
+
+  if (keyData.borderWidth && keyData.borderWidth > 0) {
+    keyEl.style.border = `${keyData.borderWidth}px solid ${keyData.borderColor || '#007aff'}`;
+  } else {
+    keyEl.style.border = '';
+  }
+
+  if (keyData.imagePath) {
+    const img = document.createElement('img');
+    if (keyData.imageFit === 'contain') {
+      img.className = 'key-inner-icon-contain';
+    } else {
+      img.className = 'key-inner-bg-cover';
+    }
+    img.src = '/api/image?path=' + encodeURIComponent(keyData.imagePath);
+    keyEl.appendChild(img);
+  } else if (keyData.icon || keyData.actionType === 'multiaction' || keyData.actionType === 'obs') {
+    if (keyData.icon === 'arrow-left' || keyData.actionType === 'backtoparent') {
+      const wrap = document.createElement('div');
+      wrap.className = 'key-inner-icon-svg';
+      wrap.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${keyData.accent || '#007aff'}" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>`;
+      keyEl.appendChild(wrap);
+    } else if (keyData.icon === 'folder' || keyData.actionType === 'folder') {
+      const wrap = document.createElement('div');
+      wrap.className = 'key-inner-icon-svg';
+      wrap.innerHTML = `<svg width="26" height="26" viewBox="0 0 24 24" fill="${keyData.accent || '#f59e0b'}"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
+      keyEl.appendChild(wrap);
+    } else if (keyData.icon === 'multiaction' || keyData.actionType === 'multiaction' || keyData.uuid?.includes('routine')) {
+      const wrap = document.createElement('div');
+      wrap.className = 'key-inner-icon-svg';
+      wrap.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${keyData.accent || '#a855f7'}" stroke-width="2.5"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>`;
+      keyEl.appendChild(wrap);
+    } else if (keyData.actionType === 'obs' || keyData.uuid?.includes('obsstudio')) {
+      const wrap = document.createElement('div');
+      wrap.className = 'key-inner-icon-svg';
+      wrap.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${keyData.accent || '#007aff'}" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>`;
+      keyEl.appendChild(wrap);
+    } else if (keyData.icon && (keyData.icon.startsWith('/') || keyData.icon.startsWith('http') || keyData.icon.includes('.'))) {
+      const img = document.createElement('img');
+      img.className = 'key-inner-icon-contain';
+      img.src = keyData.icon;
+      keyEl.appendChild(img);
+    }
+  }
+
+  // Renderização de Título e Subtítulo idêntica à tela LCD física
+  if (keyData.showTitle !== false && (keyData.title || keyData.subtitle)) {
+    const textWrap = document.createElement('div');
+    textWrap.className = 'key-inner-text-wrap';
+    if (keyData.titleAlignment === 'top') {
+      textWrap.classList.add('align-top');
+    } else if (keyData.titleAlignment === 'bottom') {
+      textWrap.classList.add('align-bottom');
+    } else {
+      textWrap.classList.add('align-middle');
+    }
+
+    if (keyData.title) {
+      const lines = String(keyData.title).split('\n').filter(l => l.trim().length > 0);
+      if (lines.length > 1) {
+        lines.forEach((lineText) => {
+          const lineEl = document.createElement('span');
+          lineEl.className = 'key-inner-title-line';
+          lineEl.innerText = lineText;
+          if (keyData.textColor) lineEl.style.color = keyData.textColor;
+          if (keyData.fontFamily) lineEl.style.fontFamily = keyData.fontFamily;
+          if (keyData.bold) lineEl.style.fontWeight = '700';
+          if (keyData.italic) lineEl.style.fontStyle = 'italic';
+          if (keyData.underline) lineEl.style.textDecoration = 'underline';
+          if (keyData.fontSize) lineEl.style.fontSize = (parseInt(keyData.fontSize) || 11) + 'px';
+          textWrap.appendChild(lineEl);
+        });
+      } else {
+        const titleEl = document.createElement('span');
+        titleEl.className = 'key-inner-title';
+        titleEl.innerText = keyData.title;
+        if (keyData.textColor) titleEl.style.color = keyData.textColor;
+        if (keyData.fontFamily) titleEl.style.fontFamily = keyData.fontFamily;
+        if (keyData.bold) titleEl.style.fontWeight = '700';
+        if (keyData.italic) titleEl.style.fontStyle = 'italic';
+        if (keyData.underline) titleEl.style.textDecoration = 'underline';
+        if (keyData.fontSize) titleEl.style.fontSize = (parseInt(keyData.fontSize) || 11) + 'px';
+        textWrap.appendChild(titleEl);
+      }
+    }
+
+    if (keyData.subtitle) {
+      const subEl = document.createElement('span');
+      subEl.className = 'key-inner-subtitle';
+      subEl.innerText = keyData.subtitle;
+      textWrap.appendChild(subEl);
+    }
+
+    keyEl.appendChild(textWrap);
+  }
+}
+
+// Atualiza cirurgicamente a tecla na grade e na miniatura do inspector em tempo real (0ms)
+function updateSlotVisual(slot, keyData) {
+  if (state.profiles[state.activeProfile]) {
+    if (!state.profiles[state.activeProfile].keys) {
+      state.profiles[state.activeProfile].keys = {};
+    }
+    state.profiles[state.activeProfile].keys[slot] = keyData;
+  }
+
+  // Atualiza div da grade
+  const keyEl = document.querySelector(`.deck-key-slot[data-slot="${slot}"]`);
+  if (keyEl) {
+    renderKeyVisualContent(keyEl, keyData);
+  }
+
+  // Se for o slot selecionado, atualiza também a miniatura e o preview do inspector
+  if (slot === state.selectedSlot && keyData) {
+    const previewCard = document.getElementById('keyPreviewCard');
+    if (previewCard) {
+      previewCard.style.backgroundColor = keyData.bg || '#18181b';
+      if (keyData.borderWidth && keyData.borderWidth > 0) {
+        previewCard.style.border = `${keyData.borderWidth}px solid ${keyData.borderColor || '#007aff'}`;
+      } else {
+        previewCard.style.border = '1px solid var(--border-subtle)';
+      }
+
+      let imgPreview = previewCard.querySelector('.preview-card-img');
+      if (keyData.imagePath) {
+        if (!imgPreview) {
+          imgPreview = document.createElement('img');
+          imgPreview.className = 'preview-card-img';
+          previewCard.insertBefore(imgPreview, previewCard.firstChild);
+        }
+        imgPreview.src = '/api/image?path=' + encodeURIComponent(keyData.imagePath);
+        imgPreview.style.objectFit = keyData.imageFit || 'cover';
+        imgPreview.style.display = 'block';
+      } else if (imgPreview) {
+        imgPreview.style.display = 'none';
+      }
+    }
+
+    const prevLabel = document.getElementById('previewKeyLabel');
+    if (prevLabel) {
+      prevLabel.innerText = keyData.title || '';
+      prevLabel.style.display = keyData.showTitle === false ? 'none' : 'block';
+      if (keyData.fontFamily) prevLabel.style.fontFamily = keyData.fontFamily;
+      prevLabel.style.fontWeight = keyData.bold ? '700' : 'normal';
+      prevLabel.style.fontStyle = keyData.italic ? 'italic' : 'normal';
+      prevLabel.style.textDecoration = keyData.underline ? 'underline' : 'none';
+    }
+
+    const prevSub = document.getElementById('previewKeySub');
+    if (prevSub) {
+      prevSub.innerText = keyData.subtitle || '';
+      prevSub.style.display = (keyData.showTitle !== false && keyData.subtitle) ? 'block' : 'none';
+    }
+  }
+}
+
 // Renderiza as 15 Teclas do Deck com Drag-and-Drop 1:1, Duplicação e Menu de Contexto
 function renderDeckGrid() {
   const grid = document.getElementById('deckGrid');
@@ -547,129 +748,18 @@ function renderDeckGrid() {
     keyEl.className = `deck-key-slot ${slot === state.selectedSlot ? 'selected' : ''}`;
     keyEl.dataset.slot = slot;
 
-    // Se a tecla possui conteúdo configurado, permite arrastá-la para outro quadrado
-    if (keyData) {
-      keyEl.draggable = true;
+    renderKeyVisualContent(keyEl, keyData);
 
-      if (keyData.actionType === 'folder' || keyData.uuid?.includes('openchild') || keyData.actionUuid?.includes('openchild') || keyData.target?.startsWith('folder_')) {
-        keyEl.classList.add('is-folder');
-      } else if (keyData.actionType === 'backtoparent' || keyData.uuid?.includes('backtoparent') || keyData.actionUuid?.includes('backtoparent')) {
-        keyEl.classList.add('is-back-key');
-      } else if (keyData.actionType === 'multiaction' || keyData.uuid?.includes('routine') || keyData.actionUuid?.includes('routine')) {
-        keyEl.classList.add('is-multiaction');
-      } else if (keyData.actionType === 'obs' || keyData.uuid?.includes('obsstudio') || keyData.actionUuid?.includes('obsstudio')) {
-        keyEl.classList.add('is-obs');
-      }
+    keyEl.ondragstart = (e) => {
+      e.dataTransfer.setData('text/slot', slot.toString());
+      e.dataTransfer.effectAllowed = 'copyMove';
+      keyEl.classList.add('dragging');
+    };
 
-      keyEl.ondragstart = (e) => {
-        e.dataTransfer.setData('text/slot', slot.toString());
-        e.dataTransfer.effectAllowed = 'copyMove';
-        keyEl.classList.add('dragging');
-      };
-
-      keyEl.ondragend = () => {
-        keyEl.classList.remove('dragging');
-        document.querySelectorAll('.deck-key-slot').forEach(el => el.classList.remove('drag-target'));
-      };
-
-      if (keyData.bg) {
-        keyEl.style.backgroundColor = keyData.bg;
-      }
-      if (keyData.borderWidth && keyData.borderWidth > 0) {
-        keyEl.style.border = `${keyData.borderWidth}px solid ${keyData.borderColor || '#007aff'}`;
-      } else {
-        keyEl.style.border = '';
-      }
-
-      if (keyData.imagePath) {
-        const img = document.createElement('img');
-        if (keyData.imageFit === 'contain') {
-          img.className = 'key-inner-icon-contain';
-        } else {
-          img.className = 'key-inner-bg-cover';
-        }
-        img.src = '/api/image?path=' + encodeURIComponent(keyData.imagePath);
-        keyEl.appendChild(img);
-      } else if (keyData.icon || keyData.actionType === 'multiaction' || keyData.actionType === 'obs') {
-        if (keyData.icon === 'arrow-left' || keyData.actionType === 'backtoparent') {
-          const wrap = document.createElement('div');
-          wrap.className = 'key-inner-icon-svg';
-          wrap.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${keyData.accent || '#007aff'}" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>`;
-          keyEl.appendChild(wrap);
-        } else if (keyData.icon === 'folder' || keyData.actionType === 'folder') {
-          const wrap = document.createElement('div');
-          wrap.className = 'key-inner-icon-svg';
-          wrap.innerHTML = `<svg width="26" height="26" viewBox="0 0 24 24" fill="${keyData.accent || '#f59e0b'}"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
-          keyEl.appendChild(wrap);
-        } else if (keyData.icon === 'multiaction' || keyData.actionType === 'multiaction' || keyData.uuid?.includes('routine')) {
-          const wrap = document.createElement('div');
-          wrap.className = 'key-inner-icon-svg';
-          wrap.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${keyData.accent || '#a855f7'}" stroke-width="2.5"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>`;
-          keyEl.appendChild(wrap);
-        } else if (keyData.actionType === 'obs' || keyData.uuid?.includes('obsstudio')) {
-          const wrap = document.createElement('div');
-          wrap.className = 'key-inner-icon-svg';
-          wrap.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${keyData.accent || '#007aff'}" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>`;
-          keyEl.appendChild(wrap);
-        } else if (keyData.icon && (keyData.icon.startsWith('/') || keyData.icon.startsWith('http') || keyData.icon.includes('.'))) {
-          const img = document.createElement('img');
-          img.className = 'key-inner-icon-contain';
-          img.src = keyData.icon;
-          keyEl.appendChild(img);
-        }
-      }
-
-      // Renderização de Título e Subtítulo idêntica à tela LCD física
-      if (keyData.showTitle !== false && (keyData.title || keyData.subtitle)) {
-        const textWrap = document.createElement('div');
-        textWrap.className = 'key-inner-text-wrap';
-        if (keyData.titleAlignment === 'top') {
-          textWrap.classList.add('align-top');
-        } else if (keyData.titleAlignment === 'bottom') {
-          textWrap.classList.add('align-bottom');
-        } else {
-          textWrap.classList.add('align-middle');
-        }
-
-        if (keyData.title) {
-          const lines = String(keyData.title).split('\n').filter(l => l.trim().length > 0);
-          if (lines.length > 1) {
-            lines.forEach((lineText) => {
-              const lineEl = document.createElement('span');
-              lineEl.className = 'key-inner-title-line';
-              lineEl.innerText = lineText;
-              if (keyData.textColor) lineEl.style.color = keyData.textColor;
-              if (keyData.fontFamily) lineEl.style.fontFamily = keyData.fontFamily;
-              if (keyData.bold) lineEl.style.fontWeight = '700';
-              if (keyData.italic) lineEl.style.fontStyle = 'italic';
-              if (keyData.underline) lineEl.style.textDecoration = 'underline';
-              if (keyData.fontSize) lineEl.style.fontSize = (parseInt(keyData.fontSize) || 11) + 'px';
-              textWrap.appendChild(lineEl);
-            });
-          } else {
-            const titleEl = document.createElement('span');
-            titleEl.className = 'key-inner-title';
-            titleEl.innerText = keyData.title;
-            if (keyData.textColor) titleEl.style.color = keyData.textColor;
-            if (keyData.fontFamily) titleEl.style.fontFamily = keyData.fontFamily;
-            if (keyData.bold) titleEl.style.fontWeight = '700';
-            if (keyData.italic) titleEl.style.fontStyle = 'italic';
-            if (keyData.underline) titleEl.style.textDecoration = 'underline';
-            if (keyData.fontSize) titleEl.style.fontSize = (parseInt(keyData.fontSize) || 11) + 'px';
-            textWrap.appendChild(titleEl);
-          }
-        }
-
-        if (keyData.subtitle) {
-          const subEl = document.createElement('span');
-          subEl.className = 'key-inner-subtitle';
-          subEl.innerText = keyData.subtitle;
-          textWrap.appendChild(subEl);
-        }
-
-        keyEl.appendChild(textWrap);
-      }
-    }
+    keyEl.ondragend = () => {
+      keyEl.classList.remove('dragging');
+      document.querySelectorAll('.deck-key-slot').forEach(el => el.classList.remove('drag-target'));
+    };
 
     // Feedback tátil imediato de clique / afundamento com o mouse
     keyEl.onmousedown = (e) => {
@@ -683,7 +773,8 @@ function renderDeckGrid() {
 
     // Duplo clique: se for pasta entra; se for ação, executa imediatamente no Mac!
     keyEl.ondblclick = () => {
-      if (!keyData) return;
+      const curData = state.profiles[state.activeProfile]?.keys?.[slot];
+      if (!curData) return;
       if (keyData.actionType === 'folder' || keyData.uuid?.includes('openchild') || keyData.actionUuid?.includes('openchild') || keyData.target?.startsWith('folder_')) {
         openFolder(keyData.target || keyData.folderId);
       } else if (keyData.actionType === 'backtoparent' || keyData.uuid?.includes('backtoparent') || keyData.actionUuid?.includes('backtoparent')) {
@@ -1728,23 +1819,26 @@ function bindEvents() {
   if (inputTitle) {
     inputTitle.addEventListener('input', (e) => {
       const val = e.target.value;
-      const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
-      if (keyData) {
-        keyData.title = val;
-        const targetFolderId = keyData.target || keyData.folderId;
-        if (targetFolderId && state.profiles[targetFolderId]) {
-          state.profiles[targetFolderId].name = val;
-        }
-        const prevLabel = document.getElementById('previewKeyLabel');
-        if (prevLabel) prevLabel.innerText = val;
-
-        renderDeckGrid();
-
-        clearTimeout(titleDebounceTimer);
-        titleDebounceTimer = setTimeout(() => {
-          syncKeyToHardware(state.selectedSlot, keyData);
-        }, 120);
+      if (!state.profiles[state.activeProfile]) return;
+      if (!state.profiles[state.activeProfile].keys) state.profiles[state.activeProfile].keys = {};
+      let keyData = state.profiles[state.activeProfile].keys[state.selectedSlot];
+      if (!keyData) {
+        keyData = { title: '', subtitle: '', bg: '#18181b', textColor: '#ffffff', fontSize: 12, showTitle: true, actionType: 'none' };
+        state.profiles[state.activeProfile].keys[state.selectedSlot] = keyData;
       }
+      keyData.title = val;
+      const targetFolderId = keyData.target || keyData.folderId;
+      if (targetFolderId && state.profiles[targetFolderId]) {
+        state.profiles[targetFolderId].name = val;
+      }
+
+      // Atualiza visual imediatamente no grid e no preview (0ms)
+      updateSlotVisual(state.selectedSlot, keyData);
+
+      clearTimeout(titleDebounceTimer);
+      titleDebounceTimer = setTimeout(() => {
+        syncKeyToHardware(state.selectedSlot, keyData);
+      }, 120);
     });
   }
 
@@ -1754,22 +1848,22 @@ function bindEvents() {
   if (inputSubtitle) {
     inputSubtitle.addEventListener('input', (e) => {
       const val = e.target.value;
-      const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
-      if (keyData) {
-        keyData.subtitle = val;
-        const prevSub = document.getElementById('previewKeySub');
-        if (prevSub) {
-          prevSub.innerText = val;
-          prevSub.style.display = val ? 'block' : 'none';
-        }
-
-        renderDeckGrid();
-
-        clearTimeout(subDebounceTimer);
-        subDebounceTimer = setTimeout(() => {
-          syncKeyToHardware(state.selectedSlot, keyData);
-        }, 120);
+      if (!state.profiles[state.activeProfile]) return;
+      if (!state.profiles[state.activeProfile].keys) state.profiles[state.activeProfile].keys = {};
+      let keyData = state.profiles[state.activeProfile].keys[state.selectedSlot];
+      if (!keyData) {
+        keyData = { title: '', subtitle: '', bg: '#18181b', textColor: '#ffffff', fontSize: 12, showTitle: true, actionType: 'none' };
+        state.profiles[state.activeProfile].keys[state.selectedSlot] = keyData;
       }
+      keyData.subtitle = val;
+
+      // Atualiza visual imediatamente no grid e no preview (0ms)
+      updateSlotVisual(state.selectedSlot, keyData);
+
+      clearTimeout(subDebounceTimer);
+      subDebounceTimer = setTimeout(() => {
+        syncKeyToHardware(state.selectedSlot, keyData);
+      }, 120);
     });
   }
 
@@ -1781,14 +1875,21 @@ function bindEvents() {
     txtPayload.addEventListener('input', (e) => {
       const val = e.target.value;
       updateCharCounter(val.length);
-      const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
-      if (keyData) {
-        keyData.textPayload = val;
-        clearTimeout(textDebounceTimer);
-        textDebounceTimer = setTimeout(() => {
-          syncKeyToHardware(state.selectedSlot, keyData);
-        }, 70);
+      if (!state.profiles[state.activeProfile]) return;
+      if (!state.profiles[state.activeProfile].keys) state.profiles[state.activeProfile].keys = {};
+      let keyData = state.profiles[state.activeProfile].keys[state.selectedSlot];
+      if (!keyData) {
+        keyData = { title: 'Texto', subtitle: '', bg: '#18181b', textColor: '#ffffff', fontSize: 12, showTitle: true, actionType: 'text' };
+        state.profiles[state.activeProfile].keys[state.selectedSlot] = keyData;
       }
+      keyData.textPayload = val;
+      keyData.actionType = 'text';
+      updateSlotVisual(state.selectedSlot, keyData);
+
+      clearTimeout(textDebounceTimer);
+      textDebounceTimer = setTimeout(() => {
+        syncKeyToHardware(state.selectedSlot, keyData);
+      }, 70);
     });
   }
 
@@ -1819,13 +1920,18 @@ function bindEvents() {
   const inputOpen = document.getElementById('inputOpenPath');
   if (inputOpen) {
     inputOpen.addEventListener('input', (e) => {
-      const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
-      if (keyData) {
-        keyData.path = e.target.value;
-        keyData.actionType = 'open';
-        keyData.uuid = 'com.hotspot.streamdock.system.open';
-        syncKeyToHardware(state.selectedSlot, keyData);
+      if (!state.profiles[state.activeProfile]) return;
+      if (!state.profiles[state.activeProfile].keys) state.profiles[state.activeProfile].keys = {};
+      let keyData = state.profiles[state.activeProfile].keys[state.selectedSlot];
+      if (!keyData) {
+        keyData = { title: 'Abre', subtitle: '', bg: '#18181b', textColor: '#ffffff', fontSize: 12, showTitle: true, actionType: 'open' };
+        state.profiles[state.activeProfile].keys[state.selectedSlot] = keyData;
       }
+      keyData.path = e.target.value;
+      keyData.actionType = 'open';
+      keyData.uuid = 'com.hotspot.streamdock.system.open';
+      updateSlotVisual(state.selectedSlot, keyData);
+      syncKeyToHardware(state.selectedSlot, keyData);
     });
   }
 
@@ -1892,22 +1998,24 @@ function bindEvents() {
         </div>
       `;
       card.onclick = () => {
-        const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
-        if (keyData) {
-          keyData.path = app.path;
-          keyData.actionType = 'open';
-          keyData.uuid = 'com.hotspot.streamdock.system.open';
-          if (!keyData.title || keyData.title === 'Nova Ação' || keyData.title === 'Abre' || keyData.title === 'Abra uma aplicação') {
-            keyData.title = app.name;
-            if (inputTitle) inputTitle.value = app.name;
-            const lbl = document.getElementById('previewKeyLabel');
-            if (lbl) lbl.innerText = app.name;
-          }
-          if (inputOpen) inputOpen.value = app.path;
-          renderDeckGrid();
-          syncKeyToHardware(state.selectedSlot, keyData);
-          showToast(`✓ Aplicação vinculada: ${app.name}`);
+        if (!state.profiles[state.activeProfile]) return;
+        if (!state.profiles[state.activeProfile].keys) state.profiles[state.activeProfile].keys = {};
+        let keyData = state.profiles[state.activeProfile].keys[state.selectedSlot];
+        if (!keyData) {
+          keyData = { title: app.name, subtitle: '', bg: '#18181b', textColor: '#ffffff', fontSize: 12, showTitle: true, actionType: 'open' };
+          state.profiles[state.activeProfile].keys[state.selectedSlot] = keyData;
         }
+        keyData.path = app.path;
+        keyData.actionType = 'open';
+        keyData.uuid = 'com.hotspot.streamdock.system.open';
+        if (!keyData.title || keyData.title === 'Nova Ação' || keyData.title === 'Abre' || keyData.title === 'Abra uma aplicação') {
+          keyData.title = app.name;
+          if (inputTitle) inputTitle.value = app.name;
+        }
+        if (inputOpen) inputOpen.value = app.path;
+        updateSlotVisual(state.selectedSlot, keyData);
+        syncKeyToHardware(state.selectedSlot, keyData);
+        showToast(`✓ Aplicação vinculada: ${app.name}`);
         modalAppPicker.style.display = 'none';
       };
       appPickerGrid.appendChild(card);
@@ -2069,12 +2177,19 @@ function bindEvents() {
         btnRecord.innerText = 'Gravar Atalho';
         window.removeEventListener('keydown', recordListener, true);
 
-        const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
-        if (keyData) {
-          keyData.hotkey = combo;
-          syncKeyToHardware(state.selectedSlot, keyData);
-          showToast(`✓ Atalho gravado: ${combo}`);
+        if (!state.profiles[state.activeProfile]) return;
+        if (!state.profiles[state.activeProfile].keys) state.profiles[state.activeProfile].keys = {};
+        let keyData = state.profiles[state.activeProfile].keys[state.selectedSlot];
+        if (!keyData) {
+          keyData = { title: combo, subtitle: 'Atalho', bg: '#18181b', textColor: '#ffffff', fontSize: 12, showTitle: true, actionType: 'hotkey' };
+          state.profiles[state.activeProfile].keys[state.selectedSlot] = keyData;
         }
+        keyData.hotkey = combo;
+        keyData.actionType = 'hotkey';
+        keyData.uuid = 'com.hotspot.streamdock.system.hotkey';
+        updateSlotVisual(state.selectedSlot, keyData);
+        syncKeyToHardware(state.selectedSlot, keyData);
+        showToast(`✓ Atalho gravado: ${combo}`);
       };
 
       window.addEventListener('keydown', recordListener, true);
@@ -2085,11 +2200,18 @@ function bindEvents() {
   const inputUrl = document.getElementById('inputUrlTarget');
   if (inputUrl) {
     inputUrl.addEventListener('input', (e) => {
-      const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
-      if (keyData) {
-        keyData.url = e.target.value;
-        syncKeyToHardware(state.selectedSlot, keyData);
+      if (!state.profiles[state.activeProfile]) return;
+      if (!state.profiles[state.activeProfile].keys) state.profiles[state.activeProfile].keys = {};
+      let keyData = state.profiles[state.activeProfile].keys[state.selectedSlot];
+      if (!keyData) {
+        keyData = { title: 'Site', subtitle: '', bg: '#18181b', textColor: '#ffffff', fontSize: 12, showTitle: true, actionType: 'url' };
+        state.profiles[state.activeProfile].keys[state.selectedSlot] = keyData;
       }
+      keyData.url = e.target.value;
+      keyData.actionType = 'url';
+      keyData.uuid = 'com.hotspot.streamdock.system.website';
+      updateSlotVisual(state.selectedSlot, keyData);
+      syncKeyToHardware(state.selectedSlot, keyData);
     });
   }
 
@@ -2315,7 +2437,7 @@ function bindEvents() {
     };
   }
 
-  // Drag-and-drop dos itens da biblioteca
+  // Drag-and-drop e Clique Direto dos itens da biblioteca de ações
   document.querySelectorAll('.action-item').forEach(item => {
     item.ondragstart = (e) => {
       const uuid = item.dataset.uuid;
@@ -2323,6 +2445,19 @@ function bindEvents() {
       const category = item.closest('.accordion-item')?.querySelector('.acc-name')?.innerText || 'Geral';
       const icon = item.querySelector('.act-icon')?.src || '';
       e.dataTransfer.setData('application/json', JSON.stringify({ uuid, name, category, icon }));
+    };
+
+    // Clique direto: aplica imediatamente a ação ao slot selecionado e abre as Propriedades
+    item.onclick = (e) => {
+      e.preventDefault();
+      const slot = (state.selectedSlot !== null && state.selectedSlot !== undefined) ? state.selectedSlot : 0;
+      const uuid = item.dataset.uuid;
+      const name = item.dataset.name;
+      const category = item.closest('.accordion-item')?.querySelector('.acc-name')?.innerText || 'Geral';
+      const icon = item.querySelector('.act-icon')?.src || '';
+      assignActionToSlot(slot, { uuid, name, category, icon });
+      switchRightTab('tabPaneInspector');
+      showToast(`✓ Ação "${name}" aplicada à tecla ${slot + 1}`);
     };
   });
 
@@ -3416,8 +3551,7 @@ function applyKeyColor(color, applyToAll = false) {
     }
   }
 
-  renderDeckGrid();
-  selectKey(state.selectedSlot);
+  updateSlotVisual(state.selectedSlot, keyData);
   syncKeyToHardware(state.selectedSlot, keyData);
   showToast(`✓ Cor LCD definida: ${color}`);
 }

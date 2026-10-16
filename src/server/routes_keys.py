@@ -64,14 +64,17 @@ def register_keys_routes(router: Router):
                     engine.config["pages"][page]["keys"] = {}
                 engine.config["pages"][page]["keys"][key_num] = key_data
 
+            # Se o usuário está editando teclas desta página na Web UI, garante que ela é a página ativa no Stream Deck
+            engine.config["active_page"] = page
+            engine._last_manual_page = page
+            engine._auto_switched = False
             engine.save_config()
 
-            if page == engine.config.get("active_page"):
-                try:
-                    slot_int = int(key_num)
-                    engine.sync_key(slot_int)
-                except Exception as e:
-                    print(f"[Server] Erro ao sincronizar tecla {key_num}: {e}")
+            try:
+                slot_int = int(key_num)
+                engine.sync_key(slot_int, force=True, page_id=page)
+            except Exception as e:
+                print(f"[Server] Erro ao sincronizar tecla {key_num}: {e}")
 
             router.send_json(handler, 200, {"success": True, "page": page, "key": key_num})
         else:

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>fifine Control Deck Studio Pro - O dispositivo está conectado</title>
-  <link rel="stylesheet" href="styles.css?v=20261016_mirror">
+  <link rel="stylesheet" href="styles.css?v=20261016_ui_taste">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -219,22 +219,22 @@
               <!-- Estado Vazio (Nenhuma tecla selecionada - Mostra Propriedades da Cena) -->
               <div class="inspector-empty-state" id="inspectorEmptyState">
                 <div class="scene-inspector-card">
-                  <div class="scene-inspector-badge">PROPRIEDADES DA CENA</div>
+                  <div class="scene-inspector-badge">Propriedades da Cena</div>
                   <div class="scene-inspector-header">
                     <span class="scene-inspector-title" id="emptyStateSceneTitle">Cena Padrão</span>
                     <button class="fifine-btn secondary-sm" id="btnInspectorLinkApp">
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                      Vincular App
+                      <span>Vincular App</span>
                     </button>
                   </div>
                   <div class="scene-inspector-row">
                     <span class="scene-prop-label">App Vinculado:</span>
                     <span class="scene-prop-val" id="emptyStateLinkedApp">Nenhum (Troca Manual)</span>
                   </div>
-                  <div class="scene-inspector-row" style="flex-direction: column; align-items: stretch; gap: 8px; margin-top: 10px; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+                  <div class="scene-inspector-row" style="flex-direction: column; align-items: stretch; gap: 12px; margin-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 12px;">
                     <div style="display: flex; align-items: center; justify-content: space-between;">
-                      <span class="scene-prop-label" style="font-weight: 600;">Cor LCD da Cena (15 Telas):</span>
-                      <span id="currentSceneColorHex" style="font-size: 11px; font-family: monospace; color: var(--text-muted);">#18181b</span>
+                      <span class="scene-prop-label" style="font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">Cor LCD da Cena (15 Telas):</span>
+                      <span id="currentSceneColorHex" style="font-size: 11px; font-family: var(--font-mono, monospace); color: #60a5fa; background: rgba(59, 130, 246, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(59, 130, 246, 0.2);">#18181b</span>
                     </div>
                     <div class="palette-swatches">
                       <button class="swatch scene-swatch" data-color="#18181b" style="background: #18181b;" title="Preto Studio (#18181b)"></button>
@@ -247,8 +247,8 @@
                       <button class="swatch scene-swatch" data-color="#dc2626" style="background: #dc2626;" title="Vermelho (#dc2626)"></button>
                       <input type="color" id="sceneCustomColorPicker" value="#18181b" title="Cor Personalizada da Cena">
                     </div>
-                    <button class="fifine-btn secondary-sm" id="btnApplySceneColor" style="margin-top: 4px; font-size: 11px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>
+                    <button class="fifine-btn secondary-sm" id="btnApplySceneColor" style="margin-top: 4px; width: 100%; height: 38px;">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>
                       <span>Colorir Todas as 15 Telas LCD</span>
                     </button>
                   </div>
@@ -261,9 +261,9 @@
                 <!-- Header da Tecla: Categoria : Ação + Lixeira -->
                 <div class="inspector-header">
                   <span class="inspector-action-title" id="inspectorActionCategory">Caixa de Ferramentas : Texto</span>
-                  <div style="display: flex; align-items: center; gap: 6px;">
-                    <button class="fifine-btn secondary-sm" id="btnTestCurrentAction" title="Executar esta ação no computador agora para teste" style="font-size: 11px; padding: 3px 8px; display: flex; align-items: center; gap: 4px;">
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  <div class="inspector-header-actions">
+                    <button class="fifine-btn secondary-sm" id="btnTestCurrentAction" title="Executar esta ação no computador agora para teste">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                       <span>Testar Ação</span>
                     </button>
                     <button class="inspector-delete-btn" id="btnDeleteKeyAction" title="Limpar Esta Tecla">
@@ -274,24 +274,31 @@
 
                 <!-- Corpo do Inspector com Altura Total e Scroll Próprio -->
                 <div class="inspector-body">
-                  <!-- Miniatura em Destaque da Tecla -->
-                  <div class="key-preview-card" id="keyPreviewCard">
-                    <div class="preview-key-inner" id="previewKeyInner">
-                      <span class="preview-key-label" id="previewKeyLabel"></span>
-                      <span class="preview-key-sub" id="previewKeySub" style="display: none; font-size: 9px; color: #a1a1aa; margin-top: 2px;"></span>
+                  <!-- CARD 1: Miniatura em Destaque da Tecla -->
+                  <div class="inspector-section-card preview-card">
+                    <div class="key-preview-card" id="keyPreviewCard">
+                      <div class="preview-key-inner" id="previewKeyInner">
+                        <span class="preview-key-label" id="previewKeyLabel"></span>
+                        <span class="preview-key-sub" id="previewKeySub" style="display: none; font-size: 9px; color: #a1a1aa; margin-top: 2px;"></span>
+                      </div>
                     </div>
                   </div>
 
-                  <!-- Campos de Configuração -->
-                  <div class="inspector-fields">
+                  <!-- CARD 2: Rótulo e Tipografia -->
+                  <div class="inspector-section-card">
+                    <div class="section-badge">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+                      <span>Rótulo & Tipografia</span>
+                    </div>
+
                     <!-- Título da Tecla com Menu Tipografia "T" -->
                     <div class="inspector-row">
-                      <label class="row-label">Título:</label>
+                      <label class="row-label">Título Principal:</label>
                       <div class="title-input-wrap">
                         <input type="text" class="fifine-input" id="inputKeyTitle" placeholder="Rótulo da tecla...">
                         <div class="typography-anchor">
                           <button class="typography-btn" id="btnTypography" title="Formatação de Tipografia">T</button>
-                          <div class="typography-popover" id="typographyPopover" style="display: none; width: 230px;">
+                          <div class="typography-popover" id="typographyPopover" style="display: none;">
                             <div class="popover-row">
                               <span class="popover-label">Fonte:</span>
                               <select class="pop-select" id="selectFontFamily" style="max-width: 130px;">
@@ -335,8 +342,8 @@
                                 <button class="pop-btn" id="btnAlignBottom" title="Base">▼</button>
                               </div>
                             </div>
-                            <div class="popover-row" style="margin-top: 6px; border-top: 1px solid var(--border-subtle); padding-top: 6px;">
-                              <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #a1a1aa; cursor: pointer;">
+                            <div class="popover-row" style="margin-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 6px;">
+                              <label style="display: flex; align-items: center; gap: 8px; font-size: 11px; color: #a1a1aa; cursor: pointer;">
                                 <input type="checkbox" id="chkDoNotShowTitle">
                                 <span>Ocultar Título (Modo Ícone)</span>
                               </label>
@@ -348,14 +355,22 @@
 
                     <!-- Subtítulo Secundário (igual ao hardware) -->
                     <div class="inspector-row">
-                      <label class="row-label">Subtítulo:</label>
+                      <label class="row-label">Subtítulo (Hardware LCD):</label>
                       <input type="text" class="fifine-input" id="inputKeySubtitle" placeholder="Subtítulo menor (ex: Live, Mac, Samsung)...">
+                    </div>
+                  </div>
+
+                  <!-- CARD 3: Configuração da Ação Vinculada -->
+                  <div class="inspector-section-card">
+                    <div class="section-badge">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                      <span>Ação Configurada</span>
                     </div>
 
                     <!-- Contexto: Ação Texto -->
                     <div class="action-fields-context" id="fieldsContextText">
                       <div class="inspector-row align-top">
-                        <label class="row-label">Texto:</label>
+                        <label class="row-label">Texto a Digitar / Colar:</label>
                         <div class="textarea-wrap">
                           <textarea class="fifine-textarea" id="inputTextPayload" rows="4" maxlength="5000" placeholder="Digite o texto que será colado/digitado..."></textarea>
                           <div class="char-counter" id="charCounter">0 / 5000</div>
@@ -380,56 +395,50 @@
                     <!-- Contexto: Ação Abrir / Aplicação -->
                     <div class="action-fields-context" id="fieldsContextOpen" style="display: none;">
                       <div class="inspector-row">
-                        <label class="row-label">App / Arquivo:</label>
+                        <label class="row-label">Aplicativo ou Arquivo:</label>
                         <div class="file-picker-wrap">
                           <input type="text" class="fifine-input" id="inputOpenPath" placeholder="Ex: Safari ou /Applications/Nome.app">
                           <button class="fifine-btn secondary" id="btnBrowseFile" title="Escolher Aplicativo Instalado no Mac">Escolher App...</button>
                         </div>
                       </div>
-                      <div class="inspector-row" style="margin-top: 6px;">
-                        <button class="fifine-btn secondary-sm" id="btnTestOpenAction" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                          <span>Testar Abrir App no Mac Agora</span>
-                        </button>
-                      </div>
+                      <button class="fifine-btn secondary-sm" id="btnTestOpenAction" style="width: 100%; height: 38px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Testar Abrir App no Mac Agora</span>
+                      </button>
                     </div>
 
                     <!-- Contexto: Ação Hotkey / Atalho de Teclado -->
                     <div class="action-fields-context" id="fieldsContextHotkey" style="display: none;">
                       <div class="inspector-row">
-                        <label class="row-label">Atalho:</label>
+                        <label class="row-label">Combinação de Teclas:</label>
                         <div class="hotkey-recorder-wrap">
                           <div class="hotkey-badge" id="hotkeyBadge">Pressione para gravar</div>
                           <button class="fifine-btn secondary" id="btnRecordHotkey">Gravar Atalho</button>
                         </div>
                       </div>
-                      <div class="inspector-row" style="margin-top: 6px;">
-                        <button class="fifine-btn secondary-sm" id="btnTestHotkeyAction" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                          <span>Testar Atalho no Mac Agora</span>
-                        </button>
-                      </div>
+                      <button class="fifine-btn secondary-sm" id="btnTestHotkeyAction" style="width: 100%; height: 38px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Testar Atalho no Mac Agora</span>
+                      </button>
                     </div>
 
                     <!-- Contexto: Ação URL / Website -->
                     <div class="action-fields-context" id="fieldsContextUrl" style="display: none;">
                       <div class="inspector-row">
-                        <label class="row-label">URL:</label>
+                        <label class="row-label">Endereço Web (URL):</label>
                         <input type="url" class="fifine-input" id="inputUrlTarget" placeholder="https://exemplo.com">
                       </div>
-                      <div class="inspector-row" style="margin-top: 6px;">
-                        <button class="fifine-btn secondary-sm" id="btnTestUrlAction" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                          <span>Testar Abrir Site no Navegador</span>
-                        </button>
-                      </div>
+                      <button class="fifine-btn secondary-sm" id="btnTestUrlAction" style="width: 100%; height: 38px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Testar Abrir Site no Navegador</span>
+                      </button>
                     </div>
 
                     <!-- Contexto: Ação Pasta / Sub-página -->
                     <div class="action-fields-context" id="fieldsContextFolder" style="display: none;">
                       <div class="inspector-row">
-                        <label class="row-label">Pasta:</label>
-                        <button class="fifine-btn primary" id="btnEnterFolder" style="display: flex; align-items: center; gap: 6px;">
+                        <label class="row-label">Navegação:</label>
+                        <button class="fifine-btn primary" id="btnEnterFolder" style="width: 100%; height: 40px;">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                           <span>Abrir Sub-página da Pasta</span>
                         </button>
@@ -439,8 +448,8 @@
                     <!-- Contexto: Ação Voltar -->
                     <div class="action-fields-context" id="fieldsContextBack" style="display: none;">
                       <div class="inspector-row">
-                        <label class="row-label">Ação:</label>
-                        <button class="fifine-btn secondary" id="btnGoBackParent" style="display: flex; align-items: center; gap: 6px;">
+                        <label class="row-label">Navegação:</label>
+                        <button class="fifine-btn secondary" id="btnGoBackParent" style="width: 100%; height: 40px;">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
                           <span>Voltar ao Nível Pai</span>
                         </button>
@@ -481,11 +490,9 @@
                         <input type="number" class="fifine-input" id="inputObsItemId" placeholder="Ex: 1, 2, 3">
                       </div>
 
-                      <div class="inspector-row" style="margin-top: 6px;">
-                        <button class="fifine-btn secondary small-btn" id="btnTestObsAction" style="width: 100%;">
-                          Testar Comando no OBS Agora
-                        </button>
-                      </div>
+                      <button class="fifine-btn secondary small-btn" id="btnTestObsAction" style="width: 100%; height: 38px;">
+                        <span>Testar Comando no OBS Agora</span>
+                      </button>
                     </div>
 
                     <!-- Contexto: Macro Multi-Action com Delays -->
@@ -518,46 +525,49 @@
                           <button class="fifine-btn secondary" id="btnBrowseSound">Procurar Som...</button>
                         </div>
                       </div>
-                      <div class="inspector-row" style="margin-top: 6px;">
-                        <button class="fifine-btn secondary small-btn" id="btnTestSound" style="width: 100%;">
-                          ▶ Testar Áudio no Mac (afplay)
-                        </button>
-                      </div>
+                      <button class="fifine-btn secondary small-btn" id="btnTestSound" style="width: 100%; height: 38px;">
+                        ▶ Testar Áudio no Mac (afplay)
+                      </button>
                     </div>
 
                     <!-- Contexto: Shell Script / Terminal -->
                     <div class="action-fields-context" id="fieldsContextShell" style="display: none;">
                       <div class="inspector-row">
                         <label class="row-label">Comando Bash/Zsh:</label>
-                        <textarea class="fifine-input" id="inputShellCommand" rows="3" placeholder="Ex: open -a Safari ou /bin/zsh meu_script.sh" style="resize: vertical; font-family: monospace; font-size: 11px; width: 100%;"></textarea>
+                        <textarea class="fifine-textarea" id="inputShellCommand" rows="3" placeholder="Ex: open -a Safari ou /bin/zsh meu_script.sh" style="resize: vertical; font-family: var(--font-mono, monospace); font-size: 11.5px;"></textarea>
                       </div>
-                      <div class="inspector-row" style="margin-top: 6px;">
-                        <button class="fifine-btn secondary small-btn" id="btnTestShellCommand" style="width: 100%;">
-                          ⚡ Executar Comando Agora
-                        </button>
-                      </div>
+                      <button class="fifine-btn secondary small-btn" id="btnTestShellCommand" style="width: 100%; height: 38px;">
+                        ⚡ Executar Comando Agora
+                      </button>
                     </div>
 
                     <!-- Contexto: Toggle Alternância de 2 Estados A/B -->
                     <div class="action-fields-context" id="fieldsContextToggle" style="display: none;">
-                      <div style="font-size: 11px; color: #a1a1aa; margin-bottom: 8px;">Alterna entre dois estados a cada clique físico:</div>
+                      <div style="font-size: 11.5px; color: #a1a1aa; line-height: 1.4;">Alterna entre dois estados a cada clique físico no StreamDeck:</div>
                       <div class="inspector-row">
                         <label class="row-label">Estado A (Título/Atalho):</label>
-                        <input type="text" class="fifine-input" id="inputToggleTitleA" placeholder="Ex: MIC ON" style="margin-bottom: 4px; width: 100%;">
-                        <input type="text" class="fifine-input" id="inputToggleKeysA" placeholder="Atalho A (ex: Cmd+Shift+M)" style="width: 100%;">
+                        <input type="text" class="fifine-input" id="inputToggleTitleA" placeholder="Ex: MIC ON" style="margin-bottom: 6px;">
+                        <input type="text" class="fifine-input" id="inputToggleKeysA" placeholder="Atalho A (ex: Cmd+Shift+M)">
                       </div>
-                      <div class="inspector-row" style="margin-top: 8px;">
+                      <div class="inspector-row">
                         <label class="row-label">Estado B (Título/Atalho):</label>
-                        <input type="text" class="fifine-input" id="inputToggleTitleB" placeholder="Ex: MUTED" style="margin-bottom: 4px; width: 100%;">
-                        <input type="text" class="fifine-input" id="inputToggleKeysB" placeholder="Atalho B (ex: Cmd+Shift+M)" style="width: 100%;">
+                        <input type="text" class="fifine-input" id="inputToggleTitleB" placeholder="Ex: MUTED" style="margin-bottom: 6px;">
+                        <input type="text" class="fifine-input" id="inputToggleKeysB" placeholder="Atalho B (ex: Cmd+Shift+M)">
                       </div>
                     </div>
+                  </div>
 
-                    <!-- Paleta de Cores de Fundo LCD -->
-                    <div class="inspector-row color-palette-row" style="flex-direction: column; align-items: stretch; gap: 8px;">
+                  <!-- CARD 4: Paleta de Cores de Fundo LCD e Borda -->
+                  <div class="inspector-section-card">
+                    <div class="section-badge">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+                      <span>Cor LCD & Moldura</span>
+                    </div>
+
+                    <div class="inspector-row">
                       <div style="display: flex; align-items: center; justify-content: space-between;">
                         <label class="row-label" style="margin-bottom: 0;">Cor LCD:</label>
-                        <span id="currentColorHex" style="font-size: 11px; font-family: monospace; color: var(--text-muted);">#18181b</span>
+                        <span id="currentColorHex" style="font-size: 11px; font-family: var(--font-mono, monospace); color: #60a5fa; background: rgba(59, 130, 246, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(59, 130, 246, 0.2);">#18181b</span>
                       </div>
                       <div class="palette-swatches">
                         <button class="swatch" data-color="#18181b" style="background: #18181b;" title="Preto Studio (#18181b)"></button>
@@ -571,55 +581,55 @@
                         <button class="swatch" data-color="#dc2626" style="background: #dc2626;" title="Vermelho (#dc2626)"></button>
                         <input type="color" id="customColorPicker" value="#004481" title="Cor Personalizada">
                       </div>
-                      <button class="fifine-btn secondary-sm" id="btnApplyColorToAll" title="Aplica a cor selecionada a todas as 15 telas LCD da cena atual" style="font-size: 11px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 5px 8px;">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                      <button class="fifine-btn secondary-sm" id="btnApplyColorToAll" title="Aplica a cor selecionada a todas as 15 telas LCD da cena atual" style="width: 100%; height: 38px;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                         <span>Aplicar Cor a Todas as 15 Telas LCD</span>
                       </button>
                     </div>
 
-                    <!-- Borda e Moldura LCD (Estilo Oficial Fifine) -->
-                    <div class="inspector-row">
-                      <label class="row-label">Borda LCD:</label>
-                      <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-                        <select class="fifine-input" id="selectBorderWidth" style="width: 90px; height: 28px; padding: 2px 6px; font-size: 11px;">
+                    <!-- Borda e Moldura LCD -->
+                    <div class="inspector-row" style="margin-top: 4px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px;">
+                      <label class="row-label">Borda & Moldura LCD:</label>
+                      <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+                        <select class="fifine-input" id="selectBorderWidth" style="flex: 1; height: 38px;">
                           <option value="0">Sem Borda</option>
                           <option value="2">Fina (2px)</option>
                           <option value="3">Média (3px)</option>
                           <option value="5">Grossa (5px)</option>
                         </select>
-                        <div style="display: flex; align-items: center; gap: 4px;">
-                          <input type="color" id="inputBorderColor" value="#007aff" style="width: 28px; height: 28px; border: 1px solid var(--border-subtle); border-radius: 4px; background: transparent; cursor: pointer;" title="Cor da Borda">
-                          <span style="font-size: 11px; color: var(--text-muted);">Cor</span>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                          <input type="color" id="inputBorderColor" value="#007aff" style="width: 38px; height: 38px; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; background: transparent; cursor: pointer;" title="Cor da Borda">
                         </div>
                       </div>
                     </div>
-
-                    <!-- Ícone e Imagem da Tecla -->
-                    <div class="inspector-row" style="margin-top: 10px; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
-                      <label class="row-label">Ícone / Imagem:</label>
-                      <div style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
-                        <div style="display: flex; gap: 6px;">
-                          <button class="fifine-btn secondary-sm" id="btnUploadKeyImage" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                            <span>Escolher Imagem...</span>
-                          </button>
-                        </div>
-                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
-                          <div style="display: flex; align-items: center; gap: 4px;">
-                            <span style="font-size: 11px; color: var(--text-muted);">Ajuste:</span>
-                            <select class="fifine-input" id="selectImageFit" style="width: 95px; height: 26px; padding: 2px 4px; font-size: 11px;">
-                              <option value="cover">Cobrir</option>
-                              <option value="contain">Conter (Fit)</option>
-                            </select>
-                          </div>
-                          <button class="fifine-btn secondary-sm danger-sm" id="btnRemoveKeyImage" style="height: 26px; padding: 0 8px; font-size: 11px; display: none;">
-                            Remover
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
                   </div>
+
+                  <!-- CARD 5: Ícone e Imagem da Tecla -->
+                  <div class="inspector-section-card">
+                    <div class="section-badge">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                      <span>Ícone & Imagem Personalizada</span>
+                    </div>
+                    <div class="inspector-row">
+                      <button class="fifine-btn secondary" id="btnUploadKeyImage" style="width: 100%; height: 40px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <span>Escolher Imagem do Mac...</span>
+                      </button>
+                      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 4px;">
+                        <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                          <span style="font-size: 11px; color: #a1a1aa; font-weight: 600;">AJUSTE:</span>
+                          <select class="fifine-input" id="selectImageFit" style="height: 34px; padding: 2px 8px; font-size: 11.5px; flex: 1;">
+                            <option value="cover">Cobrir (Preencher)</option>
+                            <option value="contain">Conter (Fit)</option>
+                          </select>
+                        </div>
+                        <button class="fifine-btn secondary-sm danger-sm" id="btnRemoveKeyImage" style="height: 34px; padding: 0 12px; font-size: 11.5px; display: none; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.25); color: #f87171;">
+                          Remover
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
 

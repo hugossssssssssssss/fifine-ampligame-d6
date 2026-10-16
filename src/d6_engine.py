@@ -253,7 +253,7 @@ DEFAULT_PROFILES = {
 
 
 class D6Engine:
-    KEY_SIZE = (96, 96)  # Resolução nativa real do hardware Fifine AmpliGame D6 (revertida via REA do app oficial)
+    KEY_SIZE = (100, 100)  # Resolução perfeita validada fisicamente no hardware Fifine AmpliGame D6
 
     def __init__(self):
         self.device = None
@@ -1253,8 +1253,8 @@ class D6Engine:
             if total_rot != 0:
                 img = img.rotate(total_rot)
 
-            # Salva JPEG baseline com qualidade 92 idêntica ao SDK oficial (sem mancha verde, 100% preenchido)
-            img.save(temp_path, "JPEG", quality=92, progressive=False, optimize=False)
+            # Salva JPEG 4:4:4 cristalino com preenchimento 100% de tela validado fisicamente
+            img.save(temp_path, "JPEG", quality=95, subsampling=0, progressive=False, optimize=False)
 
             # Dirty Checking com Hash MD5: se a imagem for idêntica ao que já está no LCD, pula transmissão USB
             import hashlib

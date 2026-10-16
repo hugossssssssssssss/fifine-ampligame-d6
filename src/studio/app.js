@@ -615,16 +615,32 @@ function renderDeckGrid() {
         }
 
         if (keyData.title) {
-          const titleEl = document.createElement('span');
-          titleEl.className = 'key-inner-title';
-          titleEl.innerText = keyData.title;
-          if (keyData.textColor) titleEl.style.color = keyData.textColor;
-          if (keyData.fontFamily) titleEl.style.fontFamily = keyData.fontFamily;
-          if (keyData.bold) titleEl.style.fontWeight = '700';
-          if (keyData.italic) titleEl.style.fontStyle = 'italic';
-          if (keyData.underline) titleEl.style.textDecoration = 'underline';
-          if (keyData.fontSize) titleEl.style.fontSize = (parseInt(keyData.fontSize) || 12) + 'px';
-          textWrap.appendChild(titleEl);
+          const lines = String(keyData.title).split('\n').filter(l => l.trim().length > 0);
+          if (lines.length > 1) {
+            lines.forEach((lineText) => {
+              const lineEl = document.createElement('span');
+              lineEl.className = 'key-inner-title-line';
+              lineEl.innerText = lineText;
+              if (keyData.textColor) lineEl.style.color = keyData.textColor;
+              if (keyData.fontFamily) lineEl.style.fontFamily = keyData.fontFamily;
+              if (keyData.bold) lineEl.style.fontWeight = '700';
+              if (keyData.italic) lineEl.style.fontStyle = 'italic';
+              if (keyData.underline) lineEl.style.textDecoration = 'underline';
+              if (keyData.fontSize) lineEl.style.fontSize = (parseInt(keyData.fontSize) || 11) + 'px';
+              textWrap.appendChild(lineEl);
+            });
+          } else {
+            const titleEl = document.createElement('span');
+            titleEl.className = 'key-inner-title';
+            titleEl.innerText = keyData.title;
+            if (keyData.textColor) titleEl.style.color = keyData.textColor;
+            if (keyData.fontFamily) titleEl.style.fontFamily = keyData.fontFamily;
+            if (keyData.bold) titleEl.style.fontWeight = '700';
+            if (keyData.italic) titleEl.style.fontStyle = 'italic';
+            if (keyData.underline) titleEl.style.textDecoration = 'underline';
+            if (keyData.fontSize) titleEl.style.fontSize = (parseInt(keyData.fontSize) || 11) + 'px';
+            textWrap.appendChild(titleEl);
+          }
         }
 
         if (keyData.subtitle) {

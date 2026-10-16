@@ -3,7 +3,6 @@
  * Sincronização interativa, drag-and-drop, Property Inspector dinâmico e gestão de perfis.
  */
 
-import { showToast } from './modules/api.js';
 import { initTheme } from './modules/theme.js';
 import { bindProfileDropdownEvents as setupProfileDropdown } from './modules/sceneMenu.js';
 
@@ -273,6 +272,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   bindEvents();
   initObsSettings();
   initWallpaperMuralModal();
+  initModals();
 
   // Polling a cada 3.5 segundos para refletir novas cenas criadas fora da janela e telemetria OBS
   setInterval(() => {
@@ -3077,6 +3077,7 @@ function closeModal(id) {
   if (el) el.style.display = 'none';
 }
 
+function initModals() {
   // Handler global para botões data-close em qualquer modal
   document.querySelectorAll('[data-close]').forEach(btn => {
     btn.onclick = () => {

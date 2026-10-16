@@ -1,0 +1,18 @@
+[
+
+    { "path": "a.jpg", "name": "a.jpg", "tags": [] },
+    { "path": "a34.jpg", "name": "a34.jpg", "tags": [] },
+    { "path": "a666.jpg", "name": "a666.jpg", "tags": [] },
+    { "path": "a987.jpg", "name": "a987.jpg", "tags": [] },
+    { "path": "a2233.jpg", "name": "a2233.jpg", "tags": [] },
+    { "path": "aa01.jpg", "name": "aa01.jpg", "tags": [] },
+    { "path": "cease.jpg", "name": "cease.jpg", "tags": [] },
+    { "path": "Mute.jpg", "name": "Mute.jpg", "tags": [] },
+    { "path": "Next song.jpg", "name": "Next song.jpg", "tags": [] },
+    { "path": "Previous song.jpg", "name": "Previous song.jpg", "tags": [] },
+    { "path": "suspend.jpg", "name": "suspend.jpg", "tags": [] },
+    { "path": "volume-.jpg", "name": "volume-.jpg", "tags": [] },
+    { "path": "volume+.jpg", "name": "volume+.jpg", "tags": [] }
+ 
+
+]

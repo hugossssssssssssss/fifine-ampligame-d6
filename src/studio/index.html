@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>fifine Control Deck Studio Pro - O dispositivo está conectado</title>
+  <link rel="stylesheet" href="styles.css?v=20261015_36">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body class="studio-web-app">
+  <!-- Container da Aplicação Web: 100vw x 100vh preenchendo todo o espaço -->
+  <div class="web-app-container">
+
+    <!-- ================= TOP HEADER DO SITE (Full-Width) ================= -->
+    <header class="app-top-header">
+      <div class="header-left-zone">
+        <div class="brand-badge">
+          <span class="brand-logo">fifine</span>
+          <span class="brand-product">Control Deck Pro</span>
+          <span class="brand-tag">v3.10</span>
+        </div>
+      </div>
+
+      <div class="header-center-zone">
+        <!-- Status USB do Dispositivo -->
+        <div class="header-status-pill usb-status" title="Hardware USB StreamDock 293S conectado via HID nativo">
+          <span class="pulse-indicator"></span>
+          <span class="status-name">D6_1494</span>
+          <span class="status-sub">Conectado</span>
+        </div>
+
+        <!-- Status OBS WebSocket v5 -->
+        <div class="header-status-pill obs-status" id="headerObsStatusPill" title="OBS Studio WebSocket v5 (RFC 4455)">
+          <span class="obs-status-dot disconnected" id="headerObsDot"></span>
+          <span class="status-name" id="headerObsLabel">OBS</span>
+          <span class="status-sub" id="headerObsText">Desconectado</span>
+        </div>
+
+        <!-- Cena / Perfil em Tempo Real -->
+        <div class="header-status-pill scene-status">
+          <span class="scene-dot"></span>
+          <span class="status-sub">Cena:</span>
+          <strong class="status-name" id="headerCurrentSceneName">Nitro</strong>
+        </div>
+      </div>
+
+      <div class="header-right-zone">
+        <!-- Ferramentas Rápidas -->
+        <button class="header-tool-btn" id="btnQuickThemeToggle" title="Alternar Modo Claro / Escuro">
+          <svg class="icon-theme-dark" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-theme-light" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <span class="tool-label-text" id="lblThemeMode">Tema</span>
+        </button>
+
+        <button class="header-tool-btn" id="btnNavSleep" title="Suspender Telas (Sleep / Economia de Energia)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <span class="tool-label-text">Sleep</span>
+        </button>
+
+        <button class="header-tool-btn" id="btnNavHelp" title="Ajuda e Guia do Teclado">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span class="tool-label-text">Ajuda</span>
+        </button>
+
+        <button class="header-tool-btn" id="btnFullscreenToggle" title="Alternar Modo Tela Cheia">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        </button>
+
+        <button class="header-sidebar-toggle" id="btnToggleSideTabs" title="Alternar Painel Lateral">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ================= WORKSPACE PRINCIPAL (3 COLUNAS FLUIDAS) ================= -->
+    <div class="app-workspace-body">
+      
+      <!-- ================= COLUNA 1: ESQUERDA (Cenas & Equipamento) ================= -->
+      <aside class="col-scenes" id="colScenes">
+        <!-- Cabeçalho da Seção de Cenas -->
+        <div class="col-section-header">
+          <div class="section-title-wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            <span class="section-title">Cenas & Perfis</span>
+          </div>
+          <div class="scene-header-actions">
+            <button class="scene-action-btn" id="btnAddScene" title="Nova Cena">+</button>
+            <button class="scene-action-btn" id="btnDeleteScene" title="Excluir Cena">−</button>
+            <button class="scene-action-btn" id="btnSceneMenu" title="Opções da Cena">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Lista de Cenas / Perfis Oficiais -->
+        <div class="scene-list-scroll">
+          <div class="scene-list" id="sceneList">
+            <!-- Renderizado dinamicamente via JS (Cena Padrão, Nitro, Pastas) -->
+          </div>
+        </div>
+
+        <!-- Seção Equipamento / Hardware -->
+        <div class="col-equipment-box">
+          <div class="equipment-header-row">
+            <span class="equipment-title">Equipamento USB</span>
+            <span class="equipment-status-badge">15 LCDs</span>
+          </div>
+
+          <div class="equipment-select-wrap">
+            <select class="equipment-select" id="deviceSelect">
+              <option value="D6_1494" selected>Fifine D6 (1494)</option>
+            </select>
+            <span class="select-chevron">▾</span>
+          </div>
+
+          <!-- Miniatura Gráfica 3x5 de Hardware Oficial -->
+          <div class="equipment-mini-deck" title="Espelho do Hardware em Tempo Real">
+            <div class="mini-grid">
+              <div class="mini-key"></div><div class="mini-key"></div><div class="mini-key"></div><div class="mini-key"></div><div class="mini-key"></div>
+              <div class="mini-key"></div><div class="mini-key"></div><div class="mini-key"></div><div class="mini-key"></div><div class="mini-key"></div>
+              <div class="mini-key"></div><div class="mini-key"></div><div class="mini-key"></div><div class="mini-key"></div><div class="mini-key"></div>
+            </div>
+          </div>
+          <div class="equipment-footer-stats">
+            <span>VID: 0x3142</span>
+            <span>PID: 0x0007</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ================= COLUNA 2: CENTRO (Mesa do Deck em Destaque) ================= -->
+      <main class="col-deck-canvas" id="colDeckCanvas">
+        <div class="deck-canvas-viewport">
+          
+          <!-- Breadcrumb de Navegação em Pastas -->
+          <div class="deck-folder-breadcrumb" id="folderBreadcrumb" style="display: none;">
+            <button class="folder-back-btn" id="btnBreadcrumbBack" title="Voltar ao Nível Anterior">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+              <span>Voltar ao Nível Pai</span>
+            </button>
+            <div class="folder-crumb-path" id="folderCrumbPath">
+              <span class="crumb-root" id="crumbRootName">Cena Padrão</span>
+              <span class="crumb-sep">/</span>
+              <span class="crumb-active" id="crumbFolderName">Minha Pasta</span>
+            </div>
+          </div>
+
+          <!-- Hardware Deck Chassi -->
+          <div class="deck-hardware-stage">
+            <div class="deck-chassis">
+              <div class="deck-chassis-brand">
+                <span class="chassis-brand-text">fifine</span>
+              </div>
+              <div class="deck-grid-15" id="deckGrid">
+                <!-- As 15 teclas (5 colunas x 3 linhas) geradas via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Barra de Paginação Oficial e Ferramentas do Deck -->
+          <div class="deck-pagination-bar" style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 640px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="pagination-label">Páginas:</span>
+              <button class="page-pill active" id="currentPagePill">1</button>
+              <button class="page-add-btn" id="btnAddPage" title="Adicionar Nova Página ao Perfil">+</button>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button class="fifine-btn secondary-sm" id="btnOpenWallpaperMural" title="Fatiar Imagem em 15 Telas LCD Contínuas" style="display: flex; align-items: center; gap: 6px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span>Mural 3x5 (Papel de Parede)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Guia de Ajuda de Interação Tátil -->
+          <div class="deck-canvas-hint">
+            <span>Clique para configurar • Arraste ações da aba direita • Botão direito para opções de tecla</span>
+          </div>
+
+        </div>
+      </main>
+
+      <!-- ================= COLUNA 3: DIREITA (Abas de Ferramentas & Configuração) ================= -->
+      <aside class="col-side-tabs" id="colSideTabs">
+        
+        <!-- Barra de Navegação das Abas Direitas -->
+        <nav class="side-tabs-nav" id="sideTabsNav">
+          <button class="side-tab-btn active" data-tab="tabPaneInspector" id="tabBtnInspector" title="Propriedades da Tecla / Cena">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>
+            <span>Propriedades</span>
+          </button>
+          <button class="side-tab-btn" data-tab="tabPaneActions" id="tabBtnActions" title="Catálogo de Ações">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span>Ações</span>
+          </button>
+          <button class="side-tab-btn" data-tab="tabPaneStore" id="tabBtnStore" title="Loja de Ícones Nativos">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>Loja</span>
+          </button>
+          <button class="side-tab-btn" data-tab="tabPaneSkins" id="tabBtnSkins" title="Temas e Skins de 15 Telas">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            <span>Skins</span>
+          </button>
+          <button class="side-tab-btn" data-tab="tabPaneSettings" id="tabBtnSettings" title="Configurações e Hardware">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span>Ajustes</span>
+          </button>
+        </nav>
+
+        <!-- Container dos Painéis das Abas -->
+        <div class="side-panes-viewport">
+
+          <!-- ================= ABA 1: PROPRIEDADES (Inspector Completo) ================= -->
+          <section class="tab-pane active" id="tabPaneInspector">
+            <div class="pane-content-wrapper" id="propertyInspector">
+              
+              <!-- Estado Vazio (Nenhuma tecla selecionada - Mostra Propriedades da Cena) -->
+              <div class="inspector-empty-state" id="inspectorEmptyState">
+                <div class="scene-inspector-card">
+                  <div class="scene-inspector-badge">PROPRIEDADES DA CENA</div>
+                  <div class="scene-inspector-header">
+                    <span class="scene-inspector-title" id="emptyStateSceneTitle">Cena Padrão</span>
+                    <button class="fifine-btn secondary-sm" id="btnInspectorLinkApp">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                      Vincular App
+                    </button>
+                  </div>
+                  <div class="scene-inspector-row">
+                    <span class="scene-prop-label">App Vinculado:</span>
+                    <span class="scene-prop-val" id="emptyStateLinkedApp">Nenhum (Troca Manual)</span>
+                  </div>
+                  <div class="scene-inspector-row" style="flex-direction: column; align-items: stretch; gap: 8px; margin-top: 10px; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                      <span class="scene-prop-label" style="font-weight: 600;">Cor LCD da Cena (15 Telas):</span>
+                      <span id="currentSceneColorHex" style="font-size: 11px; font-family: monospace; color: var(--text-muted);">#18181b</span>
+                    </div>
+                    <div class="palette-swatches">
+                      <button class="swatch scene-swatch" data-color="#18181b" style="background: #18181b;" title="Preto Studio (#18181b)"></button>
+                      <button class="swatch scene-swatch" data-color="#004481" style="background: #004481;" title="Azul Fifine (#004481)"></button>
+                      <button class="swatch scene-swatch" data-color="#008855" style="background: #008855;" title="Verde Esmeralda (#008855)"></button>
+                      <button class="swatch scene-swatch" data-color="#88b010" style="background: #88b010;" title="Lima (#88b010)"></button>
+                      <button class="swatch scene-swatch" data-color="#e65c00" style="background: #e65c00;" title="Laranja (#e65c00)"></button>
+                      <button class="swatch scene-swatch" data-color="#3cb4b4" style="background: #3cb4b4;" title="Ciano (#3cb4b4)"></button>
+                      <button class="swatch scene-swatch" data-color="#6366f1" style="background: #6366f1;" title="Índigo (#6366f1)"></button>
+                      <button class="swatch scene-swatch" data-color="#dc2626" style="background: #dc2626;" title="Vermelho (#dc2626)"></button>
+                      <input type="color" id="sceneCustomColorPicker" value="#18181b" title="Cor Personalizada da Cena">
+                    </div>
+                    <button class="fifine-btn secondary-sm" id="btnApplySceneColor" style="margin-top: 4px; font-size: 11px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>
+                      <span>Colorir Todas as 15 Telas LCD</span>
+                    </button>
+                  </div>
+                  <p class="scene-inspector-hint">Selecione qualquer tecla na mesa ao lado para customizar seu visual individual, atalhos e ações, ou defina uma cor padrão para toda a cena acima.</p>
+                </div>
+              </div>
+
+              <!-- Estado Ativo (Tecla Selecionada) -->
+              <div class="inspector-active-content" id="inspectorActiveContent" style="display: none;">
+                <!-- Header da Tecla: Categoria : Ação + Lixeira -->
+                <div class="inspector-header">
+                  <span class="inspector-action-title" id="inspectorActionCategory">Caixa de Ferramentas : Texto</span>
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <button class="fifine-btn secondary-sm" id="btnTestCurrentAction" title="Executar esta ação no computador agora para teste" style="font-size: 11px; padding: 3px 8px; display: flex; align-items: center; gap: 4px;">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                      <span>Testar Ação</span>
+                    </button>
+                    <button class="inspector-delete-btn" id="btnDeleteKeyAction" title="Limpar Esta Tecla">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Corpo do Inspector com Altura Total e Scroll Próprio -->
+                <div class="inspector-body">
+                  <!-- Miniatura em Destaque da Tecla -->
+                  <div class="key-preview-card" id="keyPreviewCard">
+                    <div class="preview-key-inner" id="previewKeyInner">
+                      <span class="preview-key-label" id="previewKeyLabel"></span>
+                      <span class="preview-key-sub" id="previewKeySub" style="display: none; font-size: 9px; color: #a1a1aa; margin-top: 2px;"></span>
+                    </div>
+                  </div>
+
+                  <!-- Campos de Configuração -->
+                  <div class="inspector-fields">
+                    <!-- Título da Tecla com Menu Tipografia "T" -->
+                    <div class="inspector-row">
+                      <label class="row-label">Título:</label>
+                      <div class="title-input-wrap">
+                        <input type="text" class="fifine-input" id="inputKeyTitle" placeholder="Rótulo da tecla...">
+                        <div class="typography-anchor">
+                          <button class="typography-btn" id="btnTypography" title="Formatação de Tipografia">T</button>
+                          <div class="typography-popover" id="typographyPopover" style="display: none; width: 230px;">
+                            <div class="popover-row">
+                              <span class="popover-label">Fonte:</span>
+                              <select class="pop-select" id="selectFontFamily" style="max-width: 130px;">
+                                <option value="Helvetica" selected>Helvetica</option>
+                                <option value="Arial">Arial</option>
+                                <option value="Impact">Impact</option>
+                                <option value="Courier New">Courier New</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Trebuchet MS">Trebuchet MS</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Menlo">Menlo (Código)</option>
+                                <option value="Comic Sans MS">Comic Sans</option>
+                              </select>
+                            </div>
+                            <div class="popover-row">
+                              <span class="popover-label">Tamanho:</span>
+                              <select class="pop-select" id="selectFontSize">
+                                <option value="10">10 pt</option>
+                                <option value="12" selected>12 pt</option>
+                                <option value="14">14 pt</option>
+                                <option value="16">16 pt</option>
+                                <option value="18">18 pt</option>
+                                <option value="20">20 pt</option>
+                                <option value="24">24 pt</option>
+                              </select>
+                            </div>
+                            <div class="popover-row">
+                              <span class="popover-label">Estilo:</span>
+                              <div class="style-btn-group">
+                                <button class="pop-btn" id="btnStyleBold" title="Negrito"><b>B</b></button>
+                                <button class="pop-btn" id="btnStyleItalic" title="Itálico"><i>I</i></button>
+                                <button class="pop-btn" id="btnStyleUnderline" title="Sublinhado"><u>U</u></button>
+                              </div>
+                            </div>
+                            <div class="popover-row">
+                              <span class="popover-label">Posição:</span>
+                              <div class="align-btn-group">
+                                <button class="pop-btn" id="btnAlignTop" title="Topo">▲</button>
+                                <button class="pop-btn active" id="btnAlignMiddle" title="Centro">●</button>
+                                <button class="pop-btn" id="btnAlignBottom" title="Base">▼</button>
+                              </div>
+                            </div>
+                            <div class="popover-row" style="margin-top: 6px; border-top: 1px solid var(--border-subtle); padding-top: 6px;">
+                              <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #a1a1aa; cursor: pointer;">
+                                <input type="checkbox" id="chkDoNotShowTitle">
+                                <span>Ocultar Título (Modo Ícone)</span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Subtítulo Secundário (igual ao hardware) -->
+                    <div class="inspector-row">
+                      <label class="row-label">Subtítulo:</label>
+                      <input type="text" class="fifine-input" id="inputKeySubtitle" placeholder="Subtítulo menor (ex: Live, Mac, Samsung)...">
+                    </div>
+
+                    <!-- Contexto: Ação Texto -->
+                    <div class="action-fields-context" id="fieldsContextText">
+                      <div class="inspector-row align-top">
+                        <label class="row-label">Texto:</label>
+                        <div class="textarea-wrap">
+                          <textarea class="fifine-textarea" id="inputTextPayload" rows="4" maxlength="5000" placeholder="Digite o texto que será colado/digitado..."></textarea>
+                          <div class="char-counter" id="charCounter">0 / 5000</div>
+                        </div>
+                      </div>
+                      <div class="inspector-row checkbox-row">
+                        <label class="fifine-checkbox-label">
+                          <input type="checkbox" id="chkPressEnter">
+                          <span class="custom-chk"></span>
+                          <span>Pressione Enter após enviar</span>
+                        </label>
+                      </div>
+                      <div class="inspector-row checkbox-row">
+                        <label class="fifine-checkbox-label">
+                          <input type="checkbox" id="chkUseClipboard" checked>
+                          <span class="custom-chk"></span>
+                          <span>Usar cópia ultrarrápida via Clipboard</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <!-- Contexto: Ação Abrir / Aplicação -->
+                    <div class="action-fields-context" id="fieldsContextOpen" style="display: none;">
+                      <div class="inspector-row">
+                        <label class="row-label">App / Arquivo:</label>
+                        <div class="file-picker-wrap">
+                          <input type="text" class="fifine-input" id="inputOpenPath" placeholder="Ex: Safari ou /Applications/Nome.app">
+                          <button class="fifine-btn secondary" id="btnBrowseFile" title="Escolher Aplicativo Instalado no Mac">Escolher App...</button>
+                        </div>
+                      </div>
+                      <div class="inspector-row" style="margin-top: 6px;">
+                        <button class="fifine-btn secondary-sm" id="btnTestOpenAction" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                          <span>Testar Abrir App no Mac Agora</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Contexto: Ação Hotkey / Atalho de Teclado -->
+                    <div class="action-fields-context" id="fieldsContextHotkey" style="display: none;">
+                      <div class="inspector-row">
+                        <label class="row-label">Atalho:</label>
+                        <div class="hotkey-recorder-wrap">
+                          <div class="hotkey-badge" id="hotkeyBadge">Pressione para gravar</div>
+                          <button class="fifine-btn secondary" id="btnRecordHotkey">Gravar Atalho</button>
+                        </div>
+                      </div>
+                      <div class="inspector-row" style="margin-top: 6px;">
+                        <button class="fifine-btn secondary-sm" id="btnTestHotkeyAction" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                          <span>Testar Atalho no Mac Agora</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Contexto: Ação URL / Website -->
+                    <div class="action-fields-context" id="fieldsContextUrl" style="display: none;">
+                      <div class="inspector-row">
+                        <label class="row-label">URL:</label>
+                        <input type="url" class="fifine-input" id="inputUrlTarget" placeholder="https://exemplo.com">
+                      </div>
+                      <div class="inspector-row" style="margin-top: 6px;">
+                        <button class="fifine-btn secondary-sm" id="btnTestUrlAction" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                          <span>Testar Abrir Site no Navegador</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Contexto: Ação Pasta / Sub-página -->
+                    <div class="action-fields-context" id="fieldsContextFolder" style="display: none;">
+                      <div class="inspector-row">
+                        <label class="row-label">Pasta:</label>
+                        <button class="fifine-btn primary" id="btnEnterFolder" style="display: flex; align-items: center; gap: 6px;">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                          <span>Abrir Sub-página da Pasta</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Contexto: Ação Voltar -->
+                    <div class="action-fields-context" id="fieldsContextBack" style="display: none;">
+                      <div class="inspector-row">
+                        <label class="row-label">Ação:</label>
+                        <button class="fifine-btn secondary" id="btnGoBackParent" style="display: flex; align-items: center; gap: 6px;">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                          <span>Voltar ao Nível Pai</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Contexto: OBS Studio WebSocket v5 -->
+                    <div class="action-fields-context" id="fieldsContextObs" style="display: none;">
+                      <div class="obs-status-banner" id="obsStatusBanner">
+                        <span class="obs-status-dot disconnected" id="obsStatusDot"></span>
+                        <span class="obs-status-text" id="obsStatusText">OBS WebSocket: Desconectado</span>
+                      </div>
+
+                      <div class="inspector-row" id="rowObsScene" style="display: none;">
+                        <label class="row-label">Cena Alvo:</label>
+                        <select class="studio-select" id="selectObsScene" style="flex: 1;">
+                          <option value="">Selecione a cena</option>
+                        </select>
+                      </div>
+                      <div class="inspector-row" id="rowObsSceneCustom" style="display: none;">
+                        <label class="row-label">Nome Cena:</label>
+                        <input type="text" class="fifine-input" id="inputObsSceneName" placeholder="Ex: Ao Vivo, Gameplay">
+                      </div>
+
+                      <div class="inspector-row" id="rowObsAudio" style="display: none;">
+                        <label class="row-label">Fonte Áudio:</label>
+                        <select class="studio-select" id="selectObsAudio" style="flex: 1;">
+                          <option value="">Selecione a fonte</option>
+                        </select>
+                      </div>
+                      <div class="inspector-row" id="rowObsAudioCustom" style="display: none;">
+                        <label class="row-label">Nome Fonte:</label>
+                        <input type="text" class="fifine-input" id="inputObsAudioName" placeholder="Ex: Mic/Aux">
+                      </div>
+
+                      <div class="inspector-row" id="rowObsSourceItem" style="display: none;">
+                        <label class="row-label">ID Item:</label>
+                        <input type="number" class="fifine-input" id="inputObsItemId" placeholder="Ex: 1, 2, 3">
+                      </div>
+
+                      <div class="inspector-row" style="margin-top: 6px;">
+                        <button class="fifine-btn secondary small-btn" id="btnTestObsAction" style="width: 100%;">
+                          Testar Comando no OBS Agora
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Contexto: Macro Multi-Action com Delays -->
+                    <div class="action-fields-context" id="fieldsContextMulti" style="display: none;">
+                      <div class="multi-action-header-row">
+                        <span class="multi-action-label">Etapas da Sequência:</span>
+                        <button class="fifine-btn secondary small-btn" id="btnToggleAddMultiMenu">+ Adicionar Etapa</button>
+                      </div>
+
+                      <div class="multi-add-menu" id="multiAddMenu" style="display: none;">
+                        <button class="add-step-opt-btn" data-type="open">Abrir App</button>
+                        <button class="add-step-opt-btn" data-type="url">Abrir URL</button>
+                        <button class="add-step-opt-btn" data-type="text">Digitar Texto</button>
+                        <button class="add-step-opt-btn" data-type="hotkey">Atalho Teclado</button>
+                        <button class="add-step-opt-btn" data-type="delay">Atraso (Delay)</button>
+                        <button class="add-step-opt-btn" data-type="multimedia">Multimídia</button>
+                      </div>
+
+                      <div class="multi-steps-container" id="multiStepsContainer">
+                        <!-- Etapas encadeadas geradas via JS -->
+                      </div>
+                    </div>
+
+                    <!-- Contexto: Soundboard (Áudio) -->
+                    <div class="action-fields-context" id="fieldsContextSoundboard" style="display: none;">
+                      <div class="inspector-row">
+                        <label class="row-label">Arquivo de Áudio:</label>
+                        <div class="file-picker-wrap">
+                          <input type="text" class="fifine-input" id="inputSoundboardPath" placeholder="/caminho/efeito.mp3 ou .wav">
+                          <button class="fifine-btn secondary" id="btnBrowseSound">Procurar Som...</button>
+                        </div>
+                      </div>
+                      <div class="inspector-row" style="margin-top: 6px;">
+                        <button class="fifine-btn secondary small-btn" id="btnTestSound" style="width: 100%;">
+                          ▶ Testar Áudio no Mac (afplay)
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Contexto: Shell Script / Terminal -->
+                    <div class="action-fields-context" id="fieldsContextShell" style="display: none;">
+                      <div class="inspector-row">
+                        <label class="row-label">Comando Bash/Zsh:</label>
+                        <textarea class="fifine-input" id="inputShellCommand" rows="3" placeholder="Ex: open -a Safari ou /bin/zsh meu_script.sh" style="resize: vertical; font-family: monospace; font-size: 11px; width: 100%;"></textarea>
+                      </div>
+                      <div class="inspector-row" style="margin-top: 6px;">
+                        <button class="fifine-btn secondary small-btn" id="btnTestShellCommand" style="width: 100%;">
+                          ⚡ Executar Comando Agora
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Contexto: Toggle Alternância de 2 Estados A/B -->
+                    <div class="action-fields-context" id="fieldsContextToggle" style="display: none;">
+                      <div style="font-size: 11px; color: #a1a1aa; margin-bottom: 8px;">Alterna entre dois estados a cada clique físico:</div>
+                      <div class="inspector-row">
+                        <label class="row-label">Estado A (Título/Atalho):</label>
+                        <input type="text" class="fifine-input" id="inputToggleTitleA" placeholder="Ex: MIC ON" style="margin-bottom: 4px; width: 100%;">
+                        <input type="text" class="fifine-input" id="inputToggleKeysA" placeholder="Atalho A (ex: Cmd+Shift+M)" style="width: 100%;">
+                      </div>
+                      <div class="inspector-row" style="margin-top: 8px;">
+                        <label class="row-label">Estado B (Título/Atalho):</label>
+                        <input type="text" class="fifine-input" id="inputToggleTitleB" placeholder="Ex: MUTED" style="margin-bottom: 4px; width: 100%;">
+                        <input type="text" class="fifine-input" id="inputToggleKeysB" placeholder="Atalho B (ex: Cmd+Shift+M)" style="width: 100%;">
+                      </div>
+                    </div>
+
+                    <!-- Paleta de Cores de Fundo LCD -->
+                    <div class="inspector-row color-palette-row" style="flex-direction: column; align-items: stretch; gap: 8px;">
+                      <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <label class="row-label" style="margin-bottom: 0;">Cor LCD:</label>
+                        <span id="currentColorHex" style="font-size: 11px; font-family: monospace; color: var(--text-muted);">#18181b</span>
+                      </div>
+                      <div class="palette-swatches">
+                        <button class="swatch" data-color="#18181b" style="background: #18181b;" title="Preto Studio (#18181b)"></button>
+                        <button class="swatch" data-color="#004481" style="background: #004481;" title="Azul Fifine (#004481)"></button>
+                        <button class="swatch" data-color="#008855" style="background: #008855;" title="Verde Esmeralda (#008855)"></button>
+                        <button class="swatch" data-color="#88b010" style="background: #88b010;" title="Lima (#88b010)"></button>
+                        <button class="swatch" data-color="#e65c00" style="background: #e65c00;" title="Laranja (#e65c00)"></button>
+                        <button class="swatch" data-color="#3cb4b4" style="background: #3cb4b4;" title="Ciano (#3cb4b4)"></button>
+                        <button class="swatch" data-color="#99d6d6" style="background: #99d6d6;" title="Céu (#99d6d6)"></button>
+                        <button class="swatch" data-color="#6366f1" style="background: #6366f1;" title="Índigo (#6366f1)"></button>
+                        <button class="swatch" data-color="#dc2626" style="background: #dc2626;" title="Vermelho (#dc2626)"></button>
+                        <input type="color" id="customColorPicker" value="#004481" title="Cor Personalizada">
+                      </div>
+                      <button class="fifine-btn secondary-sm" id="btnApplyColorToAll" title="Aplica a cor selecionada a todas as 15 telas LCD da cena atual" style="font-size: 11px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 5px 8px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        <span>Aplicar Cor a Todas as 15 Telas LCD</span>
+                      </button>
+                    </div>
+
+                    <!-- Borda e Moldura LCD (Estilo Oficial Fifine) -->
+                    <div class="inspector-row">
+                      <label class="row-label">Borda LCD:</label>
+                      <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                        <select class="fifine-input" id="selectBorderWidth" style="width: 90px; height: 28px; padding: 2px 6px; font-size: 11px;">
+                          <option value="0">Sem Borda</option>
+                          <option value="2">Fina (2px)</option>
+                          <option value="3">Média (3px)</option>
+                          <option value="5">Grossa (5px)</option>
+                        </select>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                          <input type="color" id="inputBorderColor" value="#007aff" style="width: 28px; height: 28px; border: 1px solid var(--border-subtle); border-radius: 4px; background: transparent; cursor: pointer;" title="Cor da Borda">
+                          <span style="font-size: 11px; color: var(--text-muted);">Cor</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Ícone e Imagem da Tecla -->
+                    <div class="inspector-row" style="margin-top: 10px; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+                      <label class="row-label">Ícone / Imagem:</label>
+                      <div style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
+                        <div style="display: flex; gap: 6px;">
+                          <button class="fifine-btn secondary-sm" id="btnOpenIconLibrary" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                            <span>Biblioteca de Ícones</span>
+                          </button>
+                          <button class="fifine-btn secondary-sm" id="btnUploadKeyImage" title="Carregar Imagem Local">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                          </button>
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                          <div style="display: flex; align-items: center; gap: 4px;">
+                            <span style="font-size: 11px; color: var(--text-muted);">Ajuste:</span>
+                            <select class="fifine-input" id="selectImageFit" style="width: 95px; height: 26px; padding: 2px 4px; font-size: 11px;">
+                              <option value="cover">Cobrir</option>
+                              <option value="contain">Conter (Fit)</option>
+                            </select>
+                          </div>
+                          <button class="fifine-btn secondary-sm danger-sm" id="btnRemoveKeyImage" style="height: 26px; padding: 0 8px; font-size: 11px; display: none;">
+                            Remover
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- ================= ABA 2: CATÁLOGO DE AÇÕES (6 Acordeões Oficiais) ================= -->
+          <section class="tab-pane" id="tabPaneActions">
+            <div class="pane-content-wrapper">
+              
+              <!-- Busca de Ações Superior -->
+              <div class="catalog-search-wrap">
+                <div class="search-input-box">
+                  <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input type="text" class="catalog-search-input" id="searchCatalog" placeholder="Procurar ações no catálogo...">
+                </div>
+                <button class="btn-mode-pill active">Botão</button>
+              </div>
+
+              <!-- Os 6 Acordeões Oficiais da Fifine (1:1) -->
+              <div class="catalog-accordions-list" id="accordionsList">
+                
+                <!-- 1. fifine Control Deck -->
+                <div class="accordion-item open" data-cat="fifine_control_deck">
+                  <div class="accordion-header">
+                    <div class="acc-title-wrap">
+                      <svg class="acc-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                      <div class="acc-icon-square">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                      </div>
+                      <span class="acc-name">fifine Control Deck</span>
+                    </div>
+                  </div>
+                  <div class="accordion-content">
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.profile.openchild" data-name="Criar Pasta">
+                      <img class="act-icon" src="assets/native_icons/folder_40.png" alt="">
+                      <span class="act-name">Criar Pasta</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.profile.rotate" data-name="Alternar Cenas">
+                      <img class="act-icon" src="assets/native_icons/rotate_40.png" alt="">
+                      <span class="act-name">Alternar Cenas</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.page.previous" data-name="Página Anterior">
+                      <img class="act-icon" src="assets/native_icons/previous_48.png" alt="">
+                      <span class="act-name">Página Anterior</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.page.next" data-name="Página Seguinte">
+                      <img class="act-icon" src="assets/native_icons/next_48.png" alt="">
+                      <span class="act-name">Página Seguinte</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.page.goto" data-name="Ir Para Página">
+                      <img class="act-icon" src="assets/native_icons/goto_48.png" alt="">
+                      <span class="act-name">Ir Para Página</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.page.indicator" data-name="Indicador de Página">
+                      <img class="act-icon" src="assets/native_icons/indicator_48.png" alt="">
+                      <span class="act-name">Indicador de Página</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.device.brightness" data-name="Ajustar Brilho">
+                      <img class="act-icon" src="assets/native_icons/brightness_inc_40.png" alt="">
+                      <span class="act-name">Ajustar Brilho</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.device.devsleep" data-name="Suspender Telas">
+                      <img class="act-icon" src="assets/native_icons/sleep_40.png" alt="">
+                      <span class="act-name">Suspender Telas</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2. Caixa de Ferramentas -->
+                <div class="accordion-item open" data-cat="toolbox">
+                  <div class="accordion-header">
+                    <div class="acc-title-wrap">
+                      <svg class="acc-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                      <div class="acc-icon-square">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                      </div>
+                      <span class="acc-name">Caixa de Ferramentas</span>
+                    </div>
+                  </div>
+                  <div class="accordion-content">
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.system.website" data-name="Site">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                      <span class="act-name">Site</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.system.hotkey" data-name="Hotkey">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6" y2="8"/><line x1="10" y1="8" x2="10" y2="8"/><line x1="14" y1="8" x2="14" y2="8"/><line x1="18" y1="8" x2="18" y2="8"/><line x1="6" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="18" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
+                      <span class="act-name">Hotkey</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.system.hotkeySwitch" data-name="HotkeySwitch">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="5" width="22" height="14" rx="7" ry="7"/><circle cx="16" cy="12" r="3"/></svg>
+                      <span class="act-name">HotkeySwitch</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.mouse.event" data-name="Evento do mouse">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="7"/><line x1="12" y1="6" x2="12" y2="10"/></svg>
+                      <span class="act-name">Evento do mouse</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.system.open" data-name="Abre">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                      <span class="act-name">Abre</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.system.openApps" data-name="Abra uma aplicação">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                      <span class="act-name">Abra uma aplicação</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.system.text" data-name="Texto">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+                      <span class="act-name">Texto</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.system.password" data-name="Senha">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                      <span class="act-name">Senha</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.system.shell" data-name="Comando Shell">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                      <span class="act-name">Comando Shell</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.system.toggle" data-name="Alternância A/B">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="5" width="22" height="14" rx="7" ry="7"/><circle cx="16" cy="12" r="3"/></svg>
+                      <span class="act-name">Alternância A/B</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3. Reprodutor de Áudio -->
+                <div class="accordion-item" data-cat="audio">
+                  <div class="accordion-header">
+                    <div class="acc-title-wrap">
+                      <svg class="acc-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                      <div class="acc-icon-square">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                      </div>
+                      <span class="acc-name">Reprodutor de Áudio</span>
+                    </div>
+                  </div>
+                  <div class="accordion-content">
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.soundboard.playaudio" data-name="Reproduzir Áudio">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                      <span class="act-name">Reproduzir Áudio</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.soundboard.stopaudioplay" data-name="Parar áudio">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><rect x="9" y="9" width="6" height="6"/></svg>
+                      <span class="act-name">Parar áudio</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 4. Touchbar -->
+                <div class="accordion-item" data-cat="touchbar">
+                  <div class="accordion-header">
+                    <div class="acc-title-wrap">
+                      <svg class="acc-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                      <div class="acc-icon-square">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="6" cy="12" r="1"/><circle cx="10" cy="12" r="1"/><circle cx="14" cy="12" r="1"/><circle cx="18" cy="12" r="1"/></svg>
+                      </div>
+                      <span class="acc-name">Touchbar</span>
+                    </div>
+                  </div>
+                  <div class="accordion-content">
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.touchbar.dispatchcenter" data-name="Centro de Despacho">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                      <span class="act-name">Centro de Despacho</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.touchbar.siri" data-name="Siri">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0-9 9c0 3.1 1.6 5.8 4 7.4"/></svg>
+                      <span class="act-name">Siri</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.touchbar.screenshot" data-name="Screenshot">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                      <span class="act-name">Screenshot</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.touchbar.launchpad" data-name="Plataforma de lançamento">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+                      <span class="act-name">Plataforma de lançamento</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.touchbar.volumedown" data-name="Baixe o volume">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="15" y1="12" x2="21" y2="12"/></svg>
+                      <span class="act-name">Baixe o volume</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.touchbar.volumeup" data-name="Aumentar o volume">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="18" y1="9" x2="18" y2="15"/><line x1="15" y1="12" x2="21" y2="12"/></svg>
+                      <span class="act-name">Aumentar o volume</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.touchbar.mute" data-name="Mudo">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+                      <span class="act-name">Mudo</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.touchbar.closewindow" data-name="Fechar Janela">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      <span class="act-name">Fechar Janela (⌘W)</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.touchbar.closeapp" data-name="Fechar App">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                      <span class="act-name">Fechar App (⌘Q)</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.touchbar.minimizewindow" data-name="Minimizar">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      <span class="act-name">Minimizar (⌘M)</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.touchbar.fullscreentoggle" data-name="Tela Cheia">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                      <span class="act-name">Tela Cheia (⌘⌃F)</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.touchbar.screenlock" data-name="Bloquear Mac">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                      <span class="act-name">Bloquear Mac (⌘⌃Q)</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.touchbar.showdesktop" data-name="Mostrar Mesa">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                      <span class="act-name">Mostrar Mesa</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 5. Fluxo de Operação (Multi Actions) -->
+                <div class="accordion-item" data-cat="multiactions">
+                  <div class="accordion-header">
+                    <div class="acc-title-wrap">
+                      <svg class="acc-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                      <div class="acc-icon-square">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><path d="M14 7h7m-3-3v6M3 17h7m-3-3v6"/></svg>
+                      </div>
+                      <span class="acc-name">Fluxo de operação</span>
+                    </div>
+                  </div>
+                  <div class="accordion-content">
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.multiactions.routine" data-name="Ação Múltipla">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+                      <span class="act-name">Ação Múltipla</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.multiactions.delay" data-name="Atraso">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      <span class="act-name">Atraso</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 6. OBS Studio -->
+                <div class="accordion-item" data-cat="obs">
+                  <div class="accordion-header">
+                    <div class="acc-title-wrap">
+                      <svg class="acc-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                      <div class="acc-icon-square">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+                      </div>
+                      <span class="acc-name">OBS Studio</span>
+                    </div>
+                  </div>
+                  <div class="accordion-content">
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.obsstudio.record" data-name="Gravar">
+                      <svg class="act-icon-svg text-danger" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
+                      <span class="act-name">Gravar</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.obsstudio.stream" data-name="Transmitir">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><circle cx="12" cy="20" r="2"/></svg>
+                      <span class="act-name">Transmitir</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.obsstudio.virtualcamera" data-name="Câmera Virtual">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                      <span class="act-name">Câmera Virtual</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.obsstudio.scene" data-name="Mudar Cena">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                      <span class="act-name">Mudar Cena</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.obsstudio.mixeraudio" data-name="Mixer de Áudio">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                      <span class="act-name">Mixer de Áudio</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.obsstudio.studiomode" data-name="Modo Estúdio">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
+                      <span class="act-name">Modo Estúdio</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.obsstudio.screenshot" data-name="Captura de Tela OBS">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                      <span class="act-name">Captura OBS</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.obsstudio.source" data-name="Visibilidade da Fonte">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      <span class="act-name">Visibilidade Fonte</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </section>
+
+          <!-- ================= ABA 3: LOJA DE ÍCONES ================= -->
+          <section class="tab-pane" id="tabPaneStore">
+            <div class="pane-content-wrapper">
+              <div class="pane-header-title">
+                <span class="pane-title-text">Pacotes Oficiais de Ícones</span>
+                <span class="pane-subtitle-text">Selecione uma tecla e clique no ícone para aplicar instantaneamente</span>
+              </div>
+              <div class="store-pack-tabs" id="storePackTabs">
+                <!-- Gerado via JS com os pacotes oficiais -->
+              </div>
+              <div class="store-grid" id="storeIconsContainer">
+                <!-- Ícones carregados dinamicamente -->
+              </div>
+            </div>
+          </section>
+
+          <!-- ================= ABA 4: SKINS & TEMAS ================= -->
+          <section class="tab-pane" id="tabPaneSkins">
+            <div class="pane-content-wrapper">
+              <div class="pane-header-title">
+                <span class="pane-title-text">Biblioteca de Skins (15 Telas)</span>
+                <span class="pane-subtitle-text">Aplica arte panorâmica recortada perfeitamente nas 15 telas LCD</span>
+              </div>
+              <div class="skin-grid" id="skinGridContainer">
+                <!-- Skins oficiais carregadas dinamicamente -->
+              </div>
+            </div>
+          </section>
+
+          <!-- ================= ABA 5: AJUSTES & DISPOSITIVO ================= -->
+          <section class="tab-pane" id="tabPaneSettings">
+            <div class="pane-content-wrapper settings-wrapper">
+              
+              <!-- Sub-navegação interna de Ajustes -->
+              <div class="settings-subtabs-nav">
+                <button class="modal-tab-btn active" data-tab="tabDevice">Dispositivo</button>
+                <button class="modal-tab-btn" data-tab="tabGeneral">Geral</button>
+                <button class="modal-tab-btn" data-tab="tabOBS">OBS Studio</button>
+                <button class="modal-tab-btn" data-tab="tabBackup">Backup</button>
+                <button class="modal-tab-btn" data-tab="tabAbout">Sobre</button>
+              </div>
+
+              <div class="settings-subtabs-body">
+                <!-- Aba Dispositivo -->
+                <div class="modal-tab-content active" id="tabDevice">
+                  <div class="setting-row">
+                    <div class="setting-label-group">
+                      <span class="setting-title">Brilho do Teclado LCD</span>
+                      <span class="setting-desc">Ajuste fino da iluminação dos displays (0 a 100%)</span>
+                    </div>
+                    <div class="setting-control-group">
+                      <input type="range" min="0" max="100" value="80" class="studio-slider" id="settingBrightnessSlider">
+                      <span class="slider-val" id="settingBrightnessVal">80%</span>
+                    </div>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-label-group">
+                      <span class="setting-title">Orientação / Rotação</span>
+                      <span class="setting-desc">Gira as imagens nos 15 LCDs</span>
+                    </div>
+                    <select class="studio-select" id="settingRotationSelect">
+                      <option value="0" selected>Padrão (0°)</option>
+                      <option value="90">90° Horário (CW)</option>
+                      <option value="180">180° Invertido</option>
+                      <option value="270">270° Anti-horário (CCW)</option>
+                    </select>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-label-group">
+                      <span class="setting-title">Desligar a tela automaticamente</span>
+                      <span class="setting-desc">Tempo de inatividade antes de desligar os LCDs</span>
+                    </div>
+                    <div class="setting-control-group" style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+                      <select class="studio-select" id="settingScreenOffSelect">
+                        <option value="0">Nunca</option>
+                        <option value="30">30 segundos (Teste Rápido)</option>
+                        <option value="60">1 minuto</option>
+                        <option value="300">5 minutos</option>
+                        <option value="600">10 minutos</option>
+                        <option value="900">15 minutos</option>
+                        <option value="1800">30 minutos</option>
+                        <option value="3600">1 hora</option>
+                      </select>
+                      <button class="fifine-btn secondary-sm" id="btnTestSleepNow" style="margin-top: 4px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                        Suspender Agora
+                      </button>
+                    </div>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-label-group">
+                      <span class="setting-title">LED seguir o modo de suspensão</span>
+                      <span class="setting-desc">Apaga instantaneamente displays e LEDs quando o Mac entra em repouso ou bloqueia tela</span>
+                    </div>
+                    <div class="setting-control-group">
+                      <label class="studio-switch">
+                        <input type="checkbox" id="settingLedSleepFollowCheck" checked>
+                        <span class="switch-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Aba Geral -->
+                <div class="modal-tab-content" id="tabGeneral">
+                  <div class="setting-row">
+                    <div class="setting-label-group">
+                      <span class="setting-title">Aparência da Aplicação</span>
+                      <span class="setting-desc">Escolha entre o Modo Escuro e o Modo Claro</span>
+                    </div>
+                    <div class="theme-switcher-pills" id="themeSwitcherPills">
+                      <button class="theme-pill-btn active" data-theme-val="dark" id="btnThemeDark">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                        <span>Escuro</span>
+                      </button>
+                      <button class="theme-pill-btn" data-theme-val="light" id="btnThemeLight">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                        <span>Claro</span>
+                      </button>
+                      <button class="theme-pill-btn" data-theme-val="auto" id="btnThemeAuto">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                        <span>Sistema</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-label-group">
+                      <span class="setting-title">Idioma da Interface</span>
+                      <span class="setting-desc">Português do Brasil ou English</span>
+                    </div>
+                    <select class="studio-select" id="settingLanguageSelect">
+                      <option value="pt" selected>Português (Brasil)</option>
+                      <option value="en">English (US)</option>
+                    </select>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-label-group">
+                      <span class="setting-title">Auto-Troca de Perfil pelo Aplicativo Ativo</span>
+                      <span class="setting-desc">Muda de cena dinamicamente com base na janela ativa no macOS</span>
+                    </div>
+                    <label class="switch-toggle">
+                      <input type="checkbox" id="settingAutoSwitchCheck" checked>
+                      <span class="slider-round"></span>
+                    </label>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-label-group">
+                      <span class="setting-title">Blindagem Guardian Ativa</span>
+                      <span class="setting-desc">Proteção contra corrupção de manifest.json</span>
+                    </div>
+                    <span class="badge-status-ok">Protegido (Ativo)</span>
+                  </div>
+                </div>
+
+                <!-- Aba OBS Studio -->
+                <div class="modal-tab-content" id="tabOBS">
+                  <div class="setting-row">
+                    <div class="setting-label-group">
+                      <span class="setting-title">Status OBS WebSocket v5</span>
+                      <span class="setting-desc">Comunicação direta nativa</span>
+                    </div>
+                    <div id="obsModalStatusBadge" class="badge-status-disconnected">Desconectado</div>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-label-group">
+                      <span class="setting-title">Servidor / Host</span>
+                    </div>
+                    <input type="text" class="fifine-input" id="settingObsHost" value="127.0.0.1" style="max-width: 180px;">
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-label-group">
+                      <span class="setting-title">Porta WebSocket</span>
+                    </div>
+                    <input type="number" class="fifine-input" id="settingObsPort" value="4455" style="max-width: 180px;">
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-label-group">
+                      <span class="setting-title">Senha</span>
+                    </div>
+                    <input type="password" class="fifine-input" id="settingObsPassword" placeholder="Opcional" style="max-width: 180px;">
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-label-group">
+                      <span class="setting-title">Cenas Detectadas</span>
+                    </div>
+                    <div id="obsDetectedScenesList" class="scenes-pills-wrap">
+                      <span class="scene-pill-empty">Nenhuma cena detectada</span>
+                    </div>
+                  </div>
+                  <div class="setting-row" style="justify-content: flex-end; gap: 8px;">
+                    <button class="fifine-btn secondary" id="btnSaveObsConfig">Salvar</button>
+                    <button class="fifine-btn primary" id="btnConnectObs">Conectar OBS</button>
+                  </div>
+                </div>
+
+                <!-- Aba Backup & Perfis -->
+                <div class="modal-tab-content" id="tabBackup">
+                  <div class="setting-row">
+                    <div class="setting-label-group">
+                      <span class="setting-title">Backup Dourado Oficial</span>
+                      <span class="setting-desc">Restaura perfis de fábrica originais</span>
+                    </div>
+                    <button class="fifine-btn secondary" id="btnRestoreGoldenBackup">Restaurar Perfis</button>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-label-group">
+                      <span class="setting-title">Exportar Configuração Geral</span>
+                      <span class="setting-desc">Download do arquivo JSON completo com todas as cenas</span>
+                    </div>
+                    <button class="fifine-btn secondary" id="btnExportFullConfig">Baixar Backup (.json)</button>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-label-group">
+                      <span class="setting-title">Restaurar Configuração Geral</span>
+                      <span class="setting-desc">Carrega arquivo JSON exportado anteriormente</span>
+                    </div>
+                    <button class="fifine-btn primary" id="btnImportFullConfig">Restaurar Backup (.json)</button>
+                    <input type="file" id="fileInputFullBackup" accept=".json" style="display: none;">
+                  </div>
+                </div>
+
+                <!-- Aba Sobre -->
+                <div class="modal-tab-content" id="tabAbout">
+                  <div class="about-hero">
+                    <div class="about-logo">fifine</div>
+                    <div class="about-app-title">AmpliGame D6 Studio Pro</div>
+                    <div class="about-version">Versão 3.10.195 (Engine Pro v2)</div>
+                  </div>
+                  <div class="about-details-list">
+                    <div class="about-detail-item"><span>Dispositivo:</span> <strong>AmpliGame D6 (StreamDock 293S)</strong></div>
+                    <div class="about-detail-item"><span>Número de Série:</span> <strong>355499441494</strong></div>
+                    <div class="about-detail-item"><span>Identificador USB:</span> <strong>VID: 0x3142 | PID: 0x0007</strong></div>
+                    <div class="about-detail-item"><span>Total de Teclas LCD:</span> <strong>15 Displays Coloridos Independentes</strong></div>
+                    <div class="about-detail-item"><span>Modo de Operação:</span> <strong>Nativo Direto USB/HID (Zero Fifine App)</strong></div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </section>
+
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- ================= MODAIS COMPLEMENTARES FOCADOS ================= -->
+
+  <!-- Menu Dropdown Contextual de Perfis (Botão ⋮) -->
+  <div class="dropdown-profile-menu" id="dropdownProfileMenu" style="display: none;">
+    <div class="dropdown-item" id="menuItemRename">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      <span>Renomear Cena</span>
+    </div>
+    <div class="dropdown-item" id="menuItemDuplicate">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      <span>Duplicar Cena</span>
+    </div>
+    <div class="dropdown-item" id="menuItemLinkApp">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      <span>Vincular Aplicativo...</span>
+    </div>
+    <div class="dropdown-divider"></div>
+    <div class="dropdown-item" id="menuItemExport">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span>Exportar (.sdProfile)</span>
+    </div>
+    <div class="dropdown-item" id="menuItemImport">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span>Importar Perfil...</span>
+    </div>
+    <div class="dropdown-divider"></div>
+    <div class="dropdown-item danger" id="menuItemDelete">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      <span style="color: #ef4444;">Excluir Cena Atual</span>
+    </div>
+  </div>
+
+  <!-- Modal: Vincular Aplicativo à Cena (App-Aware Auto-Switch) -->
+  <div class="studio-modal-backdrop" id="modalLinkApp" style="display: none;">
+    <div class="studio-modal-window modal-sm">
+      <div class="modal-header">
+        <div class="modal-title">Vincular Aplicativo à Cena</div>
+        <button class="modal-close-btn" data-close="modalLinkApp">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 16px;">
+        <div style="font-size: 13px; color: #d4d4d8; line-height: 1.5; margin-bottom: 16px;">
+          Selecione o aplicativo do macOS que acionará automaticamente a cena <strong id="linkAppSceneName" style="color: #60a5fa;"></strong> quando estiver ativo/focado.
+        </div>
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 12px; color: #a1a1aa; margin-bottom: 6px;">Aplicativo em Execução no macOS:</label>
+          <select class="studio-select" id="selectRunningApps" style="width: 100%; padding: 8px 10px; background: #18181b; color: #fff; border: 1px solid #3f3f46; border-radius: 6px;">
+            <option value="">-- Carregando aplicativos... --</option>
+          </select>
+        </div>
+        <div class="form-group" id="groupCustomAppInput" style="margin-bottom: 14px; display: none;">
+          <label style="display: block; font-size: 12px; color: #a1a1aa; margin-bottom: 6px;">Nome ou Caminho do App:</label>
+          <input type="text" class="studio-input" id="inputCustomAppName" placeholder="Ex: Google Chrome ou /Applications/Safari.app" style="width: 100%; padding: 8px 10px; background: #18181b; color: #fff; border: 1px solid #3f3f46; border-radius: 6px;">
+        </div>
+        <div style="font-size: 11px; color: #71717a; line-height: 1.4; padding: 10px; background: #18181b; border-radius: 6px; border: 1px solid #27272a;">
+          Auto-Switch Ativo: Ao alternar entre janelas no Mac, o Stream Deck mudará imediatamente para a cena vinculada. Ao focar em janelas sem vínculo, o teclado retorna suavemente à cena anterior.
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; padding: 12px 16px; border-top: 1px solid #27272a;">
+        <button class="fifine-btn secondary" id="btnRemoveLinkApp" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4);">Desvincular (Nenhum)</button>
+        <div style="display: flex; gap: 8px;">
+          <button class="fifine-btn secondary" data-close="modalLinkApp">Cancelar</button>
+          <button class="fifine-btn primary" id="btnSaveLinkApp">Salvar Vínculo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Ajuda e Tutoriais -->
+  <div class="studio-modal-backdrop" id="modalHelp" style="display: none;">
+    <div class="studio-modal-window">
+      <div class="modal-header">
+        <div class="modal-title">Ajuda & Guia Rápido - AmpliGame D6</div>
+        <button class="modal-close-btn" data-close="modalHelp">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-row">
+          <div class="setting-label-group">
+            <span class="setting-title">Como configurar teclas</span>
+            <span class="setting-desc">Arraste qualquer ação da aba "Ações" na barra direita diretamente para um dos 15 slots da mesa central. A aba "Propriedades" abrirá automaticamente para edição.</span>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-label-group">
+            <span class="setting-title">Pastas e Sub-páginas</span>
+            <span class="setting-desc">Arraste a ação "Criar Pasta" para qualquer tecla. Dê um clique duplo ou clique no botão de pasta para navegar no novo nível com botão "Voltar" automático.</span>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-label-group">
+            <span class="setting-title">Zero Manchas Cinzas no LCD</span>
+            <span class="setting-desc">O driver utiliza compressão JPEG Baseline YUV 4:2:0 dedicada ao chip MCU do StreamDock 293S, garantindo cores vibrantes e nitidez máxima em todas as teclas.</span>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-label-group">
+            <span class="setting-title">Auto-Troca de Perfil pelo Aplicativo</span>
+            <span class="setting-desc">Vincule qualquer cena a aplicativos como Premiere, Final Cut, Chrome, VS Code ou Discord para o teclado mudar seus botões instantaneamente ao focar na janela.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inputs invisíveis para Seleção de Arquivo e Importação -->
+  <input type="file" id="fileInputApp" style="display: none;" accept=".app,*">
+  <input type="file" id="fileInputProfile" style="display: none;" accept=".json,.sdProfile">
+  <input type="file" id="fileInputKeyImage" style="display: none;" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+  <input type="file" id="fileInputMural" style="display: none;" accept="image/png,image/jpeg,image/webp">
+
+  <!-- ================= MODAL: BIBLIOTECA DE ÍCONES OFICIAL FIFINE ================= -->
+  <div class="studio-modal-backdrop" id="modalIconLibrary" style="display: none;">
+    <div class="studio-modal-window" style="width: 720px; max-width: 95vw; height: 600px; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span class="modal-title">Biblioteca de Ícones Oficial da Fifine</span>
+        </div>
+        <button class="modal-close-btn" id="btnCloseIconLibrary">&times;</button>
+      </div>
+
+      <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); display: flex; gap: 12px; align-items: center; background: #131417;">
+        <div class="search-input-box" style="flex: 1;">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" class="catalog-search-input" id="searchIconLibrary" placeholder="Filtrar ícones (ex: chrome, mic, play, obs, discord)...">
+        </div>
+        <div class="icon-lib-tabs" id="iconLibCategoryTabs" style="display: flex; gap: 4px;">
+          <button class="btn-mode-pill active" data-cat="all">Todos</button>
+          <button class="btn-mode-pill" data-cat="apps">Aplicativos</button>
+          <button class="btn-mode-pill" data-cat="system">Sistema</button>
+          <button class="btn-mode-pill" data-cat="media">Mídia</button>
+        </div>
+      </div>
+
+      <div class="modal-body icon-library-scroll" style="flex: 1; overflow-y: auto; padding: 16px;">
+        <div class="icon-library-grid" id="iconLibraryGrid">
+          <!-- Ícones gerados dinamicamente via JS a partir de /api/icons/library -->
+        </div>
+      </div>
+
+      <div style="padding: 10px 16px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); background: #131417;">
+        <span id="iconLibCount">120+ ícones originais do Fifine Control Deck</span>
+        <span>Clique em qualquer ícone para aplicar diretamente na tecla ativa</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: MURAL 3x5 (PAPEL DE PAREDE CONTÍNUO) ================= -->
+  <div class="studio-modal-backdrop" id="modalWallpaperMural" style="display: none;">
+    <div class="studio-modal-window" style="width: 640px; max-width: 95vw;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span class="modal-title">Mural 3x5 de Papel de Parede (15 Telas LCD)</span>
+        </div>
+        <button class="modal-close-btn" id="btnCloseWallpaperMural">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.5;">
+          Selecione uma imagem ou papel de parede. O sistema fatiará a foto matematicamente em 15 telas LCD contínuas (3 linhas x 5 colunas), transformando seu teclado num mural panorâmico sem quebras.
+        </p>
+        
+        <div class="mural-upload-zone" id="muralDropZone" style="border: 2px dashed var(--border-strong); border-radius: 10px; padding: 30px 20px; text-align: center; cursor: pointer; transition: all 0.2s ease; background: #15161a;">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="margin-bottom: 8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <div style="font-size: 13px; font-weight: 600; color: #fff;">Clique ou arraste uma foto aqui</div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Recomendado formato horizontal (ex: 1920x1080 ou 16:9). PNG ou JPEG.</div>
+        </div>
+
+        <div class="mural-preview-container" id="muralPreviewContainer" style="display: none; margin-top: 16px;">
+          <div style="font-size: 11px; font-weight: 600; color: #fff; margin-bottom: 6px;">Prévia da Divisão Matemática 3x5:</div>
+          <div class="mural-preview-grid-wrap" style="position: relative; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-strong);">
+            <img id="muralPreviewImg" src="" style="width: 100%; height: auto; display: block; aspect-ratio: 5 / 3; object-fit: cover;">
+            <div class="mural-grid-overlay" style="position: absolute; inset: 0; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(3, 1fr); gap: 4px; padding: 4px; pointer-events: none;">
+              <div style="border: 1px dashed rgba(255,255,255,0.4); border-radius: 4px;"></div>
+              <div style="border: 1px dashed rgba(255,255,255,0.4); border-radius: 4px;"></div>
+              <div style="border: 1px dashed rgba(255,255,255,0.4); border-radius: 4px;"></div>
+              <div style="border: 1px dashed rgba(255,255,255,0.4); border-radius: 4px;"></div>
+              <div style="border: 1px dashed rgba(255,255,255,0.4); border-radius: 4px;"></div>
+              <div style="border: 1px dashed rgba(255,255,255,0.4); border-radius: 4px;"></div>
+              <div style="border: 1px dashed rgba(255,255,255,0.4); border-radius: 4px;"></div>
+              <div style="border: 1px dashed rgba(255,255,255,0.4); border-radius: 4px;"></div>
+              <div style="border: 1px dashed rgba(255,255,255,0.4); border-radius: 4px;"></div>
+              <div style="border: 1px dashed rgba(255,255,255,0.4); border-radius: 4px;"></div>
+              <div style="border: 1px dashed rgba(255,255,255,0.4); border-radius: 4px;"></div>
+              <div style="border: 1px dashed rgba(255,255,255,0.4); border-radius: 4px;"></div>
+              <div style="border: 1px dashed rgba(255,255,255,0.4); border-radius: 4px;"></div>
+              <div style="border: 1px dashed rgba(255,255,255,0.4); border-radius: 4px;"></div>
+              <div style="border: 1px dashed rgba(255,255,255,0.4); border-radius: 4px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 18px; display: flex; justify-content: flex-end; gap: 10px;">
+          <button class="fifine-btn secondary" id="btnCancelMural">Cancelar</button>
+          <button class="fifine-btn primary" id="btnApplyMural" disabled style="display: flex; align-items: center; gap: 6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Fatiar e Aplicar no Deck Físico</span>
+          </button>
+        </div>
+      </div>
+  </div>
+
+  <!-- ================= MODAL: SELETOR DE APLICATIVOS INSTALADOS NO MAC ================= -->
+  <div class="studio-modal-backdrop" id="modalAppPicker" style="display: none;">
+    <div class="studio-modal-window" style="width: 660px; max-width: 95vw; height: 580px; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+          <span class="modal-title">Aplicativos Instalados no Mac</span>
+        </div>
+        <button class="modal-close-btn" id="btnCloseAppPicker">&times;</button>
+      </div>
+
+      <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); display: flex; gap: 12px; align-items: center; background: #131417;">
+        <div class="search-input-box" style="flex: 1;">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" class="catalog-search-input" id="searchAppPicker" placeholder="Buscar aplicativo (ex: Safari, Chrome, ResetCamera, OBS, Code)...">
+        </div>
+      </div>
+
+      <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 16px;">
+        <div class="app-picker-grid" id="appPickerGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px;">
+          <!-- Aplicativos carregados dinamicamente via /api/browse_app -->
+        </div>
+      </div>
+
+      <div style="padding: 10px 16px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); background: #131417;">
+        <span id="appPickerCount">Carregando aplicativos...</span>
+        <span>Clique para vincular o app à tecla</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Flutuante de Confirmação no Hardware -->
+  <div id="syncToast" class="sync-toast" style="display: none;"></div>
+
+  <!-- Menu de Contexto para Teclas do Deck (Botão Direito) -->
+  <div id="slotContextMenu" class="slot-context-menu" style="display: none;">
+    <div class="slot-context-item" id="ctxMenuCopy">
+      <span>Copiar Tecla</span>
+      <span class="slot-context-shortcut">⌘C</span>
+    </div>
+    <div class="slot-context-item" id="ctxMenuPaste">
+      <span>Colar Tecla</span>
+      <span class="slot-context-shortcut">⌘V</span>
+    </div>
+    <div class="slot-context-item" id="ctxMenuDuplicate">
+      <span>Duplicar Tecla</span>
+      <span class="slot-context-shortcut">⌥Arrastar</span>
+    </div>
+    <div class="slot-context-divider"></div>
+    <div class="slot-context-item danger" id="ctxMenuDelete">
+      <span>Excluir Ação</span>
+      <span class="slot-context-shortcut">⌫</span>
+    </div>
+  </div>
+
+  <script type="module" src="app.js?v=20261015_37"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+[
+
+    { "path": "02.png", "name": "Emoji.png", "tags": [] },
+    { "path": "03.png", "name": "Lookup.png", "tags": [] },
+    { "path": "04.jpg", "name": "Program switching.jpg", "tags": [] },
+    { "path": "05.png", "name": "Enlarge.png", "tags": [] },
+    { "path": "06.jpg", "name": "Management Notice.jpg", "tags": [] },
+    { "path": "07.jpg", "name": "Return to the desktop.jpg", "tags": [] },
+    { "path": "08.jpg", "name": "Screen keyboard.jpg", "tags": [] },
+    { "path": "09.jpg", "name": "Display desktop.jpg", "tags": [] },
+    { "path": "10.jpg", "name": "Task Manager.jpg", "tags": [] },
+    { "path": "11.jpg", "name": "Page up and down.jpg", "tags": [] },
+    { "path": "12.png", "name": "Set up.png", "tags": [] },
+    { "path": "13.png", "name": "Handwriting pen.png", "tags": [] },
+    { "path": "14.png", "name": "Narrow.png", "tags": [] },
+    { "path": "01.jpg", "name": "Exit all applications.jpg", "tags": [] },
+    { "path": "16.png", "name": "System settings and management.png", "tags": [] },
+    { "path": "17.png", "name": "Function.png", "tags": [] },
+    { "path": "18.jpg", "name": "Resource Manager.jpg", "tags": [] },
+    { "path": "19.jpg", "name": "Lock screen.jpg", "tags": [] }
+
+]

@@ -1,0 +1,828 @@
+[
+  {
+    "plugin": "com.hotspot.streamdock.browser.sdPlugin",
+    "name": "Browser",
+    "category": "Browser",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.hotkey.browser.back",
+        "name": "Back",
+        "tooltip": "Return to the previous page",
+        "icon": "assets/native_icons/com.hotspot.streamdock.hotkey.browser.back_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.hotkey.browser.back_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.hotkey.browser.forward",
+        "name": "Forward",
+        "tooltip": "Go to the next page",
+        "icon": "assets/native_icons/com.hotspot.streamdock.hotkey.browser.forward_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.hotkey.browser.forward_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.hotkey.browser.refresh",
+        "name": "Refresh",
+        "tooltip": "Refresh the current page",
+        "icon": "assets/native_icons/com.hotspot.streamdock.hotkey.browser.refresh_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.hotkey.browser.refresh_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.hotkey.browser.collect",
+        "name": "Collect",
+        "tooltip": "Bookmark the current page",
+        "icon": "assets/native_icons/com.hotspot.streamdock.hotkey.browser.collect_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.hotkey.browser.collect_btn.png"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.device.brightness.sdPlugin",
+    "name": "Brightness",
+    "category": "Brightness",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.device.brightness",
+        "name": "Brightness",
+        "tooltip": "Adjust the brightness of your device",
+        "icon": "assets/native_icons/com.hotspot.streamdock.device.brightness_icon.png",
+        "state_image": ""
+      },
+      {
+        "uuid": "com.hotspot.streamdock.device.devsleep",
+        "name": "devsleep",
+        "tooltip": "control device to sleep screen",
+        "icon": "",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.device.devsleep_btn.png"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.device.k1proLED+-.sdPlugin",
+    "name": "K1ProLEDLight",
+    "category": "K1ProLEDLight",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.device.k1proLED+",
+        "name": "LED+",
+        "tooltip": "Control K1Pro LED+",
+        "icon": "",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.device.k1proLED+_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.device.k1proLED-",
+        "name": "LED-",
+        "tooltip": "Control K1Pro LED-",
+        "icon": "",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.device.k1proLED-_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.device.k1proLEDSPEED+",
+        "name": "LEDSPEED+",
+        "tooltip": "Control K1Pro LEDSPEED+",
+        "icon": "",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.device.k1proLEDSPEED+_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.device.k1proLEDSPEED-",
+        "name": "LEDSPEED-",
+        "tooltip": "Control K1Pro LEDSPEED-",
+        "icon": "",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.device.k1proLEDSPEED-_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.device.k1proLEDMODECHANGE",
+        "name": "LEDMODECHANGE",
+        "tooltip": "Control K1Pro LEDMODECHANGE",
+        "icon": "",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.device.k1proLEDMODECHANGE_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.device.k1proWinqMac",
+        "name": "WinqMac",
+        "tooltip": "Control K1Pro WinqMac",
+        "icon": "",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.device.k1proWinqMac_btn.jpg"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.mouse.event.sdPlugin",
+    "name": "Mouse event",
+    "category": "Mouse event",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.mouse.event",
+        "name": "Mouse event",
+        "tooltip": "Simulated mouse event",
+        "icon": "assets/native_icons/com.hotspot.streamdock.mouse.event_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.mouse.event_btn.jpg"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.multiactions.sdPlugin",
+    "name": "Multi Action",
+    "category": "Multi Action",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.multiactions.routine",
+        "name": "Multi Action",
+        "tooltip": "Execute multiple actions",
+        "icon": "assets/native_icons/com.hotspot.streamdock.multiactions.routine_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.multiactions.routine_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.multiactions.LunBo",
+        "name": "Multi Action LunBo",
+        "tooltip": "Execute multiple actions",
+        "icon": "assets/native_icons/com.hotspot.streamdock.multiactions.LunBo_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.multiactions.LunBo_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.multiactions.toggle",
+        "name": "Multi Action Toggle",
+        "tooltip": "Execute multiple actions",
+        "icon": "assets/native_icons/com.hotspot.streamdock.multiactions.toggle_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.multiactions.toggle_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.multiactions.ActionWheel",
+        "name": "Multi Action ActionWheel",
+        "tooltip": "Execute multiple actions",
+        "icon": "assets/native_icons/com.hotspot.streamdock.multiactions.ActionWheel_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.multiactions.ActionWheel_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.multiactions.ActionTrigger",
+        "name": "Multi Action ActionTrigger",
+        "tooltip": "Execute multiple actions",
+        "icon": "assets/native_icons/com.hotspot.streamdock.multiactions.ActionTrigger_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.multiactions.ActionTrigger_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.multiactions.delay",
+        "name": "Delay",
+        "tooltip": "Pause the actions sequence",
+        "icon": "assets/native_icons/com.hotspot.streamdock.multiactions.delay_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.multiactions.delay_btn.png"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.network.sdPlugin",
+    "name": "Network",
+    "category": "Network",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.network.udp",
+        "name": "UDP",
+        "tooltip": "UDP communication",
+        "icon": "assets/native_icons/com.hotspot.streamdock.network.udp_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.network.udp_btn.png"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.obsstudio.sdPlugin",
+    "name": "OBS Studio",
+    "category": "OBS Studio",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.obsstudio.record",
+        "name": "Record",
+        "tooltip": "Start/Stop recording to file",
+        "icon": "assets/native_icons/com.hotspot.streamdock.obsstudio.record_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.obsstudio.record_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.obsstudio.stream",
+        "name": "Stream",
+        "tooltip": "Start/Stop streaming",
+        "icon": "assets/native_icons/com.hotspot.streamdock.obsstudio.stream_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.obsstudio.stream_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.obsstudio.virtualcamera",
+        "name": "Virtual camera",
+        "tooltip": "Turn on/off the virtual camera",
+        "icon": "assets/native_icons/com.hotspot.streamdock.obsstudio.virtualcamera_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.obsstudio.virtualcamera_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.obsstudio.scene",
+        "name": "Scene",
+        "tooltip": "Switch scene",
+        "icon": "assets/native_icons/com.hotspot.streamdock.obsstudio.scene_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.obsstudio.scene_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.obsstudio.source",
+        "name": "Source Visibility",
+        "tooltip": "Show/Hide source",
+        "icon": "assets/native_icons/com.hotspot.streamdock.obsstudio.source_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.obsstudio.source_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.obsstudio.mixeraudio",
+        "name": "Audio Mixer",
+        "tooltip": "Mute/Unmute audio source",
+        "icon": "assets/native_icons/com.hotspot.streamdock.obsstudio.mixeraudio_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.obsstudio.mixeraudio_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.obsstudio.studiomode",
+        "name": "Studio Mode",
+        "tooltip": "Toggle Studio Mode",
+        "icon": "assets/native_icons/com.hotspot.streamdock.obsstudio.studiomode_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.obsstudio.studiomode_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.obsstudio.screenshot",
+        "name": "Screenshot",
+        "tooltip": "Screenshot the active scene",
+        "icon": "assets/native_icons/com.hotspot.streamdock.obsstudio.screenshot_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.obsstudio.screenshot_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.obsstudio.transition",
+        "name": "Transition",
+        "tooltip": "Set a transition",
+        "icon": "assets/native_icons/com.hotspot.streamdock.obsstudio.transition_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.obsstudio.transition_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.obsstudio.shortcutup",
+        "name": "绿幕背景图 UP",
+        "tooltip": "快捷键-绿幕背景图 UP",
+        "icon": "assets/native_icons/com.hotspot.streamdock.obsstudio.shortcutup_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.obsstudio.shortcutup_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.obsstudio.shortcutdn",
+        "name": "绿幕背景图 DN",
+        "tooltip": "快捷键-绿幕背景图 DN",
+        "icon": "assets/native_icons/com.hotspot.streamdock.obsstudio.shortcutdn_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.obsstudio.shortcutdn_btn.jpg"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.page.sdPlugin",
+    "name": "Pages",
+    "category": "Pages",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.page.previous",
+        "name": "Previous page",
+        "tooltip": "",
+        "icon": "assets/native_icons/com.hotspot.streamdock.page.previous_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.page.previous_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.page.next",
+        "name": "Next page",
+        "tooltip": "",
+        "icon": "assets/native_icons/com.hotspot.streamdock.page.next_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.page.next_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.page.goto",
+        "name": "Go to page",
+        "tooltip": "",
+        "icon": "assets/native_icons/com.hotspot.streamdock.page.goto_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.page.goto_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.page.indicator",
+        "name": "Page Indicator",
+        "tooltip": "",
+        "icon": "assets/native_icons/com.hotspot.streamdock.page.indicator_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.page.indicator_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.page.change",
+        "name": "change page",
+        "tooltip": "...",
+        "icon": "assets/native_icons/com.hotspot.streamdock.page.change_icon.png",
+        "state_image": ""
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.plain.text.sdPlugin",
+    "name": "Text",
+    "category": "Text",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.plain.text",
+        "name": "Text",
+        "tooltip": "Plain text display",
+        "icon": "assets/native_icons/com.hotspot.streamdock.plain.text_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.plain.text_btn.png"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.profile.backtoparent.sdPlugin",
+    "name": "Go back",
+    "category": "Go back",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.profile.backtoparent",
+        "name": "Go back",
+        "tooltip": "Go back to previous screen",
+        "icon": "",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.profile.backtoparent_btn.png"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.profile.openchild.sdPlugin",
+    "name": "Create Folder",
+    "category": "Create Folder",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.profile.openchild",
+        "name": "Create Folder",
+        "tooltip": "Create a folder",
+        "icon": "assets/native_icons/com.hotspot.streamdock.profile.openchild_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.profile.openchild_btn.png"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.profile.rotate.sdPlugin",
+    "name": "Scene Shift",
+    "category": "Scene Shift",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.profile.rotate",
+        "name": "Scene Shift",
+        "tooltip": "Switch to another preconfigured scenario",
+        "icon": "assets/native_icons/com.hotspot.streamdock.profile.rotate_icon.png",
+        "state_image": ""
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.quickcontrol.sdPlugin",
+    "name": "Quick Control",
+    "category": "Quick Control",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.quickcontrol.sleep",
+        "name": "Sleep",
+        "tooltip": "Put your PC to sleep, or hibernate if your PC supports hibernation",
+        "icon": "assets/native_icons/com.hotspot.streamdock.quickcontrol.sleep_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.quickcontrol.sleep_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.hotkey.quickcontrol.switchscreen",
+        "name": "Switch screen",
+        "tooltip": "Switch screen",
+        "icon": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.switchscreen_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.switchscreen_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.hotkey.quickcontrol.speechrecognition",
+        "name": "Speech recognition",
+        "tooltip": "Turn on speech recognition",
+        "icon": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.speechrecognition_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.speechrecognition_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.hotkey.quickcontrol.displaydesktop",
+        "name": "Display desktop",
+        "tooltip": "Display the desktop",
+        "icon": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.displaydesktop_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.displaydesktop_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.hotkey.quickcontrol.mute",
+        "name": "Mute",
+        "tooltip": "Mute",
+        "icon": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.mute_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.mute_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.hotkey.quickcontrol.volumedown",
+        "name": "Lower the volume",
+        "tooltip": "Lower the volume",
+        "icon": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.volumedown_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.volumedown_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.hotkey.quickcontrol.volumeup",
+        "name": "Increase the volume",
+        "tooltip": "Increase the volume",
+        "icon": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.volumeup_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.volumeup_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.quickcontrol.microphone",
+        "name": "Microphone",
+        "tooltip": "Mute/unmute the microphone",
+        "icon": "assets/native_icons/com.hotspot.streamdock.quickcontrol.microphone_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.quickcontrol.microphone_btn.png"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.quicktool.sdPlugin",
+    "name": "Quick Control",
+    "category": "Quick Control",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.quicktool.calculator",
+        "name": "Calculator",
+        "tooltip": "Open the calculator",
+        "icon": "assets/native_icons/com.hotspot.streamdock.quicktool.calculator_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.quicktool.calculator_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.hotkey.quicktool.emoticons",
+        "name": "Emoticons",
+        "tooltip": "Open the emoticons",
+        "icon": "assets/native_icons/com.hotspot.streamdock.hotkey.quicktool.emoticons_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.hotkey.quicktool.emoticons_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.quicktool.mail",
+        "name": "Mail",
+        "tooltip": "Open the mail",
+        "icon": "assets/native_icons/com.hotspot.streamdock.quicktool.mail_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.quicktool.mail_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.quicktool.music",
+        "name": "Music",
+        "tooltip": "Turn on the music",
+        "icon": "assets/native_icons/com.hotspot.streamdock.quicktool.music_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.quicktool.music_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.quicktool.homepage",
+        "name": "Home page",
+        "tooltip": "Open the home page",
+        "icon": "assets/native_icons/com.hotspot.streamdock.quicktool.homepage_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.quicktool.homepage_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.hotkey.quicktool.notification",
+        "name": "Notification",
+        "tooltip": "Open notification",
+        "icon": "assets/native_icons/com.hotspot.streamdock.hotkey.quicktool.notification_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.hotkey.quicktool.notification_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.hotkey.quicktool.taskmanager",
+        "name": "Task Manager",
+        "tooltip": "Open the task manager",
+        "icon": "assets/native_icons/com.hotspot.streamdock.hotkey.quicktool.taskmanager_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.hotkey.quicktool.taskmanager_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.quicktool.controlpanel",
+        "name": "Control panel",
+        "tooltip": "Open the Control panel",
+        "icon": "assets/native_icons/com.hotspot.streamdock.quicktool.controlpanel_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.quicktool.controlpanel_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.hotkey.quicktool.searchbar",
+        "name": "Search bar",
+        "tooltip": "Open the search bar",
+        "icon": "assets/native_icons/com.hotspot.streamdock.hotkey.quicktool.searchbar_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.hotkey.quicktool.searchbar_btn.png"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.soundboard.sdPlugin",
+    "name": "Soundboard",
+    "category": "Soundboard",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.soundboard.playaudio",
+        "name": "Play Audio",
+        "tooltip": "Play a sound bite, audio effect or music clip",
+        "icon": "assets/native_icons/com.hotspot.streamdock.soundboard.playaudio_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.soundboard.playaudio_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.soundboard.stopaudioplay",
+        "name": "Stop Audio",
+        "tooltip": "Stop all Soundboard playback",
+        "icon": "assets/native_icons/com.hotspot.streamdock.soundboard.stopaudioplay_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.soundboard.stopaudioplay_btn.png"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.system.KnobOperatingGroup.sdPlugin",
+    "name": "KnobOperatingGroup",
+    "category": "Knob Operating Group",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.system.KnobOperatingGroup",
+        "name": "KnobOperatingGroup",
+        "tooltip": "Activate a key command",
+        "icon": "assets/native_icons/com.hotspot.streamdock.system.KnobOperatingGroup_icon.jpg",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.system.KnobOperatingGroup_btn.jpg"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.system.close.sdPlugin",
+    "name": "close",
+    "category": "close",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.system.close",
+        "name": "Close",
+        "tooltip": "close app",
+        "icon": "assets/native_icons/com.hotspot.streamdock.system.close_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.system.close_btn.gif"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.system.hotkey.sdPlugin",
+    "name": "Hotkey",
+    "category": "Hotkey",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.system.hotkey",
+        "name": "Hotkey",
+        "tooltip": "Activate a key command",
+        "icon": "assets/native_icons/com.hotspot.streamdock.system.hotkey_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.system.hotkey_btn.jpg"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.system.hotkeySwitch.sdPlugin",
+    "name": "HotkeySwitch",
+    "category": "HotkeySwitch",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.system.hotkeySwitch",
+        "name": "HotkeySwitch",
+        "tooltip": "Activate a key command",
+        "icon": "assets/native_icons/com.hotspot.streamdock.system.hotkeySwitch_icon.jpg",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.system.hotkeySwitch_btn.jpg"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.system.multimedia.sdPlugin",
+    "name": "Multimedia",
+    "category": "Multimedia",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.system.multimedia",
+        "name": "Multimedia",
+        "tooltip": "Control your media playback",
+        "icon": "assets/native_icons/com.hotspot.streamdock.system.multimedia_icon.png",
+        "state_image": ""
+      },
+      {
+        "uuid": "com.hotspot.streamdock.system.volume",
+        "name": "SystemVolume",
+        "tooltip": "Control your system volume",
+        "icon": "assets/native_icons/com.hotspot.streamdock.system.volume_icon.svg",
+        "state_image": ""
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.system.open.sdPlugin",
+    "name": "Open",
+    "category": "Open",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.system.open",
+        "name": "Open",
+        "tooltip": "Open an app, file or folder",
+        "icon": "assets/native_icons/com.hotspot.streamdock.system.open_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.system.open_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.system.openApps",
+        "name": "OpenApps",
+        "tooltip": "Open an app, file or folder",
+        "icon": "assets/native_icons/com.hotspot.streamdock.system.openApps_icon.png",
+        "state_image": ""
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.system.password.sdPlugin",
+    "name": "Password",
+    "category": "Password",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.system.password",
+        "name": "Password",
+        "tooltip": "Type a precomposed password string",
+        "icon": "assets/native_icons/com.hotspot.streamdock.system.password_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.system.password_btn.png"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.system.super.hotkey.sdPlugin",
+    "name": "Super Hotkeys",
+    "category": "Super Hotkeys",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.system.super.hotkey",
+        "name": "Super Hotkeys",
+        "tooltip": "Activate a key command",
+        "icon": "assets/native_icons/com.hotspot.streamdock.system.super.hotkey_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.system.super.hotkey_btn.png"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.system.text.sdPlugin",
+    "name": "Text",
+    "category": "Text",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.system.text",
+        "name": "Text",
+        "tooltip": "Type a precomposed text string",
+        "icon": "assets/native_icons/com.hotspot.streamdock.system.text_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.system.text_btn.png"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.system.website.sdPlugin",
+    "name": "Website",
+    "category": "Website",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.system.website",
+        "name": "Website",
+        "tooltip": "Open URL",
+        "icon": "assets/native_icons/com.hotspot.streamdock.system.website_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.system.website_btn.jpg"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.touchbar.sdPlugin",
+    "name": "Touchbar",
+    "category": "Touchbar",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.touchbar.dispatchcenter",
+        "name": "Dispatch Center",
+        "tooltip": "Dispatch Center",
+        "icon": "assets/native_icons/com.hotspot.streamdock.touchbar.dispatchcenter_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.touchbar.dispatchcenter_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.touchbar.siri",
+        "name": "Siri",
+        "tooltip": "Wake up siri",
+        "icon": "assets/native_icons/com.hotspot.streamdock.touchbar.siri_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.touchbar.siri_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.touchbar.screenshot",
+        "name": "Screenshot",
+        "tooltip": "Screenshot",
+        "icon": "assets/native_icons/com.hotspot.streamdock.touchbar.screenshot_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.touchbar.screenshot_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.touchbar.launchpad",
+        "name": "Launchpad",
+        "tooltip": "Launchpad",
+        "icon": "assets/native_icons/com.hotspot.streamdock.touchbar.launchpad_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.touchbar.launchpad_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.touchbar.desktopsaver",
+        "name": "Desktop Saver",
+        "tooltip": "Desktop Saver",
+        "icon": "assets/native_icons/com.hotspot.streamdock.touchbar.desktopsaver_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.touchbar.desktopsaver_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.touchbar.sleep",
+        "name": "Sleep",
+        "tooltip": "Sleep",
+        "icon": "assets/native_icons/com.hotspot.streamdock.touchbar.sleep_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.touchbar.sleep_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.touchbar.increasescreenbrightness",
+        "name": "Increase screen brightness",
+        "tooltip": "Increase screen brightness",
+        "icon": "assets/native_icons/com.hotspot.streamdock.touchbar.increasescreenbrightness_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.touchbar.increasescreenbrightness_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.touchbar.decreasescreenbrightness",
+        "name": "Decrease screen brightness",
+        "tooltip": "Decrease screen brightness",
+        "icon": "assets/native_icons/com.hotspot.streamdock.touchbar.decreasescreenbrightness_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.touchbar.decreasescreenbrightness_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.touchbar.previoustrack",
+        "name": "Previous Track",
+        "tooltip": "Previous Track",
+        "icon": "assets/native_icons/com.hotspot.streamdock.touchbar.previoustrack_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.touchbar.previoustrack_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.touchbar.playpause",
+        "name": "Play/Pause",
+        "tooltip": "Play/Pause",
+        "icon": "assets/native_icons/com.hotspot.streamdock.touchbar.playpause_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.touchbar.playpause_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.touchbar.nexttrack",
+        "name": "Next Track",
+        "tooltip": "Next Track",
+        "icon": "assets/native_icons/com.hotspot.streamdock.touchbar.nexttrack_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.touchbar.nexttrack_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.touchbar.volumeup",
+        "name": "Volume up",
+        "tooltip": "Volume up",
+        "icon": "assets/native_icons/com.hotspot.streamdock.touchbar.volumeup_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.touchbar.volumeup_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.touchbar.volumedown",
+        "name": "Volume down",
+        "tooltip": "Volume down",
+        "icon": "assets/native_icons/com.hotspot.streamdock.touchbar.volumedown_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.touchbar.volumedown_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.touchbar.mute",
+        "name": "Mute",
+        "tooltip": "Mute",
+        "icon": "assets/native_icons/com.hotspot.streamdock.touchbar.mute_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.touchbar.mute_btn.jpg"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.touchbar.volume",
+        "name": "Volume",
+        "tooltip": "Volume control",
+        "icon": "assets/native_icons/com.hotspot.streamdock.touchbar.volume_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.touchbar.volume_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.touchbar.screen.brightness",
+        "name": "Screen brightness",
+        "tooltip": "Adjusting screen brightness",
+        "icon": "assets/native_icons/com.hotspot.streamdock.touchbar.screen.brightness_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.touchbar.screen.brightness_btn.jpg"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.vmix.sdPlugin",
+    "name": "vMix",
+    "category": "vMix",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.vmix.shortcut",
+        "name": "Shortcut",
+        "tooltip": "Control your vmix",
+        "icon": "assets/native_icons/com.hotspot.streamdock.vmix.shortcut_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.vmix.shortcut_btn.png"
+      }
+    ]
+  },
+  {
+    "plugin": "com.hotspot.streamdock.youtube.sdPlugin",
+    "name": "YouTube",
+    "category": "YouTube",
+    "actions": [
+      {
+        "uuid": "com.hotspot.streamdock.youtube.chatmessage",
+        "name": "Chat Message",
+        "tooltip": "Post a precomposed YouTube chat message",
+        "icon": "assets/native_icons/com.hotspot.streamdock.youtube.chatmessage_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.youtube.chatmessage_btn.png"
+      },
+      {
+        "uuid": "com.hotspot.streamdock.youtube.viewers",
+        "name": "Viewers",
+        "tooltip": "Show number of YouTube live stream viewers",
+        "icon": "assets/native_icons/com.hotspot.streamdock.youtube.viewers_icon.png",
+        "state_image": "assets/native_icons/com.hotspot.streamdock.youtube.viewers_btn.png"
+      }
+    ]
+  }
+]

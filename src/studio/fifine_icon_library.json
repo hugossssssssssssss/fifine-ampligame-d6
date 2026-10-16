@@ -1,0 +1,962 @@
+{
+  "native_actions": [
+    {
+      "name": "device.brightness",
+      "path": "assets/native_icons/com.hotspot.streamdock.device.brightness_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "device.devsleep",
+      "path": "assets/native_icons/com.hotspot.streamdock.device.devsleep_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "device.k1proLED+",
+      "path": "assets/native_icons/com.hotspot.streamdock.device.k1proLED+_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "device.k1proLED-",
+      "path": "assets/native_icons/com.hotspot.streamdock.device.k1proLED-_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "device.k1proLEDMODECHANGE",
+      "path": "assets/native_icons/com.hotspot.streamdock.device.k1proLEDMODECHANGE_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "device.k1proLEDSPEED+",
+      "path": "assets/native_icons/com.hotspot.streamdock.device.k1proLEDSPEED+_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "device.k1proLEDSPEED-",
+      "path": "assets/native_icons/com.hotspot.streamdock.device.k1proLEDSPEED-_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "device.k1proWinqMac",
+      "path": "assets/native_icons/com.hotspot.streamdock.device.k1proWinqMac_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "hotkey.browser.back",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.browser.back_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "hotkey.browser.back",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.browser.back_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "hotkey.browser.collect",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.browser.collect_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "hotkey.browser.collect",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.browser.collect_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "hotkey.browser.forward",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.browser.forward_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "hotkey.browser.forward",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.browser.forward_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "hotkey.browser.refresh",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.browser.refresh_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "hotkey.browser.refresh",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.browser.refresh_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "hotkey.quickcontrol.displaydesktop",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.displaydesktop_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "hotkey.quickcontrol.displaydesktop",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.displaydesktop_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "hotkey.quickcontrol.mute",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.mute_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "hotkey.quickcontrol.mute",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.mute_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "hotkey.quickcontrol.speechrecognition",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.speechrecognition_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "hotkey.quickcontrol.speechrecognition",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.speechrecognition_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "hotkey.quickcontrol.switchscreen",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.switchscreen_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "hotkey.quickcontrol.switchscreen",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.switchscreen_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "hotkey.quickcontrol.volumedown",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.volumedown_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "hotkey.quickcontrol.volumedown",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.volumedown_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "hotkey.quickcontrol.volumeup",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.volumeup_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "hotkey.quickcontrol.volumeup",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quickcontrol.volumeup_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "hotkey.quicktool.emoticons",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quicktool.emoticons_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "hotkey.quicktool.emoticons",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quicktool.emoticons_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "hotkey.quicktool.notification",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quicktool.notification_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "hotkey.quicktool.notification",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quicktool.notification_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "hotkey.quicktool.searchbar",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quicktool.searchbar_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "hotkey.quicktool.searchbar",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quicktool.searchbar_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "hotkey.quicktool.taskmanager",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quicktool.taskmanager_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "hotkey.quicktool.taskmanager",
+      "path": "assets/native_icons/com.hotspot.streamdock.hotkey.quicktool.taskmanager_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "mouse.event",
+      "path": "assets/native_icons/com.hotspot.streamdock.mouse.event_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "mouse.event",
+      "path": "assets/native_icons/com.hotspot.streamdock.mouse.event_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "multiactions.ActionTrigger",
+      "path": "assets/native_icons/com.hotspot.streamdock.multiactions.ActionTrigger_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "multiactions.ActionTrigger",
+      "path": "assets/native_icons/com.hotspot.streamdock.multiactions.ActionTrigger_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "multiactions.ActionWheel",
+      "path": "assets/native_icons/com.hotspot.streamdock.multiactions.ActionWheel_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "multiactions.ActionWheel",
+      "path": "assets/native_icons/com.hotspot.streamdock.multiactions.ActionWheel_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "multiactions.LunBo",
+      "path": "assets/native_icons/com.hotspot.streamdock.multiactions.LunBo_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "multiactions.LunBo",
+      "path": "assets/native_icons/com.hotspot.streamdock.multiactions.LunBo_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "multiactions.delay",
+      "path": "assets/native_icons/com.hotspot.streamdock.multiactions.delay_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "multiactions.delay",
+      "path": "assets/native_icons/com.hotspot.streamdock.multiactions.delay_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "multiactions.routine",
+      "path": "assets/native_icons/com.hotspot.streamdock.multiactions.routine_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "multiactions.routine",
+      "path": "assets/native_icons/com.hotspot.streamdock.multiactions.routine_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "multiactions.toggle",
+      "path": "assets/native_icons/com.hotspot.streamdock.multiactions.toggle_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "multiactions.toggle",
+      "path": "assets/native_icons/com.hotspot.streamdock.multiactions.toggle_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "network.udp",
+      "path": "assets/native_icons/com.hotspot.streamdock.network.udp_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "network.udp",
+      "path": "assets/native_icons/com.hotspot.streamdock.network.udp_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "obsstudio.mixeraudio",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.mixeraudio_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "obsstudio.mixeraudio",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.mixeraudio_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "obsstudio.record",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.record_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "obsstudio.record",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.record_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "obsstudio.scene",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.scene_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "obsstudio.scene",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.scene_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "obsstudio.screenshot",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.screenshot_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "obsstudio.screenshot",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.screenshot_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "obsstudio.shortcutdn",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.shortcutdn_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "obsstudio.shortcutdn",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.shortcutdn_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "obsstudio.shortcutup",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.shortcutup_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "obsstudio.shortcutup",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.shortcutup_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "obsstudio.source",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.source_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "obsstudio.source",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.source_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "obsstudio.stream",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.stream_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "obsstudio.stream",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.stream_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "obsstudio.studiomode",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.studiomode_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "obsstudio.studiomode",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.studiomode_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "obsstudio.transition",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.transition_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "obsstudio.transition",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.transition_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "obsstudio.virtualcamera",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.virtualcamera_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "obsstudio.virtualcamera",
+      "path": "assets/native_icons/com.hotspot.streamdock.obsstudio.virtualcamera_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "page.change",
+      "path": "assets/native_icons/com.hotspot.streamdock.page.change_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "page.goto",
+      "path": "assets/native_icons/com.hotspot.streamdock.page.goto_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "page.goto",
+      "path": "assets/native_icons/com.hotspot.streamdock.page.goto_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "page.indicator",
+      "path": "assets/native_icons/com.hotspot.streamdock.page.indicator_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "page.indicator",
+      "path": "assets/native_icons/com.hotspot.streamdock.page.indicator_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "page.next",
+      "path": "assets/native_icons/com.hotspot.streamdock.page.next_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "page.next",
+      "path": "assets/native_icons/com.hotspot.streamdock.page.next_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "page.previous",
+      "path": "assets/native_icons/com.hotspot.streamdock.page.previous_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "page.previous",
+      "path": "assets/native_icons/com.hotspot.streamdock.page.previous_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "plain.text",
+      "path": "assets/native_icons/com.hotspot.streamdock.plain.text_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "plain.text",
+      "path": "assets/native_icons/com.hotspot.streamdock.plain.text_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "profile.backtoparent",
+      "path": "assets/native_icons/com.hotspot.streamdock.profile.backtoparent_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "profile.openchild",
+      "path": "assets/native_icons/com.hotspot.streamdock.profile.openchild_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "profile.openchild",
+      "path": "assets/native_icons/com.hotspot.streamdock.profile.openchild_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "profile.rotate",
+      "path": "assets/native_icons/com.hotspot.streamdock.profile.rotate_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "quickcontrol.microphone",
+      "path": "assets/native_icons/com.hotspot.streamdock.quickcontrol.microphone_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "quickcontrol.microphone",
+      "path": "assets/native_icons/com.hotspot.streamdock.quickcontrol.microphone_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "quickcontrol.sleep",
+      "path": "assets/native_icons/com.hotspot.streamdock.quickcontrol.sleep_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "quickcontrol.sleep",
+      "path": "assets/native_icons/com.hotspot.streamdock.quickcontrol.sleep_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "quicktool.calculator",
+      "path": "assets/native_icons/com.hotspot.streamdock.quicktool.calculator_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "quicktool.calculator",
+      "path": "assets/native_icons/com.hotspot.streamdock.quicktool.calculator_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "quicktool.controlpanel",
+      "path": "assets/native_icons/com.hotspot.streamdock.quicktool.controlpanel_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "quicktool.controlpanel",
+      "path": "assets/native_icons/com.hotspot.streamdock.quicktool.controlpanel_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "quicktool.homepage",
+      "path": "assets/native_icons/com.hotspot.streamdock.quicktool.homepage_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "quicktool.homepage",
+      "path": "assets/native_icons/com.hotspot.streamdock.quicktool.homepage_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "quicktool.mail",
+      "path": "assets/native_icons/com.hotspot.streamdock.quicktool.mail_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "quicktool.mail",
+      "path": "assets/native_icons/com.hotspot.streamdock.quicktool.mail_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "quicktool.music",
+      "path": "assets/native_icons/com.hotspot.streamdock.quicktool.music_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "quicktool.music",
+      "path": "assets/native_icons/com.hotspot.streamdock.quicktool.music_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "soundboard.playaudio",
+      "path": "assets/native_icons/com.hotspot.streamdock.soundboard.playaudio_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "soundboard.playaudio",
+      "path": "assets/native_icons/com.hotspot.streamdock.soundboard.playaudio_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "soundboard.stopaudioplay",
+      "path": "assets/native_icons/com.hotspot.streamdock.soundboard.stopaudioplay_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "soundboard.stopaudioplay",
+      "path": "assets/native_icons/com.hotspot.streamdock.soundboard.stopaudioplay_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "system.KnobOperatingGroup",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.KnobOperatingGroup_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "system.KnobOperatingGroup",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.KnobOperatingGroup_icon.jpg",
+      "is_btn": false
+    },
+    {
+      "name": "system.close.gif",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.close_btn.gif",
+      "is_btn": true
+    },
+    {
+      "name": "system.close",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.close_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "system.hotkeySwitch",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.hotkeySwitch_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "system.hotkeySwitch",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.hotkeySwitch_icon.jpg",
+      "is_btn": false
+    },
+    {
+      "name": "system.hotkey",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.hotkey_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "system.hotkey",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.hotkey_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "system.multimedia",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.multimedia_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "system.openApps",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.openApps_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "system.open",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.open_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "system.open",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.open_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "system.password",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.password_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "system.password",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.password_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "system.super.hotkey",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.super.hotkey_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "system.super.hotkey",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.super.hotkey_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "system.text",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.text_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "system.text",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.text_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "system.volume.svg",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.volume_icon.svg",
+      "is_btn": false
+    },
+    {
+      "name": "system.website",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.website_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "system.website",
+      "path": "assets/native_icons/com.hotspot.streamdock.system.website_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "touchbar.decreasescreenbrightness",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.decreasescreenbrightness_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "touchbar.decreasescreenbrightness",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.decreasescreenbrightness_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "touchbar.desktopsaver",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.desktopsaver_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "touchbar.desktopsaver",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.desktopsaver_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "touchbar.dispatchcenter",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.dispatchcenter_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "touchbar.dispatchcenter",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.dispatchcenter_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "touchbar.increasescreenbrightness",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.increasescreenbrightness_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "touchbar.increasescreenbrightness",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.increasescreenbrightness_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "touchbar.launchpad",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.launchpad_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "touchbar.launchpad",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.launchpad_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "touchbar.mute",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.mute_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "touchbar.mute",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.mute_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "touchbar.nexttrack",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.nexttrack_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "touchbar.nexttrack",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.nexttrack_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "touchbar.playpause",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.playpause_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "touchbar.playpause",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.playpause_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "touchbar.previoustrack",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.previoustrack_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "touchbar.previoustrack",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.previoustrack_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "touchbar.screen.brightness",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.screen.brightness_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "touchbar.screen.brightness",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.screen.brightness_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "touchbar.screenshot",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.screenshot_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "touchbar.screenshot",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.screenshot_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "touchbar.siri",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.siri_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "touchbar.siri",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.siri_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "touchbar.sleep",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.sleep_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "touchbar.sleep",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.sleep_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "touchbar.volume",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.volume_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "touchbar.volume",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.volume_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "touchbar.volumedown",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.volumedown_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "touchbar.volumedown",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.volumedown_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "touchbar.volumeup",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.volumeup_btn.jpg",
+      "is_btn": true
+    },
+    {
+      "name": "touchbar.volumeup",
+      "path": "assets/native_icons/com.hotspot.streamdock.touchbar.volumeup_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "vmix.shortcut",
+      "path": "assets/native_icons/com.hotspot.streamdock.vmix.shortcut_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "vmix.shortcut",
+      "path": "assets/native_icons/com.hotspot.streamdock.vmix.shortcut_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "youtube.chatmessage",
+      "path": "assets/native_icons/com.hotspot.streamdock.youtube.chatmessage_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "youtube.chatmessage",
+      "path": "assets/native_icons/com.hotspot.streamdock.youtube.chatmessage_icon.png",
+      "is_btn": false
+    },
+    {
+      "name": "youtube.viewers",
+      "path": "assets/native_icons/com.hotspot.streamdock.youtube.viewers_btn.png",
+      "is_btn": true
+    },
+    {
+      "name": "youtube.viewers",
+      "path": "assets/native_icons/com.hotspot.streamdock.youtube.viewers_icon.png",
+      "is_btn": false
+    }
+  ],
+  "windows_controller": [
+    {
+      "name": "Emoji.png",
+      "path": "assets/icon_packs/com.streamdock.WindowsController.sdIconPack/02.png"
+    },
+    {
+      "name": "Lookup.png",
+      "path": "assets/icon_packs/com.streamdock.WindowsController.sdIconPack/03.png"
+    },
+    {
+      "name": "Program switching.jpg",
+      "path": "assets/icon_packs/com.streamdock.WindowsController.sdIconPack/04.jpg"
+    },
+    {
+      "name": "Enlarge.png",
+      "path": "assets/icon_packs/com.streamdock.WindowsController.sdIconPack/05.png"
+    },
+    {
+      "name": "Management Notice.jpg",
+      "path": "assets/icon_packs/com.streamdock.WindowsController.sdIconPack/06.jpg"
+    },
+    {
+      "name": "Return to the desktop.jpg",
+      "path": "assets/icon_packs/com.streamdock.WindowsController.sdIconPack/07.jpg"
+    },
+    {
+      "name": "Screen keyboard.jpg",
+      "path": "assets/icon_packs/com.streamdock.WindowsController.sdIconPack/08.jpg"
+    },
+    {
+      "name": "Display desktop.jpg",
+      "path": "assets/icon_packs/com.streamdock.WindowsController.sdIconPack/09.jpg"
+    },
+    {
+      "name": "Task Manager.jpg",
+      "path": "assets/icon_packs/com.streamdock.WindowsController.sdIconPack/10.jpg"
+    },
+    {
+      "name": "Page up and down.jpg",
+      "path": "assets/icon_packs/com.streamdock.WindowsController.sdIconPack/11.jpg"
+    },
+    {
+      "name": "Set up.png",
+      "path": "assets/icon_packs/com.streamdock.WindowsController.sdIconPack/12.png"
+    },
+    {
+      "name": "Handwriting pen.png",
+      "path": "assets/icon_packs/com.streamdock.WindowsController.sdIconPack/13.png"
+    },
+    {
+      "name": "Narrow.png",
+      "path": "assets/icon_packs/com.streamdock.WindowsController.sdIconPack/14.png"
+    },
+    {
+      "name": "Exit all applications.jpg",
+      "path": "assets/icon_packs/com.streamdock.WindowsController.sdIconPack/01.jpg"
+    },
+    {
+      "name": "System settings and management.png",
+      "path": "assets/icon_packs/com.streamdock.WindowsController.sdIconPack/16.png"
+    },
+    {
+      "name": "Function.png",
+      "path": "assets/icon_packs/com.streamdock.WindowsController.sdIconPack/17.png"
+    },
+    {
+      "name": "Resource Manager.jpg",
+      "path": "assets/icon_packs/com.streamdock.WindowsController.sdIconPack/18.jpg"
+    },
+    {
+      "name": "Lock screen.jpg",
+      "path": "assets/icon_packs/com.streamdock.WindowsController.sdIconPack/19.jpg"
+    }
+  ],
+  "music_pack": [
+    {
+      "name": "a.jpg",
+      "path": "assets/icon_packs/com.streamdock.designersusedicons.music.sdIconPack/a.jpg"
+    },
+    {
+      "name": "a34.jpg",
+      "path": "assets/icon_packs/com.streamdock.designersusedicons.music.sdIconPack/a34.jpg"
+    },
+    {
+      "name": "a666.jpg",
+      "path": "assets/icon_packs/com.streamdock.designersusedicons.music.sdIconPack/a666.jpg"
+    },
+    {
+      "name": "a987.jpg",
+      "path": "assets/icon_packs/com.streamdock.designersusedicons.music.sdIconPack/a987.jpg"
+    },
+    {
+      "name": "a2233.jpg",
+      "path": "assets/icon_packs/com.streamdock.designersusedicons.music.sdIconPack/a2233.jpg"
+    },
+    {
+      "name": "aa01.jpg",
+      "path": "assets/icon_packs/com.streamdock.designersusedicons.music.sdIconPack/aa01.jpg"
+    },
+    {
+      "name": "cease.jpg",
+      "path": "assets/icon_packs/com.streamdock.designersusedicons.music.sdIconPack/cease.jpg"
+    },
+    {
+      "name": "Mute.jpg",
+      "path": "assets/icon_packs/com.streamdock.designersusedicons.music.sdIconPack/Mute.jpg"
+    },
+    {
+      "name": "Next song.jpg",
+      "path": "assets/icon_packs/com.streamdock.designersusedicons.music.sdIconPack/Next song.jpg"
+    },
+    {
+      "name": "Previous song.jpg",
+      "path": "assets/icon_packs/com.streamdock.designersusedicons.music.sdIconPack/Previous song.jpg"
+    },
+    {
+      "name": "suspend.jpg",
+      "path": "assets/icon_packs/com.streamdock.designersusedicons.music.sdIconPack/suspend.jpg"
+    },
+    {
+      "name": "volume-.jpg",
+      "path": "assets/icon_packs/com.streamdock.designersusedicons.music.sdIconPack/volume-.jpg"
+    },
+    {
+      "name": "volume+.jpg",
+      "path": "assets/icon_packs/com.streamdock.designersusedicons.music.sdIconPack/volume+.jpg"
+    }
+  ]
+}

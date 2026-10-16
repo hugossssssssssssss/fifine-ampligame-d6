@@ -510,18 +510,24 @@ async function executeKeyActionOnMac(slot) {
   }
 }
 
-// Renderiza o conteúdo visual (ícones, imagens, textos e estilos) em um elemento de tecla LCD
+// Renderiza o visor LCD interno (quadrado, matriz 1:1, com bezel/moldura real e tipografia idêntica ao hardware)
 function renderKeyVisualContent(keyEl, keyData, isPreview = false) {
   if (!keyEl) return;
   keyEl.innerHTML = '';
   keyEl.classList.remove('is-folder', 'is-back-key', 'is-multiaction', 'is-obs');
 
-  // Tecla vazia / não configurada
+  // A carcaça externa da tecla física de acrílico translúcido
+  keyEl.style.backgroundColor = '#141417';
+  keyEl.draggable = !isPreview;
+
+  // VISOR LCD FÍSICO INTERNO (100% QUADRADO, exatamente onde o display do Stream Deck acende)
+  const lcdScreen = document.createElement('div');
+  lcdScreen.className = 'key-lcd-screen';
+
+  // Tecla vazia / não configurada (LCD desligado em preto absoluto)
   if (!keyData || (Object.keys(keyData).length === 0) || (keyData.actionType === 'none' && !keyData.title && !keyData.imagePath && !keyData.bg)) {
-    keyEl.style.backgroundColor = '#252528';
-    keyEl.style.border = '1.5px solid #45454b';
-    keyEl.style.boxShadow = '';
-    keyEl.draggable = !isPreview;
+    lcdScreen.style.backgroundColor = '#000000';
+    keyEl.appendChild(lcdScreen);
 
     if (isPreview) {
       const editBadge = document.createElement('div');
@@ -538,8 +544,6 @@ function renderKeyVisualContent(keyEl, keyData, isPreview = false) {
     return;
   }
 
-  keyEl.draggable = !isPreview;
-
   if (keyData.actionType === 'folder' || keyData.uuid?.includes('openchild') || keyData.actionUuid?.includes('openchild') || keyData.target?.startsWith('folder_')) {
     keyEl.classList.add('is-folder');
   } else if (keyData.actionType === 'backtoparent' || keyData.uuid?.includes('backtoparent') || keyData.actionUuid?.includes('backtoparent')) {
@@ -550,17 +554,17 @@ function renderKeyVisualContent(keyEl, keyData, isPreview = false) {
     keyEl.classList.add('is-obs');
   }
 
+  // Preenchimento de Cor Aplicado Estritamente no Display LCD Quadrado
   const bgColor = keyData.bg || keyData.bg_color || keyData.bgColor || '#18181b';
-  keyEl.style.backgroundColor = bgColor;
+  lcdScreen.style.backgroundColor = bgColor;
 
   if (keyData.borderWidth && keyData.borderWidth > 0) {
-    keyEl.style.border = `${keyData.borderWidth}px solid ${keyData.borderColor || '#007aff'}`;
-  } else if (bgColor !== '#18181b' && bgColor !== '#000000' && bgColor !== '#252528') {
-    keyEl.style.border = '1.5px solid rgba(255, 255, 255, 0.16)';
+    lcdScreen.style.border = `${keyData.borderWidth}px solid ${keyData.borderColor || '#007aff'}`;
   } else {
-    keyEl.style.border = '1.5px solid #45454b';
+    lcdScreen.style.border = '1px solid rgba(255, 255, 255, 0.08)';
   }
 
+  // Imagem personalizada
   if (keyData.imagePath) {
     const img = document.createElement('img');
     if (keyData.imageFit === 'contain') {
@@ -569,37 +573,37 @@ function renderKeyVisualContent(keyEl, keyData, isPreview = false) {
       img.className = 'key-inner-bg-cover';
     }
     img.src = '/api/image?path=' + encodeURIComponent(keyData.imagePath);
-    keyEl.appendChild(img);
+    lcdScreen.appendChild(img);
   } else if (keyData.icon || keyData.actionType === 'multiaction' || keyData.actionType === 'obs' || keyData.actionType === 'folder' || keyData.actionType === 'backtoparent') {
     if (keyData.icon === 'arrow-left' || keyData.actionType === 'backtoparent') {
       const wrap = document.createElement('div');
       wrap.className = 'key-inner-icon-svg';
-      wrap.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${keyData.accent || '#007aff'}" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>`;
-      keyEl.appendChild(wrap);
+      wrap.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${keyData.accent || '#007aff'}" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>`;
+      lcdScreen.appendChild(wrap);
     } else if (keyData.icon === 'folder' || keyData.actionType === 'folder') {
       const wrap = document.createElement('div');
       wrap.className = 'key-inner-icon-svg';
-      wrap.innerHTML = `<svg width="26" height="26" viewBox="0 0 24 24" fill="${keyData.accent || '#f59e0b'}"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
-      keyEl.appendChild(wrap);
+      wrap.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="${keyData.accent || '#f59e0b'}"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
+      lcdScreen.appendChild(wrap);
     } else if (keyData.icon === 'multiaction' || keyData.actionType === 'multiaction' || keyData.uuid?.includes('routine')) {
       const wrap = document.createElement('div');
       wrap.className = 'key-inner-icon-svg';
-      wrap.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${keyData.accent || '#a855f7'}" stroke-width="2.5"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>`;
-      keyEl.appendChild(wrap);
+      wrap.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${keyData.accent || '#a855f7'}" stroke-width="2.5"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>`;
+      lcdScreen.appendChild(wrap);
     } else if (keyData.actionType === 'obs' || keyData.uuid?.includes('obsstudio')) {
       const wrap = document.createElement('div');
       wrap.className = 'key-inner-icon-svg';
-      wrap.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${keyData.accent || '#007aff'}" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>`;
-      keyEl.appendChild(wrap);
+      wrap.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${keyData.accent || '#007aff'}" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>`;
+      lcdScreen.appendChild(wrap);
     } else if (keyData.icon && (keyData.icon.startsWith('/') || keyData.icon.startsWith('http') || keyData.icon.includes('.'))) {
       const img = document.createElement('img');
       img.className = 'key-inner-icon-contain';
       img.src = keyData.icon;
-      keyEl.appendChild(img);
+      lcdScreen.appendChild(img);
     }
   }
 
-  // Renderização de Título e Subtítulo idêntica à tela LCD física
+  // Renderização de Título e Subtítulo com Escala Tipográfica 1:1 com o Hardware (100x100)
   if (keyData.showTitle !== false && (keyData.title || keyData.subtitle)) {
     const textWrap = document.createElement('div');
     textWrap.className = 'key-inner-text-wrap';
@@ -610,6 +614,15 @@ function renderKeyVisualContent(keyEl, keyData, isPreview = false) {
     } else {
       textWrap.classList.add('align-middle');
     }
+
+    const scale = 0.66; // Proporção da tela web (66px) em relação à matriz física do LCD (100px)
+    const hwFontSize = parseInt(keyData.fontSize) || 14;
+    const effectiveFontSize = Math.max(7.5, Math.round(hwFontSize * scale * 10) / 10) + 'px';
+    const isBold = !!keyData.bold;
+    const isItalic = !!keyData.italic;
+    const isUnderline = !!keyData.underline;
+    const fontFamily = keyData.fontFamily || 'Helvetica';
+    const textColor = keyData.textColor || '#ffffff';
 
     if (keyData.title) {
       let lines = String(keyData.title).split('\n').filter(l => l.trim().length > 0);
@@ -626,24 +639,26 @@ function renderKeyVisualContent(keyEl, keyData, isPreview = false) {
           const lineEl = document.createElement('span');
           lineEl.className = 'key-inner-title-line';
           lineEl.innerText = lineText;
-          if (keyData.textColor) lineEl.style.color = keyData.textColor;
-          if (keyData.fontFamily) lineEl.style.fontFamily = keyData.fontFamily;
-          if (keyData.bold) lineEl.style.fontWeight = '700';
-          if (keyData.italic) lineEl.style.fontStyle = 'italic';
-          if (keyData.underline) lineEl.style.textDecoration = 'underline';
-          if (keyData.fontSize) lineEl.style.fontSize = (parseInt(keyData.fontSize) || 11) + 'px';
+          lineEl.style.fontSize = effectiveFontSize;
+          lineEl.style.fontFamily = `${fontFamily}, "Helvetica Neue", -apple-system, BlinkMacSystemFont, sans-serif`;
+          lineEl.style.fontWeight = isBold ? '700' : '400';
+          lineEl.style.fontStyle = isItalic ? 'italic' : 'normal';
+          lineEl.style.textDecoration = isUnderline ? 'underline' : 'none';
+          lineEl.style.color = textColor;
+          lineEl.style.textShadow = '1px 1px 0px #000000';
           textWrap.appendChild(lineEl);
         });
       } else {
         const titleEl = document.createElement('span');
         titleEl.className = 'key-inner-title';
         titleEl.innerText = keyData.title;
-        if (keyData.textColor) titleEl.style.color = keyData.textColor;
-        if (keyData.fontFamily) titleEl.style.fontFamily = keyData.fontFamily;
-        if (keyData.bold) titleEl.style.fontWeight = '700';
-        if (keyData.italic) titleEl.style.fontStyle = 'italic';
-        if (keyData.underline) titleEl.style.textDecoration = 'underline';
-        if (keyData.fontSize) titleEl.style.fontSize = (parseInt(keyData.fontSize) || 11) + 'px';
+        titleEl.style.fontSize = effectiveFontSize;
+        titleEl.style.fontFamily = `${fontFamily}, "Helvetica Neue", -apple-system, BlinkMacSystemFont, sans-serif`;
+        titleEl.style.fontWeight = isBold ? '700' : '400';
+        titleEl.style.fontStyle = isItalic ? 'italic' : 'normal';
+        titleEl.style.textDecoration = isUnderline ? 'underline' : 'none';
+        titleEl.style.color = textColor;
+        titleEl.style.textShadow = '1px 1px 0px #000000';
         textWrap.appendChild(titleEl);
       }
     }
@@ -652,11 +667,20 @@ function renderKeyVisualContent(keyEl, keyData, isPreview = false) {
       const subEl = document.createElement('span');
       subEl.className = 'key-inner-subtitle';
       subEl.innerText = keyData.subtitle;
+      const subSize = Math.max(7, Math.round(Math.max(9, hwFontSize - 4) * scale * 10) / 10) + 'px';
+      subEl.style.fontSize = subSize;
+      subEl.style.fontFamily = `${fontFamily}, "Helvetica Neue", -apple-system, BlinkMacSystemFont, sans-serif`;
+      subEl.style.fontWeight = '400';
+      subEl.style.fontStyle = isItalic ? 'italic' : 'normal';
+      subEl.style.color = '#a1a1aa';
+      subEl.style.textShadow = '1px 1px 0px #000000';
       textWrap.appendChild(subEl);
     }
 
-    keyEl.appendChild(textWrap);
+    lcdScreen.appendChild(textWrap);
   }
+
+  keyEl.appendChild(lcdScreen);
 
   // Se for o preview do Inspector, adiciona o badge de edição oficial de engrenagem
   if (isPreview) {
@@ -1002,6 +1026,11 @@ function deleteKey(slot) {
 
   // Sincroniza apagamento físico no hardware Fifine D6 (data: null)
   syncKeyToHardware(slot, null);
+  fetch('/api/key/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ page: state.activeProfile, key: slot + 1 })
+  }).catch(() => {});
 
   // Re-renderiza a grade de teclas
   renderDeckGrid();
@@ -1019,6 +1048,28 @@ function deleteKey(slot) {
   }
 
   showToast(`✓ Tecla ${slot + 1} limpa com sucesso`);
+}
+
+// Purgar Cache & Fantasmas no App e no Hardware Físico
+async function purgeAppAndHardwareCache() {
+  try {
+    showToast('⚡ Purgando cache e limpando slots fantasmas...');
+    const res = await fetch('/api/cache/purge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ page: state.activeProfile })
+    });
+    if (res.ok) {
+      await loadServerState(false);
+      renderDeckGrid();
+      if (state.selectedSlot !== null && state.selectedSlot !== undefined) {
+        selectKey(state.selectedSlot);
+      }
+      showToast('✓ Cache purgado e hardware sincronizado 100% limpo!');
+    }
+  } catch (err) {
+    showToast('Erro ao purgar cache: ' + err.message);
+  }
 }
 
 // Exibe menu de contexto flutuante com botão direito
@@ -2855,6 +2906,15 @@ function bindEvents() {
       optLink.onclick = () => {
         sceneMenu.style.display = 'none';
         openLinkAppModal(state.activeProfile);
+      };
+    }
+
+    // Purgar Cache & Fantasmas
+    const optPurge = document.getElementById('sceneMenuPurgeCache');
+    if (optPurge) {
+      optPurge.onclick = () => {
+        sceneMenu.style.display = 'none';
+        purgeAppAndHardwareCache();
       };
     }
 

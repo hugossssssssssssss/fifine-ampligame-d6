@@ -933,44 +933,43 @@ html, body {
   width: 86px;
   height: 86px;
   aspect-ratio: 1 / 1;
-  background: var(--bg-key, #252528);
-  border-radius: 16px;
-  border: 1.5px solid #45454b;
+  background: #141417;
+  border-radius: 12px;
+  border: 1.5px solid #3a3a40;
   position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.12s ease, border-color 0.12s ease, filter 0.12s ease;
   overflow: hidden;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.22);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.15);
   user-select: none;
 }
 
-/* Reflexo de acrílico translúcido de tecla física de Stream Deck sobre o display LCD */
+/* Lente de acrílico translúcido chanfrado da tecla física sobreposta ao display LCD */
 .deck-key-slot::before {
   content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 42%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.03) 60%, rgba(255, 255, 255, 0) 100%);
-  border-radius: 14px 14px 0 0;
+  height: 38%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.04) 65%, rgba(255, 255, 255, 0) 100%);
+  border-radius: 10px 10px 0 0;
   pointer-events: none;
-  z-index: 5;
+  z-index: 10;
 }
 
 .deck-key-slot:hover {
-  border-color: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.4);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.25);
 }
 
 .deck-key-slot.selected {
-  border: 2.5px solid #007aff !important;
-  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.45), 0 8px 24px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+  border: 2px solid #007aff !important;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.5), 0 8px 24px rgba(0, 0, 0, 0.65), inset 0 1px 2px rgba(255, 255, 255, 0.25) !important;
   transform: translateY(-1px);
 }
 
@@ -978,17 +977,37 @@ html, body {
 .deck-key-slot:active,
 .deck-key-slot.is-pressed {
   transform: scale(0.93) translateY(2px) !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7), inset 0 3px 8px rgba(0, 0, 0, 0.6) !important;
-  filter: brightness(0.9);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), inset 0 3px 8px rgba(0, 0, 0, 0.7) !important;
+  filter: brightness(0.92);
   transition: transform 0.08s cubic-bezier(0.2, 0.9, 0.3, 1.2), box-shadow 0.08s ease, filter 0.08s ease !important;
 }
 
 .deck-key-slot.selected:active,
 .deck-key-slot.selected.is-pressed {
   transform: scale(0.93) translateY(2px) !important;
-  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.5), inset 0 3px 8px rgba(0, 0, 0, 0.6) !important;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.5), inset 0 3px 8px rgba(0, 0, 0, 0.7) !important;
   border-color: #007aff !important;
   transition: transform 0.08s cubic-bezier(0.2, 0.9, 0.3, 1.2), box-shadow 0.08s ease, filter 0.08s ease !important;
+}
+
+/* VISOR LCD FÍSICO INTERNO (100% QUADRADO, Matriz 1:1, com Bezel/Moldura Real) */
+.key-lcd-screen {
+  width: 66px;
+  height: 66px;
+  aspect-ratio: 1 / 1;
+  background-color: #000000;
+  border-radius: 1.5px;
+  outline: 1px solid rgba(255, 255, 255, 0.08);
+  outline-offset: -1px;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.85), 0 0 2px rgba(0, 0, 0, 0.7);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: background-color 0.15s ease;
 }
 
 .key-inner-bg-cover {
@@ -998,12 +1017,12 @@ html, body {
   height: 100%;
   object-fit: cover;
   z-index: 1;
-  border-radius: inherit;
+  border-radius: 1px;
 }
 
 .key-inner-icon-contain {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
   margin-bottom: 2px;
   z-index: 2;
@@ -1013,14 +1032,14 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
   z-index: 2;
 }
 
 .key-inner-text-wrap {
   position: absolute;
-  left: 4px;
-  right: 4px;
+  left: 3px;
+  right: 3px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1031,7 +1050,7 @@ html, body {
 }
 
 .key-inner-text-wrap.align-top {
-  top: 7px;
+  top: 5px;
   bottom: auto;
 }
 
@@ -1041,33 +1060,42 @@ html, body {
 }
 
 .key-inner-text-wrap.align-bottom {
-  bottom: 7px;
+  bottom: 5px;
   top: auto;
 }
 
+/* Tipografia Fiel ao Motor PIL do macOS (Helvetica / Helvetica Neue) */
 .key-inner-title,
 .key-inner-title-line {
-  font-size: 11.5px;
-  font-weight: 700;
+  font-family: Helvetica, "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 9.5px;
+  font-weight: 400;
   color: #ffffff;
-  line-height: 1.18;
+  line-height: 1.15;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
   display: block;
   text-align: center;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 2px #000;
-  letter-spacing: 0.02em;
+  text-shadow: 1px 1px 0px #000000;
+  letter-spacing: 0;
 }
 
 .key-inner-subtitle {
-  font-size: 9.5px;
-  font-weight: 500;
+  font-family: Helvetica, "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 7.8px;
+  font-weight: 400;
   color: #a1a1aa;
   line-height: 1.15;
-  margin-top: 2px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 0 1px #000;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
+  text-align: center;
+  text-shadow: 1px 1px 0px #000000;
 }
 
 .key-bg-fill {
@@ -1470,38 +1498,37 @@ html, body {
   width: 86px;
   height: 86px;
   aspect-ratio: 1 / 1;
-  background: var(--bg-key, #252528);
-  border-radius: 16px;
-  border: 1.5px solid #45454b;
+  background: #141417;
+  border-radius: 12px;
+  border: 1.5px solid #3a3a40;
   position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.22);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.15);
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
   user-select: none;
 }
 
-/* Reflexo de acrílico translúcido idêntico à tecla da mesa */
+/* Reflexo de acrílico translúcido idêntico à tecla física da mesa */
 .key-preview-card::before {
   content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 42%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.03) 60%, rgba(255, 255, 255, 0) 100%);
-  border-radius: 14px 14px 0 0;
+  height: 38%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.04) 65%, rgba(255, 255, 255, 0) 100%);
+  border-radius: 10px 10px 0 0;
   pointer-events: none;
-  z-index: 5;
+  z-index: 10;
 }
 
 .key-preview-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.28);
-  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 /* Selo / Botão de Edição de Imagem da Tecla Oficial Fifine */

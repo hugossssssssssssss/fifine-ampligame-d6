@@ -57,12 +57,28 @@ def register_keys_routes(router: Router):
 
         if page in engine.config.get("pages", {}):
             if key_data is None:
-                if key_num in engine.config["pages"][page].get("keys", {}):
-                    del engine.config["pages"][page]["keys"][key_num]
+                page_keys = engine.config["pages"][page].get("keys", {})
+                page_keys.pop(str(key_num), None)
+                try:
+                    page_keys.pop(int(key_num), None)
+                except Exception:
+                    pass
+                try:
+                    slot_int = int(key_num)
+                    hw_key = engine.get_hw_key_for_slot(slot_int)
+                    engine._displayed_key_hashes.pop(hw_key, None)
+                    engine.sync_key(slot_int, force=True, page_id=page)
+                except Exception as e:
+                    print(f"[Server] Erro ao limpar tecla física {key_num}: {e}")
             else:
                 if "keys" not in engine.config["pages"][page]:
                     engine.config["pages"][page]["keys"] = {}
                 engine.config["pages"][page]["keys"][key_num] = key_data
+                try:
+                    slot_int = int(key_num)
+                    engine.sync_key(slot_int, force=True, page_id=page)
+                except Exception as e:
+                    print(f"[Server] Erro ao sincronizar tecla {key_num}: {e}")
 
             # Se o usuário está editando teclas desta página na Web UI, garante que ela é a página ativa no Stream Deck
             engine.config["active_page"] = page
@@ -70,12 +86,29 @@ def register_keys_routes(router: Router):
             engine._auto_switched = False
             engine.save_config()
 
+            router.send_json(handler, 200, {"success": True, "page": page, "key": key_num})
+        else:
+            router.send_json(handler, 400, {"success": False, "error": "Página não encontrada"})
+
+    @router.post("/api/key/delete")
+    def delete_key_endpoint(handler, engine, body):
+        page = body.get("page", engine.config.get("active_page", "principal"))
+        key_num = str(body.get("key"))
+        if page in engine.config.get("pages", {}):
+            page_keys = engine.config["pages"][page].get("keys", {})
+            page_keys.pop(str(key_num), None)
+            try:
+                page_keys.pop(int(key_num), None)
+            except Exception:
+                pass
+            engine.save_config()
             try:
                 slot_int = int(key_num)
+                hw_key = engine.get_hw_key_for_slot(slot_int)
+                engine._displayed_key_hashes.pop(hw_key, None)
                 engine.sync_key(slot_int, force=True, page_id=page)
             except Exception as e:
-                print(f"[Server] Erro ao sincronizar tecla {key_num}: {e}")
-
+                print(f"[Server] Erro ao limpar tecla física {key_num}: {e}")
             router.send_json(handler, 200, {"success": True, "page": page, "key": key_num})
         else:
             router.send_json(handler, 400, {"success": False, "error": "Página não encontrada"})

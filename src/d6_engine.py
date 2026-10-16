@@ -952,26 +952,50 @@ class D6Engine:
                 (False, True): "/System/Library/Fonts/Supplemental/Times New Roman Italic.ttf",
             },
             "menlo": {
-                (False, False): "/System/Library/Fonts/Menlo.ttc",
+                (False, False): ("/System/Library/Fonts/Menlo.ttc", 0),
+                (True, False): ("/System/Library/Fonts/Menlo.ttc", 1),
+                (False, True): ("/System/Library/Fonts/Menlo.ttc", 2),
+                (True, True): ("/System/Library/Fonts/Menlo.ttc", 3),
             },
             "comic sans ms": {
                 (False, False): "/System/Library/Fonts/Supplemental/Comic Sans MS.ttf",
                 (True, False): "/System/Library/Fonts/Supplemental/Comic Sans MS Bold.ttf",
             },
             "helvetica": {
-                (False, False): "/System/Library/Fonts/Helvetica.ttc",
+                (False, False): ("/System/Library/Fonts/Helvetica.ttc", 0),
+                (True, False): ("/System/Library/Fonts/Helvetica.ttc", 1),
+                (False, True): ("/System/Library/Fonts/Helvetica.ttc", 2),
+                (True, True): ("/System/Library/Fonts/Helvetica.ttc", 3),
+            },
+            "helvetica neue": {
+                (False, False): ("/System/Library/Fonts/HelveticaNeue.ttc", 0),
+                (True, False): ("/System/Library/Fonts/HelveticaNeue.ttc", 1),
+                (False, True): ("/System/Library/Fonts/HelveticaNeue.ttc", 2),
+                (True, True): ("/System/Library/Fonts/HelveticaNeue.ttc", 3),
             }
         }
         key = (bool(bold), bool(italic))
         fam_key = str(family or "helvetica").strip().lower()
         variants = f_map.get(fam_key, f_map["helvetica"])
-        font_path = variants.get(key) or variants.get((bold, False)) or variants.get((False, False)) or "/System/Library/Fonts/Helvetica.ttc"
+        font_val = variants.get(key) or variants.get((bold, False)) or variants.get((False, False)) or ("/System/Library/Fonts/Helvetica.ttc", 1 if bold else 0)
+        
+        if isinstance(font_val, tuple):
+            font_path, font_index = font_val
+        else:
+            font_path, font_index = str(font_val), (1 if bold else 0) if str(font_val).endswith(".ttc") else 0
+
         if not os.path.exists(font_path):
             font_path = "/System/Library/Fonts/Helvetica.ttc"
+            font_index = 1 if bold else 0
         try:
+            if font_path.endswith(".ttc"):
+                return ImageFont.truetype(font_path, size, index=font_index)
             return ImageFont.truetype(font_path, size)
         except Exception:
-            return ImageFont.load_default()
+            try:
+                return ImageFont.truetype(font_path, size)
+            except Exception:
+                return ImageFont.load_default()
 
     def render_key_image(self, key_data: Dict[str, Any], is_pressed: bool = False) -> Image.Image:
         """Gera a imagem de uma tecla LCD com tipografia rica e micro-animação de pressão tátil."""

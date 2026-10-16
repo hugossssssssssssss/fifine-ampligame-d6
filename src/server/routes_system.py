@@ -13,14 +13,6 @@ def register_system_routes(router: Router):
 
     @router.get("/api/state")
     def get_state(handler, engine, query):
-        now = time.time()
-        if now - getattr(engine, "_last_profile_sync_ts", 0) > 30.0:
-            engine._last_profile_sync_ts = now
-            try:
-                engine.sync_with_native_profiles()
-            except Exception as e:
-                print(f"[Server] Erro no sync de perfis: {e}")
-
         data = {
             "connected": engine.is_connected(),
             "brightness": engine.config.get("brightness", 80),
@@ -147,3 +139,39 @@ def register_system_routes(router: Router):
         engine.config["auto_switch_enabled"] = enabled
         engine.save_config()
         router.send_json(handler, 200, {"success": True, "auto_switch_enabled": enabled})
+
+    @router.post("/api/cache/purge")
+    def purge_cache(handler, engine, body):
+        """Limpa teclas vazias/fantasmas em todas as páginas e força o hardware a desligar teclas vazias."""
+        active_page = engine.config.get("active_page", "principal")
+        pages = engine.config.get("pages", {})
+        for p_id, p_data in pages.items():
+            if "keys" in p_data:
+                clean_keys = {}
+                for k, v in list(p_data["keys"].items()):
+                    if v and isinstance(v, dict):
+                        has_title = bool(str(v.get("title", "")).strip())
+                        has_img = bool(str(v.get("imagePath", "")).strip())
+                        act = v.get("action", {})
+                        has_act = bool(act and (act.get("type") or act.get("target") or act.get("uuid")))
+                        has_bg = bool(v.get("bg") and v.get("bg") not in ("#18181b", "#000000", "#252528"))
+                        if has_title or has_img or has_act or has_bg:
+                            clean_keys[k] = v
+                p_data["keys"] = clean_keys
+        
+        engine._displayed_key_hashes.clear()
+        engine.save_config()
+
+        if engine.device:
+            for s in range(1, 16):
+                try:
+                    engine.sync_key(s, force=True, page_id=active_page, refresh_now=False)
+                except Exception:
+                    pass
+            if hasattr(engine.device, "refresh"):
+                try:
+                    engine.device.refresh()
+                except Exception:
+                    pass
+
+        router.send_json(handler, 200, {"success": True, "pages": engine.config.get("pages", {})})

@@ -38,41 +38,6 @@ def register_keys_routes(router: Router):
             handler.send_response(404)
             handler.end_headers()
 
-    @router.get("/api/icons/library")
-    def get_icons_library(handler, engine, query):
-        base_app = Path("/Applications/fifine Control Deck.app/Contents/Resources")
-        icons_dir = base_app / "icons"
-        user_images = Path.home() / "Library" / "Application Support" / "HotSpot" / "StreamDock" / "images" / "appsImage"
-
-        categories = []
-
-        if user_images.exists():
-            app_icons = []
-            for img in sorted(user_images.glob("*.jpg"))[:120]:
-                if not img.name.endswith("_grey.jpg"):
-                    app_icons.append({
-                        "name": img.stem[:12],
-                        "path": str(img),
-                        "url": f"/api/image?path={urllib.parse.quote(str(img))}"
-                    })
-            if app_icons:
-                categories.append({"id": "apps", "name": "Aplicativos & Ferramentas", "icons": app_icons})
-
-        if icons_dir.exists():
-            for pack in icons_dir.glob("*.sdIconPack"):
-                pack_name = "Controlador Windows" if "Windows" in pack.name else "Música & Mídia"
-                pack_icons = []
-                for ext in ("*.png", "*.jpg", "*.svg"):
-                    for img in sorted(pack.rglob(ext)):
-                        pack_icons.append({
-                            "name": img.stem,
-                            "path": str(img),
-                            "url": f"/api/image?path={urllib.parse.quote(str(img))}"
-                        })
-                if pack_icons:
-                    categories.append({"id": pack.stem, "name": pack_name, "icons": pack_icons})
-
-        router.send_json(handler, 200, categories)
 
     @router.get("/api/icon_packs")
     def get_icon_packs(handler, engine, query):

@@ -202,11 +202,6 @@ export async function apiObsAction(action, data = {}) {
   return await res.json();
 }
 
-export async function apiGetIconLibrary() {
-  const res = await fetch('/api/icons/library');
-  return await res.json();
-}
-
 export async function apiUploadImage(filename, base64Data) {
   const res = await fetch('/api/upload_image', {
     method: 'POST',

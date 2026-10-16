@@ -272,7 +272,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadServerState();
   bindEvents();
   initObsSettings();
-  initIconLibraryModal();
   initWallpaperMuralModal();
 
   // Polling a cada 3.5 segundos para refletir novas cenas criadas fora da janela e telemetria OBS
@@ -3867,117 +3866,7 @@ function initObsSettings() {
   });
 }
 
-// ================= MODAL: BIBLIOTECA DE ÍCONES OFICIAL FIFINE =================
-let cachedIconLibrary = null;
 
-function initIconLibraryModal() {
-  const modal = document.getElementById('modalIconLibrary');
-  const btnOpen = document.getElementById('btnOpenIconLibrary');
-  const btnClose = document.getElementById('btnCloseIconLibrary');
-  const searchInput = document.getElementById('searchIconLibrary');
-  const grid = document.getElementById('iconLibraryGrid');
-  const countEl = document.getElementById('iconLibCount');
-  let currentCategory = 'all';
-
-  if (!modal || !btnOpen) return;
-
-  btnOpen.onclick = async () => {
-    modal.style.display = 'flex';
-    if (!cachedIconLibrary) {
-      grid.innerHTML = '<div style="padding: 20px; color: var(--text-muted); font-size: 12px;">Carregando ícones oficiais...</div>';
-      try {
-        const res = await fetch('/api/icons/library');
-        const data = await res.json();
-        cachedIconLibrary = [];
-        (data || []).forEach(cat => {
-          const catId = (cat.id || '').toLowerCase();
-          const mappedCat = catId.includes('app') ? 'apps' : (catId.includes('music') ? 'media' : 'system');
-          (cat.icons || []).forEach(ico => {
-            cachedIconLibrary.push({
-              name: ico.name,
-              path: ico.path,
-              url: ico.url,
-              category: mappedCat,
-              catName: cat.name
-            });
-          });
-        });
-      } catch (err) {
-        grid.innerHTML = '<div style="padding: 20px; color: var(--accent-red); font-size: 12px;">Erro ao carregar ícones oficiais.</div>';
-        return;
-      }
-    }
-    renderFilteredIcons();
-  };
-
-  const closeModal = () => { modal.style.display = 'none'; };
-  if (btnClose) btnClose.onclick = closeModal;
-  modal.onclick = (e) => { if (e.target === modal) closeModal(); };
-
-  function renderFilteredIcons() {
-    if (!cachedIconLibrary) return;
-    const query = (searchInput?.value || '').toLowerCase().trim();
-    const filtered = cachedIconLibrary.filter(item => {
-      const matchCat = (currentCategory === 'all') || (item.category === currentCategory);
-      const matchQuery = !query || item.name.toLowerCase().includes(query);
-      return matchCat && matchQuery;
-    });
-
-    if (countEl) countEl.innerText = `${filtered.length} ícones encontrados`;
-    grid.innerHTML = '';
-
-    if (filtered.length === 0) {
-      grid.innerHTML = '<div style="grid-column: 1 / -1; padding: 30px; text-align: center; color: var(--text-muted); font-size: 12px;">Nenhum ícone encontrado com este termo.</div>';
-      return;
-    }
-
-    filtered.forEach(icon => {
-      const card = document.createElement('div');
-      card.className = 'icon-card';
-      card.title = icon.name;
-      card.innerHTML = `
-        <img src="/api/image?path=${encodeURIComponent(icon.path)}" alt="${icon.name}" loading="lazy">
-        <span class="icon-card-name">${icon.name}</span>
-      `;
-      card.onclick = () => {
-        const profile = state.profiles[state.activeProfile];
-        if (!profile) return;
-        if (!profile.keys) profile.keys = {};
-        if (!profile.keys[state.selectedSlot]) {
-          profile.keys[state.selectedSlot] = {
-            title: icon.name,
-            bg: '#18181b',
-            actionType: 'none'
-          };
-        }
-        const keyData = profile.keys[state.selectedSlot];
-        keyData.imagePath = icon.path;
-        renderDeckGrid();
-        selectKey(state.selectedSlot);
-        syncKeyToHardware(state.selectedSlot, keyData);
-        closeModal();
-        showToast(`✓ Ícone "${icon.name}" aplicado à tecla ${state.selectedSlot + 1}`);
-      };
-      grid.appendChild(card);
-    });
-  }
-
-  if (searchInput) {
-    searchInput.oninput = () => renderFilteredIcons();
-  }
-
-  const catTabs = document.getElementById('iconLibCategoryTabs');
-  if (catTabs) {
-    catTabs.querySelectorAll('.btn-mode-pill').forEach(btn => {
-      btn.onclick = () => {
-        catTabs.querySelectorAll('.btn-mode-pill').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentCategory = btn.dataset.cat || 'all';
-        renderFilteredIcons();
-      };
-    });
-  }
-}
 
 // ================= MODAL: MURAL 3x5 (PAPEL DE PAREDE CONTÍNUO) =================
 function initWallpaperMuralModal() {

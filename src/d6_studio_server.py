@@ -82,7 +82,7 @@ def run_studio(auto_open: bool = True):
     connected = engine.connect()
     if connected:
         engine.sync_all_keys()
-        engine.start_background_telemetry()
+    engine.start_background_telemetry()
 
     StudioHandler.engine = engine
     server = FastThreadingHTTPServer(("127.0.0.1", PORT), StudioHandler)

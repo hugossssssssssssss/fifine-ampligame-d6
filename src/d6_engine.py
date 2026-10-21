@@ -1809,6 +1809,16 @@ class D6Engine:
                 try:
                     now = time.time()
 
+                    # Hotplug / Auto-Reconnect: if not connected, attempt reconnection every 2.0s
+                    if not self.is_connected():
+                        if now - getattr(self, "_last_reconnect_attempt", 0) >= 2.0:
+                            self._last_reconnect_attempt = now
+                            if self.connect():
+                                print("[Engine] Hotplug detectado: AmpliGame D6 conectado com sucesso!")
+                                self.sync_all_keys(force=True)
+                        time.sleep(1.0)
+                        continue
+
                     # 0. LED Seguir Modo de Suspensão do macOS (a cada 3.0s)
                     if now - getattr(self, "_last_sleep_check_time", 0) >= 3.0:
                         self._last_sleep_check_time = now

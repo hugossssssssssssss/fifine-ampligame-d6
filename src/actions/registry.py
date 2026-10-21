@@ -16,7 +16,7 @@ from .system_action import (
     CloseWindowCommand, CloseAppCommand, MinimizeWindowCommand,
     FullscreenToggleCommand, LockScreenCommand, ShowDesktopCommand,
     LaunchpadCommand, MissionControlCommand, SiriCommand, ScreenshotCommand,
-    EmoticonsCommand, TextInputCommand, ShellCommand
+    EmoticonsCommand, TextInputCommand, ShellCommand, MouseEventCommand
 )
 from .navigation_action import NavigationCommand
 from .device_action import BrightnessCommand, SleepDeviceCommand, ToggleStateCommand
@@ -42,6 +42,7 @@ class ActionRegistry:
         nav_cmd = NavigationCommand()
         obs_cmd = OBSActionCommand()
         macro_cmd = MacroCommand()
+        mouse_cmd = MouseEventCommand()
 
         cls._commands = {
             # Aplicativos e URLs
@@ -123,11 +124,18 @@ class ActionRegistry:
             "openchild": nav_cmd,
             "backtoparent": nav_cmd,
             "folder": nav_cmd,
+            "page.goto": nav_cmd,
+            "page.previous": nav_cmd,
+            "page.next": nav_cmd,
+            "page.indicator": nav_cmd,
 
-            # Hardware
+            # Hardware & Utilitários
             "brightness": BrightnessCommand(),
             "devsleep": SleepDeviceCommand(),
             "sleep": SleepDeviceCommand(),
+            "mouse": mouse_cmd,
+            "mouse.event": mouse_cmd,
+            "password": text_cmd,
 
             # Soundboard
             "soundboard": SoundboardPlayCommand(),
@@ -157,27 +165,49 @@ class ActionRegistry:
         if key in cls._commands:
             return cls._commands[key]
 
-        # 2. Resoluções por palavras-chave
+        # 2. Resoluções por palavras-chave com ordem estrita de precedência
+
+        # A) OBS & Macros
         if any(k in key for k in ("multiaction", "routine", "macro")):
             return cls._commands["multiaction"]
         if any(k in key for k in ("obsstudio", "obs_", "obs.")):
             return cls._commands["obs"]
-        if any(k in key for k in ("openchild", "backtoparent", "rotate", "folder")):
-            return cls._commands["page"]
+
+        # B) Soundboard: parar áudio DEVE ser testado ANTES de playaudio (stopaudioplay contém soundboard)
+        if any(k in key for k in ("stopaudioplay", "stop_audio", "stopaudio")):
+            return cls._commands["stopaudioplay"]
         if any(k in key for k in ("soundboard", "playaudio", "audioplay")):
             return cls._commands["playaudio"]
-        if any(k in key for k in ("stopaudioplay", "stop_audio")):
-            return cls._commands["stopaudioplay"]
+
+        # C) Navegação de Páginas e Pastas: DEVE vir ANTES de mídias (page.previous e page.next contêm prev e next)
+        if any(k in key for k in ("openchild", "backtoparent", "rotate", "folder")) or (
+            ("page." in key or "page_" in key) and any(p in key for p in ("prev", "next", "goto", "indicator", "previous"))
+        ):
+            return cls._commands["page"]
+
+        # D) Abrir Apps e URLs
         if any(k in key for k in ("open", "openapps", "open_app")):
             return cls._commands["open"]
         if any(k in key for k in ("website", "url")):
             return cls._commands["website"]
+
+        # E) Entrada de Texto, Teclado e Senha
         if any(k in key for k in ("hotkey", "hotkeyswitch")):
             return cls._commands["hotkey"]
+        if "password" in key:
+            return cls._commands["password"]
+        if "text" in key:
+            return cls._commands["text"]
+        if "shell" in key:
+            return cls._commands["shell"]
+
+        # F) Teclas de Mídia (volumeup, volumedown, mute, play, next, prev)
         if any(k in key for k in ("volumeup", "volumedown", "mute", "play", "next", "prev")):
             for k in ("volumeup", "volumedown", "mute", "play", "next", "prev"):
                 if k in key:
                     return cls._commands[k]
+
+        # G) Janelas e Sistema macOS
         if "close" in key and "window" in key:
             return cls._commands["close_window"]
         if "close" in key:
@@ -194,10 +224,20 @@ class ActionRegistry:
             return cls._commands["screenshot"]
         if "siri" in key:
             return cls._commands["siri"]
-        if "shell" in key:
-            return cls._commands["shell"]
-        if "text" in key:
-            return cls._commands["text"]
+        if any(k in key for k in ("dispatchcenter", "dispatch", "mission")):
+            return cls._commands["dispatchcenter"]
+        if "launchpad" in key:
+            return cls._commands["launchpad"]
+
+        # H) Hardware e Mouse
+        if "brightness" in key:
+            return cls._commands["brightness"]
+        if any(k in key for k in ("devsleep", "sleep")):
+            return cls._commands["devsleep"]
+        if any(k in key for k in ("mouse.event", "mouse")):
+            return cls._commands["mouse.event"]
+        if "toggle" in key:
+            return cls._commands["toggle"]
 
         return None
 

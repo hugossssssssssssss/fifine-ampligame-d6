@@ -1035,6 +1035,20 @@ class D6Engine:
         border_width = int(key_data.get("borderWidth", 0))
         image_fit = str(key_data.get("imageFit", "cover")).lower()
         custom_image = key_data.get("imagePath", None)
+        if not custom_image:
+            act_obj = key_data.get("action", {})
+            act_uuid = str(act_obj.get("uuid") or key_data.get("uuid") or act_obj.get("type") or "").strip()
+            if act_uuid:
+                for cand in (
+                    f"assets/native_icons/{act_uuid}_btn.jpg",
+                    f"assets/native_icons/{act_uuid}_btn.png",
+                    f"assets/native_icons/{act_uuid}_icon.png",
+                    f"assets/native_icons/{act_uuid}_icon.jpg",
+                ):
+                    studio_cand = os.path.join(os.path.dirname(__file__), "studio", cand)
+                    if os.path.exists(studio_cand):
+                        custom_image = studio_cand
+                        break
 
         if custom_image:
             cand_path = custom_image

@@ -798,7 +798,7 @@ function renderDeckGrid() {
   const activeKeys = currentProfile?.keys || {};
 
   for (let slot = 0; slot < 15; slot++) {
-    const keyData = activeKeys[slot] !== undefined ? activeKeys[slot] : (activeKeys[slot + 1] !== undefined ? activeKeys[slot + 1] : activeKeys[String(slot + 1)]);
+    const keyData = activeKeys[slot] !== undefined ? activeKeys[slot] : (activeKeys[String(slot)] !== undefined ? activeKeys[String(slot)] : null);
     const keyEl = document.createElement('div');
     keyEl.className = `deck-key-slot ${slot === state.selectedSlot ? 'selected' : ''}`;
     keyEl.dataset.slot = slot;
@@ -1003,8 +1003,6 @@ function getKeyData(profileId, slot) {
   const k = profile.keys;
   if (k[slot] !== undefined) return k[slot];
   if (k[String(slot)] !== undefined) return k[String(slot)];
-  if (k[slot + 1] !== undefined) return k[slot + 1];
-  if (k[String(slot + 1)] !== undefined) return k[String(slot + 1)];
   return null;
 }
 
@@ -1203,7 +1201,7 @@ function selectKey(slot) {
   });
 
   const activeKeys = state.profiles[state.activeProfile]?.keys || {};
-  let keyData = activeKeys[slot] !== undefined ? activeKeys[slot] : (activeKeys[slot + 1] !== undefined ? activeKeys[slot + 1] : activeKeys[String(slot + 1)]);
+  let keyData = activeKeys[slot] !== undefined ? activeKeys[slot] : (activeKeys[String(slot)] !== undefined ? activeKeys[String(slot)] : null);
 
   const emptyState = document.getElementById('inspectorEmptyState');
   const activeContent = document.getElementById('inspectorActiveContent');
@@ -1600,7 +1598,7 @@ function assignActionToSlot(slot, action) {
     pressEnter: false,
     useClipboard: true,
     icon: action.icon || '',
-    imagePath: '',
+    imagePath: action.imagePath || (action.uuid ? `assets/native_icons/${action.uuid}_btn.jpg` : ''),
     path: '',
     hotkey: '',
     url: ''

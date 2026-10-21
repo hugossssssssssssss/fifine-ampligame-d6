@@ -34,12 +34,23 @@ class NavigationCommand(ActionCommand):
 
         # 3. Próxima / Anterior / Rotação
         keys = list(engine.config.get("pages", {}).keys())
-        if tgt == "next" or "rotate" in act_type:
-            cur_idx = keys.index(engine.config.get("active_page", "principal")) if engine.config.get("active_page") in keys else 0
+        if not keys:
+            return False
+
+        cur_idx = keys.index(engine.config.get("active_page", "principal")) if engine.config.get("active_page") in keys else 0
+
+        if tgt == "next" or "rotate" in act_type or "page.next" in act_type or action.uuid.endswith(".next"):
             tgt = keys[(cur_idx + 1) % len(keys)]
-        elif tgt == "previous":
-            cur_idx = keys.index(engine.config.get("active_page", "principal")) if engine.config.get("active_page") in keys else 0
+        elif tgt == "previous" or "page.previous" in act_type or action.uuid.endswith(".previous"):
             tgt = keys[(cur_idx - 1) % len(keys)]
+        elif "goto" in act_type or action.uuid.endswith(".goto"):
+            if tgt and tgt in engine.config.get("pages", {}):
+                engine.change_page(tgt)
+                return True
+        elif "indicator" in act_type or action.uuid.endswith(".indicator"):
+            # Informational indicator - refresh keys
+            engine.sync_all_keys()
+            return True
 
         if tgt and tgt in engine.config.get("pages", {}):
             engine.change_page(tgt)

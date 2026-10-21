@@ -93,11 +93,49 @@ class TextInputCommand(ActionCommand):
             escaped = txt.replace('\\', '\\\\').replace('"', '\\"')
             subprocess.run(["osascript", "-e", f'tell application "System Events" to keystroke "{escaped}"'], timeout=2)
 
-        if action.enter:
-            time.sleep(0.05)
-            subprocess.run(["osascript", "-e", 'tell application "System Events" to key code 36'], timeout=2)
-
         return True
+
+
+class MouseEventCommand(ActionCommand):
+    """Executa evento de clique do mouse no macOS na posição atual do cursor."""
+
+    def execute(self, action: ActionModel, slot: Optional[int] = None, engine: Any = None) -> bool:
+        btn = (action.target or action.type or "left").lower()
+        try:
+            import ctypes, ctypes.util
+            cg_path = ctypes.util.find_library("CoreGraphics")
+            if not cg_path:
+                raise RuntimeError("CoreGraphics library not found")
+            cg = ctypes.cdll.LoadLibrary(cg_path)
+
+            class CGPoint(ctypes.Structure):
+                _fields_ = [("x", ctypes.c_double), ("y", ctypes.c_double)]
+
+            cg.CGEventCreate.restype = ctypes.c_void_p
+            cg.CGEventGetLocation.restype = CGPoint
+            cg.CGEventGetLocation.argtypes = [ctypes.c_void_p]
+            cg.CGEventCreateMouseEvent.restype = ctypes.c_void_p
+            cg.CGEventCreateMouseEvent.argtypes = [ctypes.c_void_p, ctypes.c_uint32, CGPoint, ctypes.c_uint32]
+            cg.CGEventPost.argtypes = [ctypes.c_uint32, ctypes.c_void_p]
+
+            ev = cg.CGEventCreate(None)
+            pos = cg.CGEventGetLocation(ev)
+
+            # kCGEventLeftMouseDown = 1, kCGEventLeftMouseUp = 2
+            # kCGEventRightMouseDown = 3, kCGEventRightMouseUp = 4
+            if "right" in btn:
+                down = cg.CGEventCreateMouseEvent(None, 3, pos, 1)
+                up = cg.CGEventCreateMouseEvent(None, 4, pos, 1)
+            else:
+                down = cg.CGEventCreateMouseEvent(None, 1, pos, 0)
+                up = cg.CGEventCreateMouseEvent(None, 2, pos, 0)
+
+            cg.CGEventPost(0, down)  # kCGHIDEventTap = 0
+            cg.CGEventPost(0, up)
+            return True
+        except Exception:
+            subprocess.run(["osascript", "-e", 'tell application "System Events" to click'], timeout=2)
+            return True
 
 
 class ShellCommand(ActionCommand):

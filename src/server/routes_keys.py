@@ -16,6 +16,10 @@ def register_keys_routes(router: Router):
     @router.get("/api/image")
     def serve_image(handler, engine, query):
         img_path = query.get("path", [""])[0]
+        if img_path and not os.path.isabs(img_path):
+            cand = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "studio", img_path))
+            if os.path.exists(cand):
+                img_path = cand
         if img_path and os.path.exists(img_path) and os.path.isfile(img_path):
             ext = Path(img_path).suffix.lower()
             mime = "image/png"

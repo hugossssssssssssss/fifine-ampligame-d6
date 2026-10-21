@@ -477,13 +477,13 @@ class D6Engine:
                         name = p_dir.stem
 
                 # Identificador limpo e determinístico
-                if parent_dir:
-                    key_id = f"pasta_{p_dir.stem[:8].lower()}"
-                else:
-                    norm = name.lower().replace(" ", "_").replace("ã", "a").replace("á", "a")
-                    key_id = "principal" if norm == "cena_padrao" else norm
+                # Se a página foi explicitamente excluída pelo usuário, não ressuscite
+                deleted_pages = config.get("deleted_pages", [])
+                if key_id in deleted_pages or p_dir.name in deleted_pages:
+                    continue
 
-                if key_id not in config["pages"]:
+                is_brand_new_page = key_id not in config["pages"]
+                if is_brand_new_page:
                     config["pages"][key_id] = {
                         "name": name,
                         "native_folder": p_dir.name,
@@ -495,7 +495,12 @@ class D6Engine:
                     if "keys" not in config["pages"][key_id]:
                         config["pages"][key_id]["keys"] = {}
 
-                # Importa ou atualiza ações contidas no manifest
+                # Importa ações do manifest APENAS SE FOR UMA PÁGINA NOVA!
+                # Se a página já existe no config, d6_profiles.json é a fonte soberana de verdade!
+                if not is_brand_new_page:
+                    continue
+
+                # Importa ações contidas no manifest
                 actions = m_data.get("Actions", {})
                 for coord, act in actions.items():
                     try:
@@ -650,6 +655,75 @@ class D6Engine:
         }
         self.save_config()
         return new_id
+
+    def delete_page(self, page_id: str) -> bool:
+        """Exclui permanentemente uma página do sistema, removendo a pasta nativa e o backup no disco."""
+        if not page_id or page_id == "principal" or page_id not in self.config.get("pages", {}):
+            return False
+
+        page_info = self.config["pages"].pop(page_id, {})
+        native_folder = page_info.get("native_folder")
+
+        # 1. Registra na lista de páginas excluídas para imunizar contra re-importações
+        if "deleted_pages" not in self.config:
+            self.config["deleted_pages"] = []
+        if page_id not in self.config["deleted_pages"]:
+            self.config["deleted_pages"].append(page_id)
+        if native_folder and native_folder not in self.config["deleted_pages"]:
+            self.config["deleted_pages"].append(native_folder)
+
+        # 2. Exclusão física da pasta .sdProfile no disco oficial e backup
+        if native_folder:
+            import shutil
+            streamdock_profiles = Path.home() / "Library" / "Application Support" / "HotSpot" / "StreamDock" / "profiles"
+            p_dir = streamdock_profiles / native_folder
+            if p_dir.exists():
+                try:
+                    shutil.rmtree(p_dir, ignore_errors=True)
+                except Exception as e:
+                    print(f"[Engine] Erro ao remover pasta de perfil {native_folder}: {e}")
+
+            backup_dir = Path.home() / "Library" / "Application Support" / "HotSpot" / "StreamDock" / "profiles_golden_backup"
+            b_dir = backup_dir / native_folder
+            if b_dir.exists():
+                try:
+                    shutil.rmtree(b_dir, ignore_errors=True)
+                except Exception as e:
+                    print(f"[Engine] Erro ao remover backup do perfil {native_folder}: {e}")
+
+        if self.config.get("active_page") == page_id:
+            self.change_page("principal")
+
+        self.save_config()
+        return True
+
+    def remove_key_from_native_manifest(self, page_id: str, slot_num: int):
+        """Remove a ação correspondente do manifest.json nativo no disco para evitar ressurreição."""
+        page_info = self.config.get("pages", {}).get(page_id, {})
+        native_folder = page_info.get("native_folder")
+        if not native_folder:
+            return
+
+        m_path = Path.home() / "Library" / "Application Support" / "HotSpot" / "StreamDock" / "profiles" / native_folder / "manifest.json"
+        if not m_path.exists():
+            return
+
+        try:
+            with open(m_path, "r", encoding="utf-8") as f:
+                m_data = json.load(f)
+            actions = m_data.get("Actions", {})
+
+            # Calcula coordenadas (x, y) no grid 5x3 a partir de slot_num 1 a 15
+            x = (slot_num - 1) % 5
+            y = (slot_num - 1) // 5
+            coord = f"{x},{y}"
+
+            if coord in actions:
+                del actions[coord]
+                with open(m_path, "w", encoding="utf-8") as f:
+                    json.dump(m_data, f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            print(f"[Engine] Erro ao limpar tecla do manifest nativo: {e}")
 
     def get_icon_packs(self) -> List[Dict[str, Any]]:
         """Lista os pacotes de ícones nativos oficiais da Fifine."""

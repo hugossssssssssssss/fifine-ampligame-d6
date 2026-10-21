@@ -72,6 +72,7 @@ def register_keys_routes(router: Router):
                     hw_key = engine.get_hw_key_for_slot(slot_int)
                     engine._displayed_key_hashes.pop(hw_key, None)
                     engine.sync_key(slot_int, force=True, page_id=page)
+                    engine.remove_key_from_native_manifest(page, slot_int)
                 except Exception as e:
                     print(f"[Server] Erro ao limpar tecla física {key_num}: {e}")
             else:
@@ -111,6 +112,7 @@ def register_keys_routes(router: Router):
                 hw_key = engine.get_hw_key_for_slot(slot_int)
                 engine._displayed_key_hashes.pop(hw_key, None)
                 engine.sync_key(slot_int, force=True, page_id=page)
+                engine.remove_key_from_native_manifest(page, slot_int)
             except Exception as e:
                 print(f"[Server] Erro ao limpar tecla física {key_num}: {e}")
             router.send_json(handler, 200, {"success": True, "page": page, "key": key_num})

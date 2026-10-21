@@ -52,10 +52,8 @@ def register_scenes_routes(router: Router):
     def delete_page(handler, engine, body):
         page_id = body.get("id")
         if page_id and page_id in engine.config.get("pages", {}) and page_id != "principal":
-            del engine.config["pages"][page_id]
-            engine.change_page("principal")
-            engine.save_config()
-            router.send_json(handler, 200, {"success": True, "active_page": "principal"})
+            ok = engine.delete_page(page_id)
+            router.send_json(handler, 200, {"success": ok, "active_page": engine.config.get("active_page", "principal")})
         else:
             router.send_json(handler, 400, {"success": False, "error": "Cena não pode ser excluída"})
 

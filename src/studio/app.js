@@ -195,7 +195,15 @@ async function loadServerState(isBackground = false) {
         // Se estiver em background, preserva a tecla que o usuário está ativamente editando no momento
         if (isBackground && state.selectedSlot !== null && state.selectedSlot !== undefined) {
           const curEditingKey = state.profiles[state.activeProfile]?.keys?.[state.selectedSlot];
-          if (curEditingKey && newProfiles[state.activeProfile]) {
+          const hasContent = curEditingKey && (
+            curEditingKey.title ||
+            curEditingKey.actionType ||
+            curEditingKey.icon ||
+            curEditingKey.imagePath ||
+            curEditingKey.actionUuid ||
+            (curEditingKey.steps && curEditingKey.steps.length > 0)
+          );
+          if (hasContent && newProfiles[state.activeProfile]) {
             if (!newProfiles[state.activeProfile].keys) {
               newProfiles[state.activeProfile].keys = {};
             }

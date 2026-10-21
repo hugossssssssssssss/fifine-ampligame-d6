@@ -148,3 +148,40 @@ class ShellCommand(ActionCommand):
             subprocess.Popen(cmd, shell=True, executable="/bin/zsh")
             return True
         return False
+
+
+class SystemStatsCommand(ActionCommand):
+    """Executa utilitário de diagnóstico ao clicar em widgets de métricas."""
+
+    def execute(self, action: ActionModel, slot: Optional[int] = None, engine: Any = None) -> bool:
+        tgt = (action.target or "").lower()
+        if "disk" in tgt or "armazenamento" in tgt or "espaco" in tgt:
+            subprocess.Popen(["open", "/System/Applications/Utilities/Disk Utility.app"])
+        else:
+            subprocess.Popen(["open", "/System/Applications/Utilities/Activity Monitor.app"])
+        return True
+
+
+class ForceQuitCommand(ActionCommand):
+    """Abre a janela de Forçar Encerramento de Aplicativos (Cmd+Option+Esc)."""
+
+    def execute(self, action: ActionModel, slot: Optional[int] = None, engine: Any = None) -> bool:
+        subprocess.run(["osascript", "-e", 'tell application "System Events" to key code 53 using {command down, option down}'], timeout=2)
+        return True
+
+
+class EmptyTrashCommand(ActionCommand):
+    """Esvazia a lixeira do macOS via AppleScript."""
+
+    def execute(self, action: ActionModel, slot: Optional[int] = None, engine: Any = None) -> bool:
+        subprocess.run(["osascript", "-e", 'tell application "Finder" to empty trash'], timeout=5)
+        return True
+
+
+class SleepMacCommand(ActionCommand):
+    """Coloca o Mac em modo de repouso (Sleep)."""
+
+    def execute(self, action: ActionModel, slot: Optional[int] = None, engine: Any = None) -> bool:
+        subprocess.run(["osascript", "-e", 'tell application "Finder" to sleep'], timeout=2)
+        return True
+

@@ -1196,6 +1196,80 @@ class D6Engine:
                 draw.line([(cx - 3, cy + glyph_offset_y), (cx - 10, cy + glyph_offset_y + 6)], fill=f_color, width=3)
                 draw.line([(cx + 2, cy + glyph_offset_y - 6), (cx + 9, cy + glyph_offset_y)], fill=f_color, width=3)
                 draw.line([(cx + 9, cy + glyph_offset_y), (cx + 2, cy + glyph_offset_y + 6)], fill=f_color, width=3)
+            elif icon == "cpu":
+                f_color = accent or "#38bdf8"
+                draw.rectangle([(cx - 9, cy + glyph_offset_y - 9), (cx + 9, cy + glyph_offset_y + 9)], outline=f_color, width=2)
+                draw.rectangle([(cx - 4, cy + glyph_offset_y - 4), (cx + 4, cy + glyph_offset_y + 4)], fill=f_color)
+                for p in (-5, 0, 5):
+                    draw.line([(cx + p, cy + glyph_offset_y - 12), (cx + p, cy + glyph_offset_y - 9)], fill=f_color, width=1)
+                    draw.line([(cx + p, cy + glyph_offset_y + 9), (cx + p, cy + glyph_offset_y + 12)], fill=f_color, width=1)
+                    draw.line([(cx - 12, cy + glyph_offset_y + p), (cx - 9, cy + glyph_offset_y + p)], fill=f_color, width=1)
+                    draw.line([(cx + 9, cy + glyph_offset_y + p), (cx + 12, cy + glyph_offset_y + p)], fill=f_color, width=1)
+            elif icon in ("ram", "memory"):
+                f_color = accent or "#a855f7"
+                draw.rectangle([(cx - 11, cy + glyph_offset_y - 6), (cx + 11, cy + glyph_offset_y + 6)], outline=f_color, width=2)
+                for p in (-7, -3, 1, 5):
+                    draw.rectangle([(cx + p, cy + glyph_offset_y - 3), (cx + p + 2, cy + glyph_offset_y + 3)], fill=f_color)
+            elif icon in ("hard-drive", "disk"):
+                f_color = accent or "#34d399"
+                draw.rounded_rectangle([(cx - 12, cy + glyph_offset_y - 6), (cx + 12, cy + glyph_offset_y + 6)], radius=2, outline=f_color, width=2)
+                draw.ellipse([(cx + 6, cy + glyph_offset_y - 2), (cx + 9, cy + glyph_offset_y + 1)], fill=f_color)
+                draw.line([(cx - 8, cy + glyph_offset_y), (cx + 2, cy + glyph_offset_y)], fill=f_color, width=1)
+            elif icon == "terminal":
+                f_color = accent or "#e4e4e7"
+                draw.line([(cx - 10, cy + glyph_offset_y - 6), (cx - 4, cy + glyph_offset_y)], fill=f_color, width=2)
+                draw.line([(cx - 4, cy + glyph_offset_y), (cx - 10, cy + glyph_offset_y + 6)], fill=f_color, width=2)
+                draw.line([(cx - 1, cy + glyph_offset_y + 6), (cx + 8, cy + glyph_offset_y + 6)], fill=f_color, width=2)
+            elif icon == "activity":
+                f_color = accent or "#38bdf8"
+                draw.line([(cx - 12, cy + glyph_offset_y), (cx - 6, cy + glyph_offset_y)], fill=f_color, width=2)
+                draw.line([(cx - 6, cy + glyph_offset_y), (cx - 2, cy + glyph_offset_y - 8)], fill=f_color, width=2)
+                draw.line([(cx - 2, cy + glyph_offset_y - 8), (cx + 2, cy + glyph_offset_y + 8)], fill=f_color, width=2)
+                draw.line([(cx + 2, cy + glyph_offset_y + 8), (cx + 6, cy + glyph_offset_y)], fill=f_color, width=2)
+                draw.line([(cx + 6, cy + glyph_offset_y), (cx + 12, cy + glyph_offset_y)], fill=f_color, width=2)
+            elif icon == "lock":
+                f_color = accent or "#eab308"
+                draw.rounded_rectangle([(cx - 9, cy + glyph_offset_y - 2), (cx + 9, cy + glyph_offset_y + 9)], radius=2, fill=f_color)
+                draw.arc([(cx - 6, cy + glyph_offset_y - 12), (cx + 6, cy + glyph_offset_y)], start=180, end=0, fill=f_color, width=2)
+            elif icon == "moon":
+                f_color = accent or "#6366f1"
+                draw.arc([(cx - 8, cy + glyph_offset_y - 8), (cx + 8, cy + glyph_offset_y + 8)], start=60, end=300, fill=f_color, width=2)
+                draw.arc([(cx - 13, cy + glyph_offset_y - 8), (cx + 3, cy + glyph_offset_y + 8)], start=60, end=300, fill=f_color, width=2)
+            elif icon == "camera":
+                f_color = accent or "#06b6d4"
+                draw.rounded_rectangle([(cx - 11, cy + glyph_offset_y - 4), (cx + 11, cy + glyph_offset_y + 9)], radius=2, outline=f_color, width=2)
+                draw.rectangle([(cx - 5, cy + glyph_offset_y - 8), (cx + 2, cy + glyph_offset_y - 4)], fill=f_color)
+                draw.ellipse([(cx - 4, cy + glyph_offset_y - 1), (cx + 4, cy + glyph_offset_y + 7)], outline=f_color, width=2)
+            elif icon in ("volume-x", "mute"):
+                f_color = accent or "#ec4899"
+                draw.polygon([(cx - 10, cy + glyph_offset_y - 4), (cx - 5, cy + glyph_offset_y - 4), (cx - 1, cy + glyph_offset_y - 8), (cx - 1, cy + glyph_offset_y + 8), (cx - 5, cy + glyph_offset_y + 4), (cx - 10, cy + glyph_offset_y + 4)], fill=f_color)
+                draw.line([(cx + 4, cy + glyph_offset_y - 4), (cx + 10, cy + glyph_offset_y + 4)], fill=f_color, width=2)
+                draw.line([(cx + 10, cy + glyph_offset_y - 4), (cx + 4, cy + glyph_offset_y + 4)], fill=f_color, width=2)
+            elif icon in ("trash-2", "trash"):
+                f_color = accent or "#f59e0b"
+                draw.line([(cx - 10, cy + glyph_offset_y - 6), (cx + 10, cy + glyph_offset_y - 6)], fill=f_color, width=2)
+                draw.rounded_rectangle([(cx - 7, cy + glyph_offset_y - 4), (cx + 7, cy + glyph_offset_y + 9)], radius=2, outline=f_color, width=2)
+                draw.line([(cx - 2, cy + glyph_offset_y - 1), (cx - 2, cy + glyph_offset_y + 6)], fill=f_color, width=1)
+                draw.line([(cx + 2, cy + glyph_offset_y - 1), (cx + 2, cy + glyph_offset_y + 6)], fill=f_color, width=1)
+            elif icon in ("refresh-cw", "refresh"):
+                f_color = accent or "#10b981"
+                draw.arc([(cx - 8, cy + glyph_offset_y - 8), (cx + 8, cy + glyph_offset_y + 8)], start=45, end=315, fill=f_color, width=2)
+                draw.polygon([(cx + 4, cy + glyph_offset_y - 11), (cx + 10, cy + glyph_offset_y - 8), (cx + 7, cy + glyph_offset_y - 3)], fill=f_color)
+            elif icon in ("alert-triangle", "force_quit"):
+                f_color = accent or "#ef4444"
+                draw.polygon([(cx, cy + glyph_offset_y - 10), (cx - 10, cy + glyph_offset_y + 8), (cx + 10, cy + glyph_offset_y + 8)], outline=f_color, width=2)
+                draw.line([(cx, cy + glyph_offset_y - 4), (cx, cy + glyph_offset_y + 2)], fill=f_color, width=2)
+                draw.point((cx, cy + glyph_offset_y + 5), fill=f_color)
+            elif icon == "info":
+                f_color = accent or "#94a3b8"
+                draw.ellipse([(cx - 9, cy + glyph_offset_y - 9), (cx + 9, cy + glyph_offset_y + 9)], outline=f_color, width=2)
+                draw.line([(cx, cy + glyph_offset_y - 2), (cx, cy + glyph_offset_y + 5)], fill=f_color, width=2)
+                draw.point((cx, cy + glyph_offset_y - 5), fill=f_color)
+            elif icon == "wifi":
+                f_color = accent or "#60a5fa"
+                draw.arc([(cx - 11, cy + glyph_offset_y - 7), (cx + 11, cy + glyph_offset_y + 15)], start=215, end=325, fill=f_color, width=2)
+                draw.arc([(cx - 7, cy + glyph_offset_y - 3), (cx + 7, cy + glyph_offset_y + 11)], start=215, end=325, fill=f_color, width=2)
+                draw.ellipse([(cx - 2, cy + glyph_offset_y + 4), (cx + 2, cy + glyph_offset_y + 8)], fill=f_color)
 
         # Se o usuário optou por ocultar o título (DoNotShowTitle), encerra aqui
         if not show_title:
@@ -1888,6 +1962,53 @@ class D6Engine:
             else:
                 print(f"[Hardware Action] Nenhuma ação configurada no slot {target_slot}")
 
+    def _get_system_metrics(self) -> Dict[str, str]:
+        """Calculates accurate real-time macOS metrics (CPU, RAM, Disk)."""
+        metrics = {}
+        # 1. CPU (based on load average over available cores)
+        try:
+            cores = os.cpu_count() or 8
+            load = os.getloadavg()[0]
+            cpu_pct = min(100, int((load / cores) * 100))
+            metrics["cpu"] = f"{cpu_pct}%"
+        except Exception:
+            metrics["cpu"] = "--%"
+
+        # 2. Disk (free and used space on root partition)
+        try:
+            import shutil
+            total, used, free = shutil.disk_usage("/")
+            free_gb = free // (1024 ** 3)
+            used_pct = int((used / total) * 100)
+            metrics["disk"] = f"{free_gb}GB livre"
+            metrics["disk_pct"] = f"{used_pct}%"
+        except Exception:
+            metrics["disk"] = "--GB"
+
+        # 3. RAM (using vm_stat and memory_pressure or sysctl)
+        try:
+            import subprocess, re
+            vm_out = subprocess.check_output(["vm_stat"], timeout=1).decode()
+            page_size = 16384
+            for line in subprocess.check_output(["sysctl", "hw.pagesize"], timeout=1).decode().splitlines():
+                if "hw.pagesize" in line:
+                    page_size = int(line.split(":")[1].strip())
+            stats = {}
+            for line in vm_out.splitlines():
+                m = re.match(r'"?([^"]+)"?:\s+(\d+)\.', line.strip())
+                if m:
+                    stats[m.group(1)] = int(m.group(2))
+            free_pages = stats.get("Pages free", 0) + stats.get("Pages speculative", 0) + stats.get("Pages inactive", 0)
+            free_bytes = free_pages * page_size
+            total_bytes = int(subprocess.check_output(["sysctl", "-n", "hw.memsize"], timeout=1).decode().strip())
+            used_bytes = max(0, total_bytes - free_bytes)
+            ram_pct = int((used_bytes / total_bytes) * 100)
+            metrics["ram"] = f"{ram_pct}%"
+        except Exception:
+            metrics["ram"] = "--%"
+
+        return metrics
+
     def start_background_telemetry(self):
         """Loop de fundo para métricas dinâmicas (CPU, RAM), auto-troca de perfil e temporizador de inatividade."""
         self.running = True
@@ -1942,29 +2063,33 @@ class D6Engine:
                         self._last_app_check_time = now
                         self.check_app_auto_switch()
 
-                    # 3. Métricas de CPU / RAM (a cada 5.0s, apenas se acordado)
-                    if not self.is_asleep and (now - self._last_stats_update >= 5.0):
+                    # 3. Métricas de CPU / RAM / Armazenamento (a cada 3.0s, apenas se acordado)
+                    if not self.is_asleep and (now - self._last_stats_update >= 3.0):
                         self._last_stats_update = now
                         page_id = self.config.get("active_page", "principal")
                         page = self.config.get("pages", {}).get(page_id, {})
-                        
-                        # Calcula carga aproximada
-                        load = os.getloadavg()[0]
-                        cpu_pct = min(100, int(load * 18))
-                        
-                        updated = False
-                        for k_str, k_data in page.get("keys", {}).items():
-                            act = k_data.get("action", {})
-                            if isinstance(act, dict) and act.get("type") == "system_stats":
-                                tgt = act.get("target")
-                                if tgt == "cpu":
-                                    k_data["subtitle"] = f"{cpu_pct}%"
-                                    self.sync_key(int(k_str))
-                                    updated = True
-                                elif tgt == "ram":
-                                    k_data["subtitle"] = "OK"
-                                    self.sync_key(int(k_str))
-                                    updated = True
+
+                        has_stats_keys = any(
+                            isinstance(k_data.get("action"), dict) and k_data["action"].get("type") in ("system_stats", "systemstats")
+                            for k_data in page.get("keys", {}).values()
+                        )
+                        if has_stats_keys:
+                            sys_metrics = self._get_system_metrics()
+                            for k_str, k_data in page.get("keys", {}).items():
+                                act = k_data.get("action", {})
+                                if isinstance(act, dict) and act.get("type") in ("system_stats", "systemstats"):
+                                    tgt = str(act.get("target", "")).lower()
+                                    new_subtitle = None
+                                    if tgt == "cpu":
+                                        new_subtitle = sys_metrics.get("cpu")
+                                    elif tgt == "ram":
+                                        new_subtitle = sys_metrics.get("ram")
+                                    elif "disk" in tgt or "armazenamento" in tgt or "espaco" in tgt:
+                                        new_subtitle = sys_metrics.get("disk")
+
+                                    if new_subtitle and k_data.get("subtitle") != new_subtitle:
+                                        k_data["subtitle"] = new_subtitle
+                                        self.sync_key(int(k_str), force=True, page_id=page_id)
                 except Exception as err:
                     pass
                 time.sleep(1.0)

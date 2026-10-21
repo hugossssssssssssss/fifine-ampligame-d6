@@ -16,7 +16,8 @@ from .system_action import (
     CloseWindowCommand, CloseAppCommand, MinimizeWindowCommand,
     FullscreenToggleCommand, LockScreenCommand, ShowDesktopCommand,
     LaunchpadCommand, MissionControlCommand, SiriCommand, ScreenshotCommand,
-    EmoticonsCommand, TextInputCommand, ShellCommand, MouseEventCommand
+    EmoticonsCommand, TextInputCommand, ShellCommand, MouseEventCommand,
+    SystemStatsCommand, ForceQuitCommand, EmptyTrashCommand, SleepMacCommand
 )
 from .navigation_action import NavigationCommand
 from .device_action import BrightnessCommand, SleepDeviceCommand, ToggleStateCommand
@@ -106,6 +107,14 @@ class ActionRegistry:
             "siri": SiriCommand(),
             "screenshot": ScreenshotCommand(),
             "emoticons": EmoticonsCommand(),
+            "system_stats": SystemStatsCommand(),
+            "systemstats": SystemStatsCommand(),
+            "force_quit": ForceQuitCommand(),
+            "forcequit": ForceQuitCommand(),
+            "empty_trash": EmptyTrashCommand(),
+            "emptytrash": EmptyTrashCommand(),
+            "sleep_mac": SleepMacCommand(),
+            "mac_sleep": SleepMacCommand(),
 
             # Quicktools Oficiais Fifine
             "quicktool.calculator": app_cmd,

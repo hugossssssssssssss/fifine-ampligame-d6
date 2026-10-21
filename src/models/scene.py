@@ -17,6 +17,8 @@ class SceneModel:
     parent_slot: Optional[int] = None
     linked_app: str = ""
     native_folder: Optional[str] = None
+    row2_mode: str = "apps"
+    has_dynamic_apps: bool = False
     keys: Dict[str, KeyModel] = field(default_factory=dict)  # "1" a "15"
 
     @classmethod
@@ -43,6 +45,8 @@ class SceneModel:
             parent_slot=data.get("parent_slot"),
             linked_app=str(data.get("linked_app") or ""),
             native_folder=data.get("native_folder"),
+            row2_mode=str(data.get("row2_mode") or "apps"),
+            has_dynamic_apps=bool(data.get("has_dynamic_apps", False)),
             keys=keys_map,
         )
 
@@ -51,6 +55,10 @@ class SceneModel:
             "name": self.name,
             "keys": {k: v.to_dict() for k, v in self.keys.items()}
         }
+        if self.row2_mode:
+            d["row2_mode"] = self.row2_mode
+        if self.has_dynamic_apps:
+            d["has_dynamic_apps"] = True
         if self.is_folder:
             d["is_folder"] = True
             if self.parent_page: d["parent_page"] = self.parent_page

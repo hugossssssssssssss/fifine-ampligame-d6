@@ -6,7 +6,7 @@ Implementa o Command Pattern, mapeando qualquer intenção para sua classe execu
 from typing import Dict, Any, Optional, Union
 from models.action import ActionModel
 from .base import ActionCommand
-from .app_action import OpenAppCommand, OpenUrlCommand
+from .app_action import OpenAppCommand, OpenUrlCommand, ToggleRow2ModeCommand
 from .hotkey_action import HotkeyCommand
 from .media_action import (
     VolumeUpCommand, VolumeDownCommand, MuteCommand,
@@ -75,6 +75,8 @@ class ActionRegistry:
             "toggle": toggle_cmd,
             "hotkeyswitch": toggle_cmd,
             "system.toggle": toggle_cmd,
+            "toggle_row2_mode": ToggleRow2ModeCommand(),
+            "toggle_mode": ToggleRow2ModeCommand(),
 
             # Multimídia
             "volumeup": VolumeUpCommand(),

@@ -124,6 +124,25 @@ class OpenUrlCommand(ActionCommand):
         if not url.startswith("http://") and not url.startswith("https://") and not url.startswith("file://"):
             url = "https://" + url
 
-        print(f"[OpenUrlCommand] Abrindo URL no navegador: {url}")
-        subprocess.Popen(["open", url])
+        print(f"[OpenUrlCommand] Abrindo URL no Safari: {url}")
+        subprocess.Popen(["open", "-a", "Safari", url])
+        return True
+
+
+class ToggleRow2ModeCommand(ActionCommand):
+    """Alterna a Linha 2 do StreamDeck entre Apps Frequentes e Sites Favoritos do Safari."""
+
+    def execute(self, action: ActionModel, slot: Optional[int] = None, engine: Any = None) -> bool:
+        if not engine:
+            return False
+        page_id = engine.config.get("active_page", "principal")
+        page = engine.config.get("pages", {}).get(page_id, {})
+        cur_mode = page.get("row2_mode", "apps")
+        new_mode = "sites" if cur_mode == "apps" else "apps"
+        page["row2_mode"] = new_mode
+        print(f"[Engine] Linha 2 alternada para modo: {new_mode.upper()}")
+        if hasattr(engine, "refresh_dynamic_row2"):
+            engine.refresh_dynamic_row2(force=True)
+        if hasattr(engine, "save_config"):
+            engine.save_config()
         return True

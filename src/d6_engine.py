@@ -1118,7 +1118,7 @@ class D6Engine:
         act = key_data.get("action", {})
         act_type = str(act.get("type") or act.get("uuid") or "").lower()
         icon = str(key_data.get("icon") or "").lower()
-        is_app_launcher = act_type == "open_app"
+        is_app_launcher = act_type == "open_app" or (act_type in ("website", "open_url") and not show_title)
 
         custom_image = key_data.get("imagePath", None)
         if not custom_image:
@@ -1363,6 +1363,15 @@ class D6Engine:
                 draw.arc([(cx - 11, cy + glyph_offset_y - 7), (cx + 11, cy + glyph_offset_y + 15)], start=215, end=325, fill=f_color, width=2)
                 draw.arc([(cx - 7, cy + glyph_offset_y - 3), (cx + 7, cy + glyph_offset_y + 11)], start=215, end=325, fill=f_color, width=2)
                 draw.ellipse([(cx - 2, cy + glyph_offset_y + 4), (cx + 2, cy + glyph_offset_y + 8)], fill=f_color)
+            elif icon in ("globe", "safari", "web", "sites"):
+                f_color = accent or "#ec4899"
+                draw.ellipse([(cx - 16, 26), (cx + 16, 58)], outline=f_color, width=2)
+                draw.line([(cx - 16, 42), (cx + 16, 42)], fill=f_color, width=2)
+                draw.ellipse([(cx - 7, 26), (cx + 7, 58)], outline=f_color, width=2)
+            elif icon in ("apps", "grid", "layers"):
+                f_color = accent or "#38bdf8"
+                for dx, dy in ((-13, 29), (3, 29), (-13, 45), (3, 45)):
+                    draw.rounded_rectangle([(cx + dx, dy), (cx + dx + 10, dy + 10)], radius=2, fill=f_color)
 
         # Se o usuário optou por ocultar o título (DoNotShowTitle), encerra aqui
         if not show_title:
@@ -1372,7 +1381,7 @@ class D6Engine:
         is_audio_media_key = icon in (
             "headphones", "fone", "speaker", "caixa",
             "volume-up", "vol_up", "volumedown", "volume-down", "vol_down",
-            "play-pause", "playpause", "play"
+            "play-pause", "playpause", "play", "globe", "safari", "web", "sites", "apps", "grid", "layers"
         )
         if is_audio_media_key:
             y_base = cy + 24
@@ -2231,6 +2240,220 @@ class D6Engine:
 
         return result
 
+    def get_open_safari_urls(self) -> List[str]:
+        """Obtém as URLs de todas as abas abertas no Safari em tempo real via osascript."""
+        import subprocess
+        script = '''
+tell application "System Events"
+    set isRunning to (count of (processes whose name is "Safari")) > 0
+end tell
+if isRunning then
+    tell application "Safari"
+        set tabUrls to {}
+        repeat with w in windows
+            repeat with t in tabs of w
+                try
+                    set tabUrl to (URL of t as string)
+                    if tabUrl is not missing value and tabUrl is not "" then
+                        set end of tabUrls to tabUrl
+                    end if
+                end try
+            end repeat
+        end repeat
+        return tabUrls
+    end tell
+else
+    return {}
+end if
+'''
+        try:
+            res = subprocess.run(["osascript", "-e", script], capture_output=True, text=True, timeout=1.5)
+            if res.returncode == 0 and res.stdout.strip():
+                return [u.strip() for u in res.stdout.strip().split(", ") if u.strip()]
+        except Exception:
+            pass
+        return []
+
+    def get_favorite_safari_sites(self, count: int = 4) -> List[Dict[str, Any]]:
+        """Retorna sites favoritos que NÃO estão atualmente abertos em nenhuma aba do Safari."""
+        import urllib.parse
+        import urllib.request
+        import os
+
+        open_urls = self.get_open_safari_urls()
+        open_hosts = []
+        for u in open_urls:
+            try:
+                host = urllib.parse.urlparse(u).netloc.lower()
+                if host:
+                    open_hosts.append(host)
+            except Exception:
+                pass
+
+        default_favorites = self.config.get("favorite_sites", [
+            {"name": "GitHub", "url": "https://github.com", "domain": "github.com"},
+            {"name": "ChatGPT", "url": "https://chatgpt.com", "domain": "chatgpt.com"},
+            {"name": "Claude", "url": "https://claude.ai", "domain": "claude.ai"},
+            {"name": "Figma", "url": "https://www.figma.com", "domain": "figma.com"},
+            {"name": "Notion", "url": "https://www.notion.so", "domain": "notion.so"},
+            {"name": "Reddit", "url": "https://www.reddit.com", "domain": "reddit.com"},
+            {"name": "YouTube", "url": "https://www.youtube.com", "domain": "youtube.com"},
+            {"name": "WhatsApp", "url": "https://web.whatsapp.com", "domain": "whatsapp.com"},
+            {"name": "X", "url": "https://x.com", "domain": "x.com"},
+            {"name": "LinkedIn", "url": "https://www.linkedin.com", "domain": "linkedin.com"},
+            {"name": "Gemini", "url": "https://gemini.google.com", "domain": "gemini.google.com"},
+            {"name": "Netflix", "url": "https://www.netflix.com", "domain": "netflix.com"},
+            {"name": "Twitch", "url": "https://www.twitch.tv", "domain": "twitch.tv"},
+            {"name": "Mercado Livre", "url": "https://www.mercadolivre.com.br", "domain": "mercadolivre.com.br"},
+            {"name": "Spotify", "url": "https://open.spotify.com", "domain": "spotify.com"},
+            {"name": "Envato", "url": "https://elements.envato.com", "domain": "envato.com"},
+            {"name": "Canva", "url": "https://www.canva.com", "domain": "canva.com"},
+            {"name": "Stack Overflow", "url": "https://stackoverflow.com", "domain": "stackoverflow.com"},
+        ])
+
+        candidates = []
+        for site in default_favorites:
+            dom = site.get("domain", "").lower()
+            if not dom:
+                try:
+                    dom = urllib.parse.urlparse(site.get("url", "")).netloc.lower()
+                except Exception:
+                    dom = ""
+
+            # Se o domínio estiver aberto em alguma aba do Safari, NÃO vem para a lista!
+            is_open = any(dom in host or host in dom for host in open_hosts)
+            if not is_open:
+                candidates.append(site)
+                if len(candidates) >= count:
+                    break
+
+        result = []
+        for site in candidates:
+            dom = site.get("domain", "")
+            icon_path = f"/tmp/d6_fav_{dom.replace('.', '_')}.png"
+            if not os.path.exists(icon_path):
+                try:
+                    fav_url = f"https://www.google.com/s2/favicons?domain={dom}&sz=128"
+                    urllib.request.urlretrieve(fav_url, icon_path)
+                except Exception:
+                    pass
+
+            result.append({
+                "name": site.get("name", dom),
+                "url": site.get("url", f"https://{dom}"),
+                "imagePath": icon_path if os.path.exists(icon_path) else "",
+                "domain": dom
+            })
+
+        return result
+
+    def refresh_dynamic_row2(self, force: bool = False):
+        """Atualiza a Linha 2 (Slots 6 a 10): Slot 6 como botão de alternância e Slots 7-10 como Apps ou Sites."""
+        page_id = self.config.get("active_page", "principal")
+        page = self.config.get("pages", {}).get(page_id, {})
+        if not page.get("has_dynamic_apps") and page_id != "macos_monitor":
+            return
+
+        mode = page.get("row2_mode", "apps").lower()
+        keys = page.setdefault("keys", {})
+
+        # Slot 6: Botão de Alternância de Modo (APPS <-> SITES)
+        slot6_data = keys.get("6", {})
+        expected_title = "APPS" if mode == "apps" else "SITES"
+        expected_accent = "#38bdf8" if mode == "apps" else "#ec4899"
+        expected_icon = "apps" if mode == "apps" else "globe"
+
+        slot6_changed = (
+            slot6_data.get("title") != expected_title or
+            slot6_data.get("accent") != expected_accent or
+            slot6_data.get("icon") != expected_icon or
+            slot6_data.get("action", {}).get("type") != "toggle_row2_mode"
+        )
+        if slot6_changed or force:
+            keys["6"] = {
+                "title": expected_title,
+                "subtitle": "MODO",
+                "bg": "#18181b",
+                "textColor": "#ffffff",
+                "accent": expected_accent,
+                "icon": expected_icon,
+                "fontSize": 12,
+                "bold": True,
+                "fontFamily": "Helvetica",
+                "showTitle": True,
+                "action": {
+                    "type": "toggle_row2_mode"
+                }
+            }
+            self.sync_key(6, force=True, page_id=page_id)
+
+        # Slots 7 a 10: 4 itens dinâmicos
+        if mode == "sites":
+            favorite_sites = self.get_favorite_safari_sites(4)
+            for idx in range(4):
+                slot_num = 7 + idx
+                slot_str = str(slot_num)
+                if idx < len(favorite_sites):
+                    site_info = favorite_sites[idx]
+                    cur_k = keys.get(slot_str, {})
+                    is_diff = (
+                        cur_k.get("title") != site_info["name"] or
+                        cur_k.get("imagePath") != site_info["imagePath"] or
+                        cur_k.get("showTitle") is not False or
+                        cur_k.get("action", {}).get("target") != site_info["url"]
+                    )
+                    if is_diff or force:
+                        keys[slot_str] = {
+                            "title": site_info["name"],
+                            "subtitle": "",
+                            "bg": "#18181b",
+                            "textColor": "#ffffff",
+                            "accent": "#ec4899",
+                            "fontSize": 11,
+                            "bold": True,
+                            "fontFamily": "Helvetica",
+                            "showTitle": False,
+                            "imagePath": site_info["imagePath"],
+                            "action": {
+                                "type": "open_url",
+                                "target": site_info["url"]
+                            }
+                        }
+                        self.sync_key(slot_num, force=True, page_id=page_id)
+        else:
+            # Modo APPS: 4 apps recentes não abertos
+            recent_apps = self.get_recent_unopened_apps(4)
+            for idx in range(4):
+                slot_num = 7 + idx
+                slot_str = str(slot_num)
+                if idx < len(recent_apps):
+                    app_info = recent_apps[idx]
+                    cur_k = keys.get(slot_str, {})
+                    is_diff = (
+                        cur_k.get("title") != app_info["name"] or
+                        cur_k.get("imagePath") != app_info["imagePath"] or
+                        cur_k.get("showTitle") is not False or
+                        cur_k.get("action", {}).get("target") != app_info["path"]
+                    )
+                    if is_diff or force:
+                        keys[slot_str] = {
+                            "title": app_info["name"],
+                            "subtitle": "",
+                            "bg": "#18181b",
+                            "textColor": "#ffffff",
+                            "accent": "#38bdf8",
+                            "fontSize": 11,
+                            "bold": True,
+                            "fontFamily": "Helvetica",
+                            "showTitle": False,
+                            "imagePath": app_info["imagePath"],
+                            "action": {
+                                "type": "open_app",
+                                "target": app_info["path"]
+                            }
+                        }
+                        self.sync_key(slot_num, force=True, page_id=page_id)
+
     def start_background_telemetry(self):
         """Loop de fundo para métricas dinâmicas (CPU, RAM), auto-troca de perfil e temporizador de inatividade."""
         self.running = True
@@ -2317,39 +2540,15 @@ class D6Engine:
                                         k_data["subtitle"] = new_subtitle
                                         self.sync_key(int(k_str), force=True, page_id=page_id)
 
-                    # 4. Rotação dinâmica de apps frequentes não-abertos (a cada 4.0s)
+                    # 4. Linha 2 Dinâmica (Apps Frequentes ou Sites Safari a cada 3.5s)
                     if not self.is_asleep:
                         page_id = self.config.get("active_page", "principal")
                         page = self.config.get("pages", {}).get(page_id, {})
                         if page.get("has_dynamic_apps") or page_id == "macos_monitor":
                             now_dyn = time.time()
-                            if now_dyn - getattr(self, "_last_dyn_apps_check", 0) >= 4.0:
+                            if now_dyn - getattr(self, "_last_dyn_apps_check", 0) >= 3.5:
                                 self._last_dyn_apps_check = now_dyn
-                                recent_apps = self.get_recent_unopened_apps(5)
-                                for idx in range(5):
-                                    slot_num = 6 + idx
-                                    slot_str = str(slot_num)
-                                    if idx < len(recent_apps):
-                                        app_info = recent_apps[idx]
-                                        cur_k = page.get("keys", {}).get(slot_str, {})
-                                        if cur_k.get("title") != app_info["name"] or not cur_k.get("imagePath") or cur_k.get("showTitle") is not False:
-                                            page.setdefault("keys", {})[slot_str] = {
-                                                "title": app_info["name"],
-                                                "subtitle": "",
-                                                "bg": "#18181b",
-                                                "textColor": "#ffffff",
-                                                "accent": "#38bdf8",
-                                                "fontSize": 11,
-                                                "bold": True,
-                                                "fontFamily": "Helvetica",
-                                                "showTitle": False,
-                                                "imagePath": app_info["imagePath"],
-                                                "action": {
-                                                    "type": "open_app",
-                                                    "target": app_info["path"]
-                                                }
-                                            }
-                                            self.sync_key(slot_num, force=True, page_id=page_id)
+                                self.refresh_dynamic_row2()
                 except Exception as err:
                     pass
                 time.sleep(1.0)

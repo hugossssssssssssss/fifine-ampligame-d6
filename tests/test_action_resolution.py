@@ -17,6 +17,7 @@ from actions.soundboard_action import SoundboardPlayCommand, SoundboardStopComma
 from actions.media_action import NextTrackCommand, PrevTrackCommand
 from actions.system_action import MissionControlCommand, LaunchpadCommand, MouseEventCommand, TextInputCommand
 from actions.device_action import BrightnessCommand, SleepDeviceCommand, ToggleStateCommand
+from actions.app_action import ToggleRow2ModeCommand
 
 
 class TestActionCatalogResolution(unittest.TestCase):
@@ -84,6 +85,34 @@ class TestActionCatalogResolution(unittest.TestCase):
         t_cmd = ActionRegistry.resolve("com.hotspot.streamdock.system.toggle")
         self.assertIsNotNone(t_cmd)
         self.assertIsInstance(t_cmd, ToggleStateCommand)
+
+    def test_toggle_row2_mode_resolution_and_toggle(self):
+        cmd = ActionRegistry.resolve("toggle_row2_mode")
+        self.assertIsNotNone(cmd)
+        self.assertIsInstance(cmd, ToggleRow2ModeCommand)
+
+        class DummyEngine:
+            def __init__(self):
+                self.config = {"active_page": "p1", "pages": {"p1": {"row2_mode": "apps"}}}
+                self.refreshed = False
+                self.saved = False
+            def refresh_dynamic_row2(self, force=False):
+                self.refreshed = True
+            def save_config(self):
+                self.saved = True
+
+        dummy = DummyEngine()
+        from models.action import ActionModel
+        # Toggle from apps -> sites
+        success = cmd.execute(ActionModel(type="toggle_row2_mode"), slot=6, engine=dummy)
+        self.assertTrue(success)
+        self.assertEqual(dummy.config["pages"]["p1"]["row2_mode"], "sites")
+        self.assertTrue(dummy.refreshed)
+        self.assertTrue(dummy.saved)
+
+        # Toggle from sites -> apps
+        cmd.execute(ActionModel(type="toggle_row2_mode"), slot=6, engine=dummy)
+        self.assertEqual(dummy.config["pages"]["p1"]["row2_mode"], "apps")
 
 
 if __name__ == "__main__":

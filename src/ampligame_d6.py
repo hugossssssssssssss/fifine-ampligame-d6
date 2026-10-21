@@ -16,7 +16,7 @@ from typing import Callable, Optional, Tuple, Dict, Any
 from pathlib import Path
 
 # Adiciona o SDK local ao path
-SDK_PATH = Path(__file__).resolve().parent.parent / "streamdock-sdk" / "Python-SDK" / "src"
+SDK_PATH = Path(__file__).resolve().parent.parent / "sdk"
 if str(SDK_PATH) not in sys.path:
     sys.path.insert(0, str(SDK_PATH))
 

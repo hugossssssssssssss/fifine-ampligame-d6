@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 
 # Adiciona o SDK local
-SDK_PATH = Path(__file__).resolve().parent.parent / "streamdock-sdk" / "Python-SDK" / "src"
+SDK_PATH = Path(__file__).resolve().parent.parent / "sdk"
 if str(SDK_PATH) not in sys.path:
     sys.path.insert(0, str(SDK_PATH))
 
@@ -1742,12 +1742,20 @@ class D6Engine:
                 else:
                     res = -1
 
+                if res is not None and res < 0:
+                    print(f"[Engine] Falha de escrita USB na tecla {key_num} (code {res}). Resetando conexão para auto-reconnect.")
+                    self._is_open = False
+                    self.device = None
+                    return
+
                 if refresh_now and hasattr(self.device, "refresh"):
                     self.device.refresh()
             
             self._displayed_key_hashes[hw_key] = img_hash
         except Exception as e:
             print(f"[Engine] Erro ao sincronizar tecla {key_num}: {e}")
+            self._is_open = False
+            self.device = None
 
     def animate_key_press(self, slot_num: int, duration: float = 0.18):
         """Micro-animação tátil de compressão (scale-down 85%) na tela LCD física."""
@@ -1768,18 +1776,25 @@ class D6Engine:
 
     def sync_all_keys(self, force: bool = True):
         """Atualiza todas as 15 telas do deck físico com retransmissão completa e segura."""
-        if not self.device:
+        if not self.device or not getattr(self, "_is_open", False):
             return
 
         active_page = self.config.get("active_page", "principal")
         for k in range(1, 16):
+            if not self.device or not getattr(self, "_is_open", False):
+                break
             self.sync_key(k, force=force, page_id=active_page, refresh_now=False)
             time.sleep(0.01)
 
         # Atualiza o display no hardware ao final do lote completo
-        if hasattr(self.device, "refresh"):
+        if self.device and hasattr(self.device, "refresh"):
             with self.lock:
-                self.device.refresh()
+                try:
+                    self.device.refresh()
+                except Exception as e:
+                    print(f"[Engine] Erro ao atualizar display do hardware: {e}")
+                    self._is_open = False
+                    self.device = None
 
     def change_page(self, page_id: str, is_auto: bool = False):
         if page_id in self.config.get("pages", {}):

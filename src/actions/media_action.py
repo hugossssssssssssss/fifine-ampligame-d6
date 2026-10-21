@@ -3,6 +3,7 @@ Comandos de Multimídia e Volume para macOS.
 Controla volume físico do sistema, mudo e reprodução de faixas.
 """
 
+import os
 import subprocess
 from typing import Optional, Any
 from .base import ActionCommand
@@ -27,27 +28,45 @@ def _sync_volume_display(engine: Any, new_vol_str: str):
         print(f"[Volume Sync Error] {e}")
 
 
+def _get_volume_step(action: ActionModel, engine: Any) -> float:
+    """Resolves volume step increment from action configuration or global engine preferences."""
+    raw = getattr(action, "raw", {}) or {}
+    if "step" in raw and raw["step"] is not None:
+        try:
+            return float(raw["step"])
+        except (ValueError, TypeError):
+            pass
+    if engine and hasattr(engine, "config") and "volume_step" in engine.config:
+        try:
+            return float(engine.config["volume_step"])
+        except (ValueError, TypeError):
+            pass
+    return 6.25
+
+
 class VolumeUpCommand(ActionCommand):
     def execute(self, action: ActionModel, slot: Optional[int] = None, engine: Any = None) -> bool:
-        script = 'set volume output volume ((output volume of (get volume settings)) + 6.25)\noutput volume of (get volume settings)'
+        step = _get_volume_step(action, engine)
+        script = f'set volume output volume ((output volume of (get volume settings)) + {step})\noutput volume of (get volume settings)'
         try:
             out = subprocess.check_output(["osascript", "-e", script], timeout=2).decode().strip()
             new_vol = f"{int(float(out))}%"
             _sync_volume_display(engine, new_vol)
         except Exception:
-            subprocess.run(["osascript", "-e", 'set volume output volume ((output volume of (get volume settings)) + 6.25)'], timeout=2)
+            subprocess.run(["osascript", "-e", f'set volume output volume ((output volume of (get volume settings)) + {step})'], timeout=2)
         return True
 
 
 class VolumeDownCommand(ActionCommand):
     def execute(self, action: ActionModel, slot: Optional[int] = None, engine: Any = None) -> bool:
-        script = 'set volume output volume ((output volume of (get volume settings)) - 6.25)\noutput volume of (get volume settings)'
+        step = _get_volume_step(action, engine)
+        script = f'set volume output volume ((output volume of (get volume settings)) - {step})\noutput volume of (get volume settings)'
         try:
             out = subprocess.check_output(["osascript", "-e", script], timeout=2).decode().strip()
             new_vol = f"{int(float(out))}%"
             _sync_volume_display(engine, new_vol)
         except Exception:
-            subprocess.run(["osascript", "-e", 'set volume output volume ((output volume of (get volume settings)) - 6.25)'], timeout=2)
+            subprocess.run(["osascript", "-e", f'set volume output volume ((output volume of (get volume settings)) - {step})'], timeout=2)
         return True
 
 
@@ -84,34 +103,42 @@ class StopMusicCommand(ActionCommand):
 
 
 class ToggleAudioOutputCommand(ActionCommand):
-    """Alterna saída de áudio entre fone Bluetooth e alto-falantes internos do Mac."""
+    """Alterna saída de áudio entre dois dispositivos selecionados (ex: fone Bluetooth e alto-falantes internos)."""
 
     def execute(self, action: ActionModel, slot: Optional[int] = None, engine: Any = None) -> bool:
         try:
-            curr = subprocess.check_output(["/opt/homebrew/bin/SwitchAudioSource", "-c"], timeout=1).decode().strip()
-            if "fone" in curr.lower():
-                target = "Alto-falantes (Mac mini)"
-                new_title = "CAIXA"
-                new_sub = ""
-                new_accent = "#f59e0b"
-                new_icon = "speaker"
-            else:
-                target = "fone bom"
-                new_title = "FONE"
-                new_sub = ""
-                new_accent = "#38bdf8"
-                new_icon = "headphones"
+            bin_path = "/opt/homebrew/bin/SwitchAudioSource"
+            if not os.path.exists(bin_path):
+                bin_path = "SwitchAudioSource"
 
-            subprocess.run(["/opt/homebrew/bin/SwitchAudioSource", "-s", target], timeout=2)
+            curr = subprocess.check_output([bin_path, "-c"], timeout=1).decode().strip()
+
+            raw = getattr(action, "raw", {}) or {}
+            device_a = raw.get("device_a") or (engine.config.get("audio_device_a") if engine else None) or "Alto-falantes (Mac mini)"
+            device_b = raw.get("device_b") or (engine.config.get("audio_device_b") if engine else None) or "fone bom"
+
+            # Se o dispositivo atual corresponder ao device_b, alterna para device_a; senão para device_b
+            if curr.strip().lower() == device_b.strip().lower() or (len(device_b) > 3 and device_b.strip().lower() in curr.strip().lower()):
+                target = device_a
+                is_device_b = False
+            else:
+                target = device_b
+                is_device_b = True
+
+            subprocess.run([bin_path, "-s", target], timeout=2)
 
             if engine and slot:
                 page_id = engine.config.get("active_page", "principal")
                 k_data = engine.config.get("pages", {}).get(page_id, {}).get("keys", {}).get(str(slot))
                 if k_data:
-                    k_data["title"] = new_title
-                    k_data["subtitle"] = new_sub
-                    k_data["accent"] = new_accent
-                    k_data["icon"] = new_icon
+                    if is_device_b:
+                        k_data["title"] = "FONE" if any(w in target.lower() for w in ("fone", "headphone", "airpod", "buds", "headset")) else target[:8].upper()
+                        k_data["accent"] = "#38bdf8"
+                        k_data["icon"] = "headphones"
+                    else:
+                        k_data["title"] = "CAIXA" if any(w in target.lower() for w in ("alto-falante", "speaker", "fhd", "caixa")) else target[:8].upper()
+                        k_data["accent"] = "#f59e0b"
+                        k_data["icon"] = "speaker"
                     engine.sync_key(slot, force=True, page_id=page_id)
             return True
         except Exception as e:
@@ -120,9 +147,13 @@ class ToggleAudioOutputCommand(ActionCommand):
 
 
 class SmartPlayPauseCommand(ActionCommand):
-    """Play/Pause inteligente: alterna música ou abre YouTube Music no Safari em modo aleatório."""
+    """Play/Pause inteligente: alterna música ou abre YouTube Music no Safari com fallback customizável."""
 
     def execute(self, action: ActionModel, slot: Optional[int] = None, engine: Any = None) -> bool:
+        raw = getattr(action, "raw", {}) or {}
+        fallback_url = raw.get("fallback_url") or "https://music.youtube.com/watch?list=RDMM"
+        auto_shuffle = raw.get("auto_shuffle", True)
+
         try:
             ps_out = subprocess.check_output(["ps", "-A", "-o", "comm"], timeout=1).decode()
         except Exception:
@@ -148,7 +179,7 @@ class SmartPlayPauseCommand(ActionCommand):
             except Exception:
                 pass
 
-        # 3. Verifica se o YouTube Music já está aberto em alguma aba do Safari
+        # 3. Verifica se o YouTube Music ou serviço de streaming já está aberto no Safari
         yt_script = '''
 tell application "Safari"
     set found to false
@@ -180,7 +211,13 @@ end tell
         except Exception:
             pass
 
-        # 4. Se não estiver tocando nada nem aberto, abre o YouTube Music no Safari no modo aleatório (My Supermix RDMM)
-        subprocess.Popen(["open", "-a", "Safari", "https://music.youtube.com/watch?list=RDMM"])
+        # 4. Se não estiver tocando nada nem aberto, abre a URL configurada no Safari
+        target_url = fallback_url
+        if auto_shuffle and "list=RDMM" not in target_url and "music.youtube.com" in target_url:
+            separator = "&" if "?" in target_url else "?"
+            target_url = f"{target_url}{separator}list=RDMM"
+
+        subprocess.Popen(["open", "-a", "Safari", target_url])
         return True
+
 

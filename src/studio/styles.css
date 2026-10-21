@@ -2890,3 +2890,103 @@ input:checked + .switch-slider:before, input:checked + .slider-round:before {
   text-overflow: ellipsis;
   margin-top: 2px;
 }
+
+/* ================= GERENCIADOR DE APPS E SITES (BLACKLIST MODAL) ================= */
+.blacklist-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #18191f;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.blacklist-item:hover {
+  background: #1f2028;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.blacklist-item-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+  flex: 1;
+}
+
+.blacklist-item-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #38bdf8;
+}
+
+.blacklist-item-texts {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.blacklist-item-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f4f4f5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.blacklist-item-sub {
+  font-size: 11px;
+  color: #a1a1aa;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.blacklist-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+.btn-toggle-block {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.btn-toggle-block.allowed {
+  background: rgba(52, 199, 89, 0.15);
+  color: #34c759;
+  border-color: rgba(52, 199, 89, 0.3);
+}
+
+.btn-toggle-block.allowed:hover {
+  background: rgba(52, 199, 89, 0.25);
+}
+
+.btn-toggle-block.blocked {
+  background: rgba(255, 69, 58, 0.15);
+  color: #ff453a;
+  border-color: rgba(255, 69, 58, 0.3);
+}
+
+.btn-toggle-block.blocked:hover {
+  background: rgba(255, 69, 58, 0.25);
+}

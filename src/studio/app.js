@@ -263,6 +263,13 @@ async function loadServerState(isBackground = false) {
           selScreenOff.value = String(data.screen_off_seconds);
         }
       }
+      if (data.volume_step !== undefined) {
+        state.volumeStep = data.volume_step;
+        const selVolStep = document.getElementById('settingVolumeStepSelect');
+        if (selVolStep) {
+          selVolStep.value = String(data.volume_step);
+        }
+      }
       if (data.startup_screen_mode !== undefined) {
         state.startupScreenMode = data.startup_screen_mode;
         const badgeBoot = document.getElementById('badgeBootScreenMode');
@@ -1474,9 +1481,22 @@ function selectKey(slot) {
   } else if (actType === 'toggle_row2_mode') {
     if (ctxToggleRow2) ctxToggleRow2.style.display = 'block';
   } else if (actType === 'toggle_audio') {
-    if (ctxToggleAudio) ctxToggleAudio.style.display = 'block';
+    if (ctxToggleAudio) {
+      ctxToggleAudio.style.display = 'block';
+      const inputDevA = document.getElementById('inputAudioDeviceA');
+      const inputDevB = document.getElementById('inputAudioDeviceB');
+      if (inputDevA) inputDevA.value = keyData.action?.device_a || keyData.device_a || 'Alto-falantes (Mac mini)';
+      if (inputDevB) inputDevB.value = keyData.action?.device_b || keyData.device_b || 'fone bom';
+      if (typeof loadAudioDevices === 'function') loadAudioDevices();
+    }
   } else if (actType === 'smart_play_pause') {
-    if (ctxSmartMedia) ctxSmartMedia.style.display = 'block';
+    if (ctxSmartMedia) {
+      ctxSmartMedia.style.display = 'block';
+      const inputUrl = document.getElementById('inputSmartMediaUrl');
+      const chkShuffle = document.getElementById('checkSmartMediaShuffle');
+      if (inputUrl) inputUrl.value = keyData.action?.fallback_url || keyData.fallback_url || 'https://music.youtube.com/watch?list=RDMM';
+      if (chkShuffle) chkShuffle.checked = (keyData.action?.auto_shuffle !== false && keyData.auto_shuffle !== false);
+    }
   } else if (actType === 'page.goto' || actType === 'goto') {
     if (ctxPageGoto) {
       ctxPageGoto.style.display = 'block';
@@ -2496,6 +2516,316 @@ function bindEvents() {
       renderAppPickerList(e.target.value);
     });
   }
+
+  // ================= GERENCIADOR DE DISPOSITIVOS DE ÁUDIO =================
+  let cachedAudioDevices = [];
+  async function loadAudioDevices(force = false) {
+    if (!force && cachedAudioDevices.length > 0) return;
+    try {
+      const res = await fetch('/api/audio/devices');
+      const data = await res.json();
+      cachedAudioDevices = data.devices || [];
+      const listA = document.getElementById('datalistAudioDevicesA');
+      const listB = document.getElementById('datalistAudioDevicesB');
+      if (listA && listB) {
+        const opts = cachedAudioDevices.map(d => `<option value="${d}"></option>`).join('');
+        listA.innerHTML = opts;
+        listB.innerHTML = opts;
+      }
+    } catch (err) {
+      console.warn('Erro ao carregar dispositivos de áudio:', err);
+    }
+  }
+
+  const inputAudioDeviceA = document.getElementById('inputAudioDeviceA');
+  const inputAudioDeviceB = document.getElementById('inputAudioDeviceB');
+  const btnReloadAudioDevices = document.getElementById('btnReloadAudioDevices');
+
+  if (btnReloadAudioDevices) {
+    btnReloadAudioDevices.onclick = async () => {
+      await loadAudioDevices(true);
+      showToast('✓ Dispositivos de áudio recarregados');
+    };
+  }
+
+  if (inputAudioDeviceA) {
+    inputAudioDeviceA.addEventListener('change', () => {
+      const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
+      if (!keyData) return;
+      if (!keyData.action) keyData.action = { type: 'toggle_audio' };
+      keyData.action.device_a = inputAudioDeviceA.value.trim();
+      keyData.device_a = inputAudioDeviceA.value.trim();
+      syncKeyToHardware(state.selectedSlot, keyData);
+    });
+  }
+
+  if (inputAudioDeviceB) {
+    inputAudioDeviceB.addEventListener('change', () => {
+      const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
+      if (!keyData) return;
+      if (!keyData.action) keyData.action = { type: 'toggle_audio' };
+      keyData.action.device_b = inputAudioDeviceB.value.trim();
+      keyData.device_b = inputAudioDeviceB.value.trim();
+      syncKeyToHardware(state.selectedSlot, keyData);
+    });
+  }
+
+  const inputSmartMediaUrl = document.getElementById('inputSmartMediaUrl');
+  const checkSmartMediaShuffle = document.getElementById('checkSmartMediaShuffle');
+
+  if (inputSmartMediaUrl) {
+    inputSmartMediaUrl.addEventListener('change', () => {
+      const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
+      if (!keyData) return;
+      if (!keyData.action) keyData.action = { type: 'smart_play_pause' };
+      keyData.action.fallback_url = inputSmartMediaUrl.value.trim();
+      keyData.fallback_url = inputSmartMediaUrl.value.trim();
+      syncKeyToHardware(state.selectedSlot, keyData);
+    });
+  }
+
+  if (checkSmartMediaShuffle) {
+    checkSmartMediaShuffle.addEventListener('change', () => {
+      const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
+      if (!keyData) return;
+      if (!keyData.action) keyData.action = { type: 'smart_play_pause' };
+      keyData.action.auto_shuffle = checkSmartMediaShuffle.checked;
+      keyData.auto_shuffle = checkSmartMediaShuffle.checked;
+      syncKeyToHardware(state.selectedSlot, keyData);
+    });
+  }
+
+  // ================= MODAL: GERENCIADOR DE APPS E SITES (BLACKLIST & FAVORITOS) =================
+  let appsSitesData = {
+    installed_apps: [],
+    blocked_apps: [],
+    favorite_sites: [],
+    blocked_sites: []
+  };
+  let currentAppsSitesTab = 'apps';
+
+  async function openAppsSitesModal() {
+    const modal = document.getElementById('modalAppsSites');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    const statusSpan = document.getElementById('appsSitesStatus');
+    if (statusSpan) statusSpan.textContent = 'Carregando configurações...';
+
+    try {
+      const res = await fetch('/api/settings/apps_sites');
+      appsSitesData = await res.json();
+      renderAppsSitesList();
+      if (statusSpan) statusSpan.textContent = 'Modificações salvas automaticamente no perfil';
+    } catch (err) {
+      console.error('Erro ao buscar apps e sites:', err);
+      if (statusSpan) statusSpan.textContent = 'Erro ao carregar dados do servidor';
+    }
+  }
+
+  function renderAppsSitesList() {
+    const query = (document.getElementById('searchAppsSites')?.value || '').toLowerCase().trim();
+
+    if (currentAppsSitesTab === 'apps') {
+      const container = document.getElementById('listAppsBlacklist');
+      if (!container) return;
+      const blockedSet = new Set((appsSitesData.blocked_apps || []).map(a => a.toLowerCase().trim()));
+      const filteredApps = (appsSitesData.installed_apps || []).filter(a => !query || a.name.toLowerCase().includes(query));
+
+      if (filteredApps.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 24px;">Nenhum aplicativo encontrado</div>`;
+        return;
+      }
+
+      container.innerHTML = filteredApps.map(app => {
+        const isBlocked = blockedSet.has(app.name.toLowerCase().trim());
+        return `
+          <div class="blacklist-item">
+            <div class="blacklist-item-info">
+              <div class="blacklist-item-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+              </div>
+              <div class="blacklist-item-texts">
+                <span class="blacklist-item-title">${app.name}</span>
+                <span class="blacklist-item-sub">${app.path}</span>
+              </div>
+            </div>
+            <div class="blacklist-item-controls">
+              <button class="btn-toggle-block ${isBlocked ? 'blocked' : 'allowed'}" onclick="toggleAppBlock('${app.name}')">
+                ${isBlocked ? '✕ Bloqueado' : '✓ Permitido'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } else {
+      const container = document.getElementById('listSitesBlacklist');
+      if (!container) return;
+      const blockedSet = new Set((appsSitesData.blocked_sites || []).map(s => s.toLowerCase().trim()));
+      const filteredSites = (appsSitesData.favorite_sites || []).filter(s => !query || s.name.toLowerCase().includes(query) || (s.domain && s.domain.toLowerCase().includes(query)));
+
+      if (filteredSites.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 24px;">Nenhum site encontrado</div>`;
+        return;
+      }
+
+      container.innerHTML = filteredSites.map((site, idx) => {
+        const key = (site.domain || site.name).toLowerCase().trim();
+        const isBlocked = blockedSet.has(key);
+        return `
+          <div class="blacklist-item">
+            <div class="blacklist-item-info">
+              <div class="blacklist-item-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+              </div>
+              <div class="blacklist-item-texts">
+                <span class="blacklist-item-title">${site.name}</span>
+                <span class="blacklist-item-sub">${site.url || site.domain}</span>
+              </div>
+            </div>
+            <div class="blacklist-item-controls">
+              <button class="btn-toggle-block ${isBlocked ? 'blocked' : 'allowed'}" onclick="toggleSiteBlock('${key}')">
+                ${isBlocked ? '✕ Bloqueado' : '✓ Permitido'}
+              </button>
+              <button class="fifine-btn danger-sm" style="height: 28px; padding: 0 8px;" onclick="removeFavoriteSite(${idx})" title="Remover da lista de favoritos">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  window.toggleAppBlock = async (appName) => {
+    const clean = appName.toLowerCase().trim();
+    let blocked = appsSitesData.blocked_apps || [];
+    if (blocked.map(x => x.toLowerCase().trim()).includes(clean)) {
+      blocked = blocked.filter(x => x.toLowerCase().trim() !== clean);
+    } else {
+      blocked.push(appName);
+    }
+    appsSitesData.blocked_apps = blocked;
+    renderAppsSitesList();
+    await saveAppsSitesSettings();
+  };
+
+  window.toggleSiteBlock = async (siteKey) => {
+    const clean = siteKey.toLowerCase().trim();
+    let blocked = appsSitesData.blocked_sites || [];
+    if (blocked.map(x => x.toLowerCase().trim()).includes(clean)) {
+      blocked = blocked.filter(x => x.toLowerCase().trim() !== clean);
+    } else {
+      blocked.push(siteKey);
+    }
+    appsSitesData.blocked_sites = blocked;
+    renderAppsSitesList();
+    await saveAppsSitesSettings();
+  };
+
+  window.removeFavoriteSite = async (idx) => {
+    if (!confirm('Deseja remover este site dos favoritos?')) return;
+    appsSitesData.favorite_sites.splice(idx, 1);
+    renderAppsSitesList();
+    await saveAppsSitesSettings();
+  };
+
+  async function saveAppsSitesSettings() {
+    const statusSpan = document.getElementById('appsSitesStatus');
+    if (statusSpan) statusSpan.textContent = 'Salvando no hardware...';
+    try {
+      await fetch('/api/settings/apps_sites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          blocked_apps: appsSitesData.blocked_apps,
+          favorite_sites: appsSitesData.favorite_sites,
+          blocked_sites: appsSitesData.blocked_sites
+        })
+      });
+      if (statusSpan) statusSpan.textContent = '✓ Configurações salvas e sincronizadas!';
+      showToast('✓ Lista de Apps e Sites atualizada');
+    } catch (err) {
+      console.error('Erro ao salvar settings apps/sites:', err);
+      if (statusSpan) statusSpan.textContent = 'Erro ao salvar alterações';
+    }
+  }
+
+  const tabBtnApps = document.getElementById('tabBtnAppsSitesApps');
+  const tabBtnSites = document.getElementById('tabBtnAppsSitesSites');
+  const contentApps = document.getElementById('contentAppsSitesApps');
+  const contentSites = document.getElementById('contentAppsSitesSites');
+
+  if (tabBtnApps && tabBtnSites) {
+    tabBtnApps.onclick = () => {
+      currentAppsSitesTab = 'apps';
+      tabBtnApps.classList.add('active');
+      tabBtnSites.classList.remove('active');
+      if (contentApps) contentApps.style.display = 'block';
+      if (contentSites) contentSites.style.display = 'none';
+      renderAppsSitesList();
+    };
+    tabBtnSites.onclick = () => {
+      currentAppsSitesTab = 'sites';
+      tabBtnSites.classList.add('active');
+      tabBtnApps.classList.remove('active');
+      if (contentApps) contentApps.style.display = 'none';
+      if (contentSites) contentSites.style.display = 'block';
+      renderAppsSitesList();
+    };
+  }
+
+  const searchAppsSites = document.getElementById('searchAppsSites');
+  if (searchAppsSites) {
+    searchAppsSites.addEventListener('input', () => renderAppsSitesList());
+  }
+
+  const btnAddFavoriteSite = document.getElementById('btnAddFavoriteSite');
+  if (btnAddFavoriteSite) {
+    btnAddFavoriteSite.onclick = async () => {
+      const inputName = document.getElementById('inputNewSiteName');
+      const inputUrl = document.getElementById('inputNewSiteUrl');
+      const name = inputName?.value.trim();
+      let url = inputUrl?.value.trim();
+      if (!name || !url) {
+        alert('Por favor informe o Nome e a URL do site');
+        return;
+      }
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+      let domain = '';
+      try {
+        domain = new URL(url).hostname;
+      } catch (_) {
+        domain = url;
+      }
+
+      if (!appsSitesData.favorite_sites) appsSitesData.favorite_sites = [];
+      appsSitesData.favorite_sites.unshift({ name, url, domain });
+      if (inputName) inputName.value = '';
+      if (inputUrl) inputUrl.value = '';
+      renderAppsSitesList();
+      await saveAppsSitesSettings();
+    };
+  }
+
+  const modalAppsSites = document.getElementById('modalAppsSites');
+  const btnCloseAppsSites = document.getElementById('btnCloseAppsSites');
+  const btnDoneAppsSites = document.getElementById('btnDoneAppsSites');
+  if (btnCloseAppsSites && modalAppsSites) {
+    btnCloseAppsSites.onclick = () => modalAppsSites.style.display = 'none';
+    if (btnDoneAppsSites) btnDoneAppsSites.onclick = () => modalAppsSites.style.display = 'none';
+    modalAppsSites.onclick = (e) => {
+      if (e.target === modalAppsSites) modalAppsSites.style.display = 'none';
+    };
+  }
+
+  document.querySelectorAll('.btn-open-apps-sites').forEach(btn => {
+    btn.onclick = (e) => {
+      e.preventDefault();
+      openAppsSitesModal();
+    };
+  });
 
   // Botões de Teste Instantâneo de Ações no macOS
   const btnTestCurrent = document.getElementById('btnTestCurrentAction');
@@ -3860,6 +4190,25 @@ function bindModalEvents() {
         showToast(enabled ? '✓ LED seguir suspensão ativado' : 'LED seguir suspensão desativado');
       } catch (err) {
         console.warn('Erro ao salvar led_sleep_follow:', err);
+      }
+    };
+  }
+
+  // Sensibilidade / Passo de Ajuste de Volume Global
+  const selVolStep = document.getElementById('settingVolumeStepSelect');
+  if (selVolStep) {
+    selVolStep.onchange = async (e) => {
+      const step = parseFloat(e.target.value) || 6.25;
+      state.volumeStep = step;
+      try {
+        await fetch('/api/settings/volume_step', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ step })
+        });
+        showToast(`✓ Passo de volume definido para ${step}%`);
+      } catch (err) {
+        console.warn('Erro ao salvar volume_step:', err);
       }
     };
   }

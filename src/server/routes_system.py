@@ -30,7 +30,11 @@ def register_system_routes(router: Router):
             "last_pressed_slot": getattr(engine, "_last_pressed_slot", None),
             "last_pressed_ts": getattr(engine, "_last_pressed_ts", 0.0),
             "pages": engine.config.get("pages", {}),
-            "rendered_frames": engine.get_rendered_frames_for_page() if hasattr(engine, "get_rendered_frames_for_page") else {}
+            "rendered_frames": engine.get_rendered_frames_for_page() if hasattr(engine, "get_rendered_frames_for_page") else {},
+            "volume_step": engine.config.get("volume_step", 6.25),
+            "blocked_apps": engine.config.get("blocked_apps", []),
+            "blocked_sites": engine.config.get("blocked_sites", []),
+            "favorite_sites": engine.config.get("favorite_sites", [])
         }
         router.send_json(handler, 200, data)
 
@@ -215,4 +219,112 @@ def register_system_routes(router: Router):
         ok = engine.set_autostart(enabled) if hasattr(engine, "set_autostart") else False
         is_now_enabled = engine.is_autostart_enabled() if hasattr(engine, "is_autostart_enabled") else False
         router.send_json(handler, 200, {"success": ok, "enabled": is_now_enabled})
+
+    @router.get("/api/audio/devices")
+    def get_audio_devices(handler, engine, query):
+        """Returns available macOS audio output devices and currently active output."""
+        devices = []
+        current = ""
+        bin_path = "/opt/homebrew/bin/SwitchAudioSource"
+        if not os.path.exists(bin_path):
+            bin_path = "SwitchAudioSource"
+        try:
+            out = subprocess.check_output([bin_path, "-a", "-t", "output"], timeout=2).decode().splitlines()
+            devices = [d.strip() for d in out if d.strip()]
+            current = subprocess.check_output([bin_path, "-c"], timeout=2).decode().strip()
+        except Exception as e:
+            print(f"[Server] Erro ao listar dispositivos de áudio: {e}")
+        router.send_json(handler, 200, {"devices": devices, "current": current})
+
+    @router.get("/api/settings/apps_sites")
+    def get_apps_sites_settings(handler, engine, query):
+        """Returns installed apps, blocked apps, favorite sites, and blocked sites."""
+        # 1. Installed apps
+        apps = []
+        seen = set()
+        search_dirs = [
+            "/Applications",
+            "/System/Applications",
+            "/System/Applications/Utilities",
+            os.path.expanduser("~/Applications")
+        ]
+        for d in search_dirs:
+            if os.path.exists(d):
+                try:
+                    for f in sorted(os.listdir(d)):
+                        if f.endswith(".app"):
+                            name = f[:-4]
+                            if name not in seen:
+                                seen.add(name)
+                                apps.append({"name": name, "path": os.path.join(d, f)})
+                except Exception:
+                    pass
+        apps.sort(key=lambda a: a["name"].lower())
+
+        default_favorites = [
+            {"name": "GitHub", "url": "https://github.com", "domain": "github.com"},
+            {"name": "ChatGPT", "url": "https://chatgpt.com", "domain": "chatgpt.com"},
+            {"name": "Claude", "url": "https://claude.ai", "domain": "claude.ai"},
+            {"name": "Figma", "url": "https://www.figma.com", "domain": "figma.com"},
+            {"name": "Notion", "url": "https://www.notion.so", "domain": "notion.so"},
+            {"name": "Reddit", "url": "https://www.reddit.com", "domain": "reddit.com"},
+            {"name": "YouTube", "url": "https://www.youtube.com", "domain": "youtube.com"},
+            {"name": "WhatsApp", "url": "https://web.whatsapp.com", "domain": "whatsapp.com"},
+            {"name": "X", "url": "https://x.com", "domain": "x.com"},
+            {"name": "LinkedIn", "url": "https://www.linkedin.com", "domain": "linkedin.com"},
+            {"name": "Gemini", "url": "https://gemini.google.com", "domain": "gemini.google.com"},
+            {"name": "Netflix", "url": "https://www.netflix.com", "domain": "netflix.com"},
+            {"name": "Twitch", "url": "https://www.twitch.tv", "domain": "twitch.tv"},
+            {"name": "Mercado Livre", "url": "https://www.mercadolivre.com.br", "domain": "mercadolivre.com.br"},
+            {"name": "Spotify", "url": "https://open.spotify.com", "domain": "spotify.com"},
+            {"name": "Envato", "url": "https://elements.envato.com", "domain": "envato.com"},
+            {"name": "Canva", "url": "https://www.canva.com", "domain": "canva.com"},
+            {"name": "Stack Overflow", "url": "https://stackoverflow.com", "domain": "stackoverflow.com"},
+        ]
+
+        data = {
+            "installed_apps": apps,
+            "blocked_apps": engine.config.get("blocked_apps", []),
+            "favorite_sites": engine.config.get("favorite_sites", default_favorites),
+            "blocked_sites": engine.config.get("blocked_sites", [])
+        }
+        router.send_json(handler, 200, data)
+
+    @router.post("/api/settings/apps_sites")
+    def save_apps_sites_settings(handler, engine, body):
+        """Saves blocked apps, favorite sites, and blocked sites configurations."""
+        if "blocked_apps" in body and isinstance(body["blocked_apps"], list):
+            engine.config["blocked_apps"] = body["blocked_apps"]
+        if "favorite_sites" in body and isinstance(body["favorite_sites"], list):
+            engine.config["favorite_sites"] = body["favorite_sites"]
+        if "blocked_sites" in body and isinstance(body["blocked_sites"], list):
+            engine.config["blocked_sites"] = body["blocked_sites"]
+        engine.save_config()
+
+        # Trigger dynamic update if engine has updater
+        if hasattr(engine, "update_dynamic_row2"):
+            try:
+                engine.update_dynamic_row2(force=True)
+            except Exception:
+                pass
+
+        router.send_json(handler, 200, {
+            "success": True,
+            "blocked_apps": engine.config.get("blocked_apps", []),
+            "favorite_sites": engine.config.get("favorite_sites", []),
+            "blocked_sites": engine.config.get("blocked_sites", [])
+        })
+
+    @router.post("/api/settings/volume_step")
+    def set_volume_step(handler, engine, body):
+        """Sets the global volume adjustment step percentage (e.g. 2, 5, 6.25, 10)."""
+        try:
+            step = float(body.get("step", 6.25))
+            if step <= 0:
+                step = 6.25
+        except (ValueError, TypeError):
+            step = 6.25
+        engine.config["volume_step"] = step
+        engine.save_config()
+        router.send_json(handler, 200, {"success": True, "volume_step": step})
 

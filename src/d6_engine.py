@@ -2197,6 +2197,8 @@ class D6Engine:
             "macspace", "finderhelper", "limpar caches", "abrir hub", "antigravity ide",
             "ccxprocess", "coreauth", "safari"
         }
+        user_blocked = {str(x).strip().lower() for x in self.config.get("blocked_apps", []) if str(x).strip()}
+        ignored.update(user_blocked)
 
         candidates = []
         seen_names = set()
@@ -2209,7 +2211,8 @@ class D6Engine:
             if "/utilities/" in p.lower() or "contents/" in p.lower() or "/adobe creative cloud/" in p.lower():
                 continue
             app_name = os.path.basename(p)[:-4]
-            if app_name.lower() in ignored:
+            app_lower = app_name.lower()
+            if app_lower in ignored or any(b in app_lower for b in user_blocked):
                 continue
 
             clean_key = app_name.lower().replace("adobe", "").strip()
@@ -2372,6 +2375,8 @@ end if
         ])
 
         candidates = []
+        user_blocked_sites = {str(x).strip().lower() for x in self.config.get("blocked_sites", []) if str(x).strip()}
+
         for site in default_favorites:
             dom = site.get("domain", "").lower()
             if not dom:
@@ -2379,6 +2384,11 @@ end if
                     dom = urllib.parse.urlparse(site.get("url", "")).netloc.lower()
                 except Exception:
                     dom = ""
+
+            # Se o site estiver na lista de bloqueio do usuário, ignora
+            site_url = site.get("url", "").lower()
+            if dom in user_blocked_sites or any(b in dom or (site_url and b in site_url) for b in user_blocked_sites):
+                continue
 
             # Se o domínio estiver aberto em alguma aba do Safari, NÃO vem para a lista!
             is_open = any(dom in host or host in dom for host in open_hosts)

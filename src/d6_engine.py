@@ -1114,10 +1114,15 @@ class D6Engine:
         border_color = key_data.get("borderColor")
         border_width = int(key_data.get("borderWidth", 0))
         image_fit = str(key_data.get("imageFit", "cover")).lower()
+
+        act = key_data.get("action", {})
+        act_type = str(act.get("type") or act.get("uuid") or "").lower()
+        icon = str(key_data.get("icon") or "").lower()
+        is_app_launcher = act_type == "open_app"
+
         custom_image = key_data.get("imagePath", None)
         if not custom_image:
-            act_obj = key_data.get("action", {})
-            act_uuid = str(act_obj.get("uuid") or key_data.get("uuid") or act_obj.get("type") or "").strip()
+            act_uuid = str(act.get("uuid") or key_data.get("uuid") or act.get("type") or "").strip()
             if act_uuid:
                 for cand in (
                     f"assets/native_icons/{act_uuid}_btn.jpg",
@@ -1140,18 +1145,21 @@ class D6Engine:
                 try:
                     raw_img = Image.open(cand_path)
                     has_alpha = raw_img.mode in ("RGBA", "LA") or (raw_img.mode == "P" and "transparency" in raw_img.info)
-                    if has_alpha or image_fit == "contain":
+                    if has_alpha or image_fit == "contain" or is_app_launcher:
                         img = Image.new("RGBA", self.KEY_SIZE, color=bg)
                         raw_rgba = raw_img.convert("RGBA")
-                        target_w, target_h = (int(self.KEY_SIZE[0] * 0.7), int(self.KEY_SIZE[1] * 0.7)) if has_alpha and show_title else self.KEY_SIZE
+                        # Para launcher de apps, ícone grande (76x76) ocupando o centro da tecla com margem elegante
+                        target_w, target_h = (76, 76) if is_app_launcher else ((int(self.KEY_SIZE[0] * 0.7), int(self.KEY_SIZE[1] * 0.7)) if has_alpha and show_title else self.KEY_SIZE)
                         ratio = min(target_w / raw_rgba.width, target_h / raw_rgba.height)
                         nw, nh = max(1, int(raw_rgba.width * ratio)), max(1, int(raw_rgba.height * ratio))
                         resized_icon = raw_rgba.resize((nw, nh), Image.Resampling.LANCZOS)
-                        offset_y = -10 if show_title and (title or subtitle) else 0
+                        offset_y = 0 if is_app_launcher else (-10 if show_title and (title or subtitle) else 0)
                         paste_x = (self.KEY_SIZE[0] - nw) // 2
                         paste_y = max(2, (self.KEY_SIZE[1] - nh) // 2 + offset_y)
                         img.paste(resized_icon, (paste_x, paste_y), mask=resized_icon)
                         img = img.convert("RGB")
+                        if is_app_launcher:
+                            return img  # Retorna o ícone do app em alta resolução sem texto atrapalhando!
                     else:
                         img = raw_img.convert("RGB").resize(self.KEY_SIZE, Image.Resampling.LANCZOS)
                 except Exception:
@@ -1171,18 +1179,14 @@ class D6Engine:
                 pass
 
         cx, cy = self.KEY_SIZE[0] // 2, self.KEY_SIZE[1] // 2
-        act = key_data.get("action", {})
-        act_type = str(act.get("type") or act.get("uuid") or "").lower()
-        icon = str(key_data.get("icon") or "").lower()
 
-        # Layout Especial para Métricas / HUD (Números Gigantes de altíssima legibilidade)
+        # Layout Especial para Métricas / HUD (Números Gigantes de altíssima legibilidade + Barra Visual Dinâmica)
         if act_type in ("system_stats", "systemstats"):
-            f_header = self._resolve_font(font_family, 12, bold=True)
-            f_huge = self._resolve_font(font_family, 26, bold=True)
-            f_unit = self._resolve_font(font_family, 10, bold=False)
+            f_header = self._resolve_font(font_family, 11, bold=True)
+            f_huge = self._resolve_font(font_family, 24, bold=True)
 
             # 1. Cabeçalho limpo no topo (ex: "CPU", "RAM", "SSD", "PING", "VOL")
-            draw.text((cx, cy - 26), (title or "STAT").upper(), fill="#a1a1aa", font=f_header, anchor="mm")
+            draw.text((cx, 16), (title or "STAT").upper(), fill="#94a3b8", font=f_header, anchor="mm")
 
             # 2. Valor Principal Gigante e Colorido (ex: "34%", "73%", "43GB", "3ms")
             val_text = subtitle or "--"
@@ -1193,14 +1197,43 @@ class D6Engine:
                 sub_unit = " ".join(parts[1:])
 
             accent_col = accent or "#38bdf8"
-            draw.text((cx, cy + (2 if not sub_unit else -2)), val_text, fill=accent_col, font=f_huge, anchor="mm")
+            draw.text((cx, 44), val_text, fill=accent_col, font=f_huge, anchor="mm")
 
-            if sub_unit:
-                draw.text((cx, cy + 20), sub_unit.upper(), fill="#71717a", font=f_unit, anchor="mm")
+            # 3. Barra visual do total baseado no que está sendo utilizado (ex: 32% de 100%)
+            track_w = 74
+            x1, x2 = cx - track_w // 2, cx + track_w // 2
+            y1, y2 = 70, 80
 
-            # 3. Barra de destaque moderna na base
-            bar_w = 24
-            draw.rounded_rectangle([(cx - bar_w, cy + 32), (cx + bar_w, cy + 34)], radius=1, fill=accent_col)
+            pct = 0
+            try:
+                import re
+                m_pct = re.search(r"(\d+)", val_text)
+                if m_pct:
+                    val_int = int(m_pct.group(1))
+                    tgt_l = str(act.get("target", "")).lower()
+                    if tgt_l == "disk" or "ssd" in tgt_l:
+                        import shutil
+                        tot, used, _ = shutil.disk_usage("/")
+                        pct = min(100, max(0, int((used / tot) * 100)))
+                    elif tgt_l in ("ping", "rede", "net"):
+                        pct = min(100, max(5, int((val_int / 80.0) * 100)))
+                    else:
+                        pct = min(100, max(0, val_int))
+            except Exception:
+                pct = 50
+
+            fill_w = int(track_w * (pct / 100.0))
+            # Track com contorno visível definindo a capacidade total (100%)
+            draw.rounded_rectangle([(x1, y1), (x2, y2)], radius=4, fill="#27272a", outline="#52525b", width=1)
+            # Preenchimento dinâmico do percentual utilizado
+            if fill_w > 0:
+                draw.rounded_rectangle([(x1, y1), (x1 + max(6, fill_w), y2)], radius=4, fill=accent_col)
+            # Marcadores de referência discretos a 25%, 50% e 75%
+            for mark in (0.25, 0.50, 0.75):
+                mx = x1 + int(track_w * mark)
+                if mx > x1 + fill_w + 3 and mx < x2 - 2:
+                    draw.line([(mx, y1 + 2), (mx, y2 - 2)], fill="#52525b", width=1)
+
             return img
 
         # Desenho de glifos vetorizados se não houver imagem customizada
@@ -1291,27 +1324,30 @@ class D6Engine:
                 draw.polygon([(cx + 4, cy + glyph_offset_y - 11), (cx + 10, cy + glyph_offset_y - 8), (cx + 7, cy + glyph_offset_y - 3)], fill=f_color)
             elif icon in ("headphones", "fone"):
                 f_color = accent or "#38bdf8"
-                draw.arc([(cx - 10, cy + glyph_offset_y - 10), (cx + 10, cy + glyph_offset_y + 10)], start=180, end=0, fill=f_color, width=2)
-                draw.rounded_rectangle([(cx - 12, cy + glyph_offset_y - 1), (cx - 7, cy + glyph_offset_y + 9)], radius=2, fill=f_color)
-                draw.rounded_rectangle([(cx + 7, cy + glyph_offset_y - 1), (cx + 12, cy + glyph_offset_y + 9)], radius=2, fill=f_color)
+                draw.arc([(cx - 18, 16), (cx + 18, 50)], start=180, end=0, fill=f_color, width=3)
+                draw.rounded_rectangle([(cx - 21, 32), (cx - 13, 50)], radius=3, fill=f_color)
+                draw.rounded_rectangle([(cx + 13, 32), (cx + 21, 50)], radius=3, fill=f_color)
             elif icon in ("speaker", "caixa"):
                 f_color = accent or "#f59e0b"
-                draw.polygon([(cx - 8, cy + glyph_offset_y - 5), (cx - 4, cy + glyph_offset_y - 5), (cx, cy + glyph_offset_y - 9), (cx, cy + glyph_offset_y + 9), (cx - 4, cy + glyph_offset_y + 5), (cx - 8, cy + glyph_offset_y + 5)], fill=f_color)
-                draw.arc([(cx - 2, cy + glyph_offset_y - 6), (cx + 6, cy + glyph_offset_y + 6)], start=300, end=60, fill=f_color, width=2)
-                draw.arc([(cx - 2, cy + glyph_offset_y - 10), (cx + 10, cy + glyph_offset_y + 10)], start=300, end=60, fill=f_color, width=2)
-            elif icon in ("volume-up", "volumedown", "volume-down", "vol_up", "vol_down"):
+                draw.polygon([(cx - 18, 27), (cx - 9, 27), (cx + 1, 19), (cx + 1, 53), (cx - 9, 45), (cx - 18, 45)], fill=f_color)
+                draw.arc([(cx - 4, 22), (cx + 12, 50)], start=300, end=60, fill=f_color, width=3)
+                draw.arc([(cx - 4, 14), (cx + 20, 58)], start=300, end=60, fill=f_color, width=3)
+            elif icon in ("volume-up", "vol_up"):
                 f_color = accent or "#f59e0b"
-                draw.polygon([(cx - 8, cy + glyph_offset_y - 5), (cx - 4, cy + glyph_offset_y - 5), (cx, cy + glyph_offset_y - 9), (cx, cy + glyph_offset_y + 9), (cx - 4, cy + glyph_offset_y + 5), (cx - 8, cy + glyph_offset_y + 5)], fill=f_color)
-                if "up" in icon or "vol_up" in icon:
-                    draw.line([(cx + 5, cy + glyph_offset_y), (cx + 11, cy + glyph_offset_y)], fill=f_color, width=2)
-                    draw.line([(cx + 8, cy + glyph_offset_y - 3), (cx + 8, cy + glyph_offset_y + 3)], fill=f_color, width=2)
-                else:
-                    draw.line([(cx + 5, cy + glyph_offset_y), (cx + 11, cy + glyph_offset_y)], fill=f_color, width=2)
+                draw.polygon([(cx - 18, 27), (cx - 9, 27), (cx + 1, 19), (cx + 1, 53), (cx - 9, 45), (cx - 18, 45)], fill=f_color)
+                px, py = cx + 13, 36
+                draw.line([(px - 7, py), (px + 7, py)], fill=f_color, width=3)
+                draw.line([(px, py - 7), (px, py + 7)], fill=f_color, width=3)
+            elif icon in ("volumedown", "volume-down", "vol_down"):
+                f_color = accent or "#f59e0b"
+                draw.polygon([(cx - 18, 27), (cx - 9, 27), (cx + 1, 19), (cx + 1, 53), (cx - 9, 45), (cx - 18, 45)], fill=f_color)
+                px, py = cx + 13, 36
+                draw.line([(px - 7, py), (px + 7, py)], fill=f_color, width=3)
             elif icon in ("play-pause", "playpause", "play"):
                 f_color = accent or "#22c55e"
-                draw.polygon([(cx - 8, cy + glyph_offset_y - 7), (cx - 8, cy + glyph_offset_y + 7), (cx - 1, cy + glyph_offset_y)], fill=f_color)
-                draw.line([(cx + 4, cy + glyph_offset_y - 7), (cx + 4, cy + glyph_offset_y + 7)], fill=f_color, width=2)
-                draw.line([(cx + 8, cy + glyph_offset_y - 7), (cx + 8, cy + glyph_offset_y + 7)], fill=f_color, width=2)
+                draw.polygon([(cx - 18, 23), (cx - 18, 49), (cx - 3, 36)], fill=f_color)
+                draw.rounded_rectangle([(cx + 4, 23), (cx + 8, 49)], radius=1, fill=f_color)
+                draw.rounded_rectangle([(cx + 13, 23), (cx + 17, 49)], radius=1, fill=f_color)
             elif icon in ("alert-triangle", "force_quit"):
                 f_color = accent or "#ef4444"
                 draw.polygon([(cx, cy + glyph_offset_y - 10), (cx - 10, cy + glyph_offset_y + 8), (cx + 10, cy + glyph_offset_y + 8)], outline=f_color, width=2)
@@ -1333,52 +1369,67 @@ class D6Engine:
             return img
 
         # Resolução de Tipografia com fontes reais do macOS
-        font_title = self._resolve_font(font_family, font_size, bold=bold, italic=italic)
-        font_sub = self._resolve_font(font_family, max(9, font_size - 4), bold=False, italic=italic)
+        is_audio_media_key = icon in (
+            "headphones", "fone", "speaker", "caixa",
+            "volume-up", "vol_up", "volumedown", "volume-down", "vol_down",
+            "play-pause", "playpause", "play"
+        )
+        if is_audio_media_key:
+            y_base = cy + 24
+            cur_fs = max(13, font_size)
+            font_title = self._resolve_font(font_family, cur_fs, bold=True)
+            while cur_fs > 10 and draw.textbbox((0, 0), title, font=font_title)[2] > 88:
+                cur_fs -= 1
+                font_title = self._resolve_font(font_family, cur_fs, bold=True)
+            draw.text((cx + 1, y_base + 1), title, fill="#000000", font=font_title, anchor="mm")
+            draw.text((cx, y_base), title, fill="#ffffff", font=font_title, anchor="mm")
+        else:
+            font_title = self._resolve_font(font_family, font_size, bold=bold, italic=italic)
+            font_sub = self._resolve_font(font_family, max(9, font_size - 4), bold=False, italic=italic)
 
-        # Alinhamento vertical
-        if title_align == "top":
-            y_base = cy - 20
-        elif title_align == "bottom":
-            y_base = cy + 20
-        else:  # middle / center
-            y_base = cy + (6 if not custom_image and icon in ("arrow-left", "folder", "multiaction", "routine") else 0)
+            # Alinhamento vertical
+            if title_align == "top":
+                y_base = cy - 20
+            elif title_align == "bottom":
+                y_base = cy + 20
+            else:  # middle / center
+                y_base = cy + (6 if not custom_image and icon in ("arrow-left", "folder", "multiaction", "routine") else 0)
 
-        if title and subtitle:
-            # Sombra de 1px para contraste
-            draw.text((cx + 1, y_base - 7), title, fill="#000000", font=font_title, anchor="mm")
-            draw.text((cx, y_base - 8), title, fill=text_color, font=font_title, anchor="mm")
-            draw.text((cx + 1, y_base + 15), subtitle, fill="#000000", font=font_sub, anchor="mm")
-            draw.text((cx, y_base + 14), subtitle, fill="#a1a1aa", font=font_sub, anchor="mm")
+            if title and subtitle:
+                # Sombra de 1px para contraste
+                draw.text((cx + 1, y_base - 7), title, fill="#000000", font=font_title, anchor="mm")
+                draw.text((cx, y_base - 8), title, fill=text_color, font=font_title, anchor="mm")
+                draw.text((cx + 1, y_base + 15), subtitle, fill="#000000", font=font_sub, anchor="mm")
+                draw.text((cx, y_base + 14), subtitle, fill="#a1a1aa", font=font_sub, anchor="mm")
 
-            if underline:
-                bbox = draw.textbbox((cx, y_base - 8), title, font=font_title, anchor="mm")
-                draw.line([(bbox[0], bbox[3] + 1), (bbox[2], bbox[3] + 1)], fill=text_color, width=1)
-        elif title:
-            lines = [l.strip() for l in title.split("\n") if l.strip()]
-            if len(lines) == 1 and (" " in lines[0] or "-" in lines[0]):
-                # Se for uma linha só mas tiver espaços e exceder o espaço da tecla, divide em 2 linhas
-                words = lines[0].split()
-                if len(words) >= 2:
-                    mid = len(words) // 2
-                    lines = [" ".join(words[:mid]), " ".join(words[mid:])]
-
-            if len(lines) >= 2:
-                draw.text((cx + 1, y_base - 9), lines[0], fill="#000000", font=font_title, anchor="mm")
-                draw.text((cx, y_base - 10), lines[0], fill=text_color, font=font_title, anchor="mm")
-                draw.text((cx + 1, y_base + 11), lines[1], fill="#000000", font=font_title, anchor="mm")
-                draw.text((cx, y_base + 10), lines[1], fill=text_color, font=font_title, anchor="mm")
                 if underline:
-                    b1 = draw.textbbox((cx, y_base - 10), lines[0], font=font_title, anchor="mm")
-                    b2 = draw.textbbox((cx, y_base + 10), lines[1], font=font_title, anchor="mm")
-                    draw.line([(b1[0], b1[3] + 1), (b1[2], b1[3] + 1)], fill=text_color, width=1)
-                    draw.line([(b2[0], b2[3] + 1), (b2[2], b2[3] + 1)], fill=text_color, width=1)
-            else:
-                draw.text((cx + 1, y_base + 1), title, fill="#000000", font=font_title, anchor="mm")
-                draw.text((cx, y_base), title, fill=text_color, font=font_title, anchor="mm")
-                if underline:
-                    bbox = draw.textbbox((cx, y_base), title, font=font_title, anchor="mm")
+                    bbox = draw.textbbox((cx, y_base - 8), title, font=font_title, anchor="mm")
                     draw.line([(bbox[0], bbox[3] + 1), (bbox[2], bbox[3] + 1)], fill=text_color, width=1)
+            elif title:
+                lines = [l.strip() for l in title.split("\n") if l.strip()]
+                if len(lines) == 1 and (" " in lines[0] or "-" in lines[0]):
+                    # Se for uma linha só mas tiver espaços e exceder o espaço da tecla, divide em 2 linhas
+                    words = lines[0].split()
+                    if len(words) >= 2:
+                        mid = len(words) // 2
+                        lines = [" ".join(words[:mid]), " ".join(words[mid:])]
+
+                if len(lines) >= 2:
+                    draw.text((cx + 1, y_base - 9), lines[0], fill="#000000", font=font_title, anchor="mm")
+                    draw.text((cx, y_base - 10), lines[0], fill=text_color, font=font_title, anchor="mm")
+                    draw.text((cx + 1, y_base + 11), lines[1], fill="#000000", font=font_title, anchor="mm")
+                    draw.text((cx, y_base + 10), lines[1], fill=text_color, font=font_title, anchor="mm")
+                    if underline:
+                        b1 = draw.textbbox((cx, y_base - 10), lines[0], font=font_title, anchor="mm")
+                        b2 = draw.textbbox((cx, y_base + 10), lines[1], font=font_title, anchor="mm")
+                        draw.line([(b1[0], b1[3] + 1), (b1[2], b1[3] + 1)], fill=text_color, width=1)
+                        draw.line([(b2[0], b2[3] + 1), (b2[2], b2[3] + 1)], fill=text_color, width=1)
+                else:
+                    draw.text((cx + 1, y_base + 1), title, fill="#000000", font=font_title, anchor="mm")
+                    draw.text((cx, y_base), title, fill=text_color, font=font_title, anchor="mm")
+                    if underline:
+                        bbox = draw.textbbox((cx, y_base), title, font=font_title, anchor="mm")
+                        draw.line([(bbox[0], bbox[3] + 1), (bbox[2], bbox[3] + 1)], fill=text_color, width=1)
 
         # Micro-animação tátil: compressão/afundamento da tecla com borda e escala reduzida
         if is_pressed:
@@ -2057,7 +2108,7 @@ class D6Engine:
         return metrics
 
     def get_recent_unopened_apps(self, count: int = 5) -> List[Dict[str, Any]]:
-        """Identifies recently used user apps on macOS that are NOT currently running."""
+        """Identifies recently used user apps on macOS that are NOT currently running, guaranteed unique and filled."""
         import subprocess, os
 
         try:
@@ -2079,6 +2130,9 @@ class D6Engine:
         }
 
         candidates = []
+        seen_names = set()
+        seen_paths = set()
+
         for p in out:
             p = p.strip()
             if not p.endswith(".app") or not os.path.exists(p):
@@ -2089,8 +2143,12 @@ class D6Engine:
             if app_name.lower() in ignored:
                 continue
 
+            clean_key = app_name.lower().replace("adobe", "").strip()
+            if clean_key in seen_names or p in seen_paths:
+                continue
+
             # Skip if already running
-            if any(app_name.lower() in exe for exe in running_exes):
+            if any(clean_key in exe or app_name.lower() in exe for exe in running_exes):
                 continue
 
             try:
@@ -2101,15 +2159,47 @@ class D6Engine:
                         d_str = l.split("=")[1].strip()
                 if d_str:
                     candidates.append((d_str, app_name, p))
+                    seen_names.add(clean_key)
+                    seen_paths.add(p)
             except Exception:
                 pass
 
         candidates.sort(reverse=True)
         selected = candidates[:count]
 
+        # Fallback pool if fewer than count apps were found
+        fallback_pool = [
+            ("Pearcleaner", "/Applications/Pearcleaner.app"),
+            ("OrbStack", "/Applications/OrbStack.app"),
+            ("Camo Studio", "/Applications/Camo Studio.app"),
+            ("Adobe InDesign 2026", "/Applications/Adobe InDesign 2026/Adobe InDesign 2026.app"),
+            ("Adobe Media Encoder 2026", "/Applications/Adobe Media Encoder 2026/Adobe Media Encoder 2026.app"),
+            ("The Unarchiver", "/Applications/The Unarchiver.app"),
+            ("Adobe Photoshop 2026", "/Applications/Adobe Photoshop 2026/Adobe Photoshop 2026.app"),
+            ("Adobe Premiere Pro 2026", "/Applications/Adobe Premiere Pro 2026/Adobe Premiere Pro 2026.app"),
+            ("Adobe Illustrator", "/Applications/Adobe Illustrator 2026/Adobe Illustrator.app"),
+            ("Steam", "/Applications/Steam.app"),
+            ("Microsoft Teams", "/Applications/Microsoft Teams.app"),
+            ("PixPin", "/Applications/PixPin.app"),
+        ]
+        if len(selected) < count:
+            for fb_name, fb_path in fallback_pool:
+                if len(selected) >= count:
+                    break
+                if not os.path.exists(fb_path):
+                    continue
+                clean_key = fb_name.lower().replace("adobe", "").strip()
+                if clean_key in seen_names or fb_path in seen_paths:
+                    continue
+                if any(clean_key in exe or fb_name.lower() in exe for exe in running_exes):
+                    continue
+                seen_names.add(clean_key)
+                seen_paths.add(fb_path)
+                selected.append(("", fb_name, fb_path))
+
         # Extract/cache PNG icons using native sips
         result = []
-        for _, name, path in selected:
+        for _, name, path in selected[:count]:
             clean_name = ''.join(c for c in name if c.isalnum())
             icon_png = f"/tmp/d6_icon_{clean_name}.png"
             if not os.path.exists(icon_png):
@@ -2118,7 +2208,8 @@ class D6Engine:
                     icns_files = [f for f in os.listdir(res_dir) if f.endswith(".icns")]
                     target_icns = None
                     for cand in icns_files:
-                        if "appicon" in cand.lower() or clean_name.lower() in cand.lower():
+                        cand_l = cand.lower()
+                        if any(k in cand_l for k in ("appicon", clean_name.lower(), "icon", "app")):
                             target_icns = cand
                             break
                     if not target_icns and icns_files:
@@ -2235,28 +2326,30 @@ class D6Engine:
                             if now_dyn - getattr(self, "_last_dyn_apps_check", 0) >= 4.0:
                                 self._last_dyn_apps_check = now_dyn
                                 recent_apps = self.get_recent_unopened_apps(5)
-                                for idx, app_info in enumerate(recent_apps):
+                                for idx in range(5):
                                     slot_num = 6 + idx
                                     slot_str = str(slot_num)
-                                    cur_k = page.get("keys", {}).get(slot_str, {})
-                                    if cur_k.get("title") != app_info["name"]:
-                                        page.setdefault("keys", {})[slot_str] = {
-                                            "title": app_info["name"],
-                                            "subtitle": "",
-                                            "bg": "#18181b",
-                                            "textColor": "#ffffff",
-                                            "accent": "#38bdf8",
-                                            "fontSize": 11,
-                                            "bold": True,
-                                            "fontFamily": "Helvetica",
-                                            "showTitle": True,
-                                            "imagePath": app_info["imagePath"],
-                                            "action": {
-                                                "type": "open_app",
-                                                "target": app_info["path"]
+                                    if idx < len(recent_apps):
+                                        app_info = recent_apps[idx]
+                                        cur_k = page.get("keys", {}).get(slot_str, {})
+                                        if cur_k.get("title") != app_info["name"] or not cur_k.get("imagePath") or cur_k.get("showTitle") is not False:
+                                            page.setdefault("keys", {})[slot_str] = {
+                                                "title": app_info["name"],
+                                                "subtitle": "",
+                                                "bg": "#18181b",
+                                                "textColor": "#ffffff",
+                                                "accent": "#38bdf8",
+                                                "fontSize": 11,
+                                                "bold": True,
+                                                "fontFamily": "Helvetica",
+                                                "showTitle": False,
+                                                "imagePath": app_info["imagePath"],
+                                                "action": {
+                                                    "type": "open_app",
+                                                    "target": app_info["path"]
+                                                }
                                             }
-                                        }
-                                        self.sync_key(slot_num, force=True, page_id=page_id)
+                                            self.sync_key(slot_num, force=True, page_id=page_id)
                 except Exception as err:
                     pass
                 time.sleep(1.0)

@@ -63,14 +63,16 @@ class ToggleAudioOutputCommand(ActionCommand):
             curr = subprocess.check_output(["/opt/homebrew/bin/SwitchAudioSource", "-c"], timeout=1).decode().strip()
             if "fone" in curr.lower():
                 target = "Alto-falantes (Mac mini)"
-                new_title = "Caixa"
-                new_sub = "Alto-falante"
+                new_title = "CAIXA"
+                new_sub = ""
                 new_accent = "#f59e0b"
+                new_icon = "speaker"
             else:
                 target = "fone bom"
-                new_title = "Fone"
-                new_sub = "Bluetooth"
+                new_title = "FONE"
+                new_sub = ""
                 new_accent = "#38bdf8"
+                new_icon = "headphones"
 
             subprocess.run(["/opt/homebrew/bin/SwitchAudioSource", "-s", target], timeout=2)
 
@@ -81,6 +83,7 @@ class ToggleAudioOutputCommand(ActionCommand):
                     k_data["title"] = new_title
                     k_data["subtitle"] = new_sub
                     k_data["accent"] = new_accent
+                    k_data["icon"] = new_icon
                     engine.sync_key(slot, force=True, page_id=page_id)
             return True
         except Exception as e:

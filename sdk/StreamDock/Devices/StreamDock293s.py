@@ -83,9 +83,9 @@ class StreamDock293s(StreamDock):
     def set_brightness(self, percent):
         return self.transport.setBrightness(percent)
 
-    # Set device background image 854 * 480
     def set_touchscreen_image(self, image):
-        image = Image.open(image)
+        if not isinstance(image, Image.Image):
+            image = Image.open(image)
         image = to_native_touchscreen_format(self, image)
         width, height = image.size
         bgr_data = []

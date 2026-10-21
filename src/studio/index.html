@@ -1033,6 +1033,45 @@
                       </label>
                     </div>
                   </div>
+
+                  <!-- Tela de Inicialização & Standby (Boot Screen) -->
+                  <div class="setting-row" style="align-items: flex-start; padding-top: 14px; padding-bottom: 14px;">
+                    <div class="setting-label-group">
+                      <span class="setting-title" style="display: flex; align-items: center; gap: 8px;">
+                        Tela de Inicialização & Standby
+                        <span id="badgeBootScreenMode" class="badge-status-neutral" style="font-size: 11px; padding: 2px 8px; border-radius: 9999px; background: #27272a; color: #a1a1aa;">Preto (Limpo)</span>
+                      </span>
+                      <span class="setting-desc">Imagem gravada na memória de fundo do teclado (854×480) exibida quando o Mac liga ou entra em standby.</span>
+                    </div>
+                    <div class="setting-control-group" style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                      <div style="display: flex; gap: 8px;">
+                        <input type="file" id="inputCustomBootImage" accept="image/png, image/jpeg" style="display: none;">
+                        <button class="fifine-btn secondary-sm" id="btnUploadBootScreen" title="Selecionar imagem personalizada para gravar no teclado">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                          Personalizar
+                        </button>
+                        <button class="fifine-btn danger-sm" id="btnResetBootScreen" title="Apaga qualquer logo antigo gravado no hardware e define tela preta limpa">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                          Resetar para Preto
+                        </button>
+                      </div>
+                      <span id="bootScreenStatusMsg" style="font-size: 11px; color: #71717a;"></span>
+                    </div>
+                  </div>
+
+                  <!-- Iniciar com a Sessão do macOS -->
+                  <div class="setting-row">
+                    <div class="setting-label-group">
+                      <span class="setting-title">Iniciar com a Sessão do macOS</span>
+                      <span class="setting-desc">Carrega o driver automaticamente no login para conectar e ativar as teclas de imediato</span>
+                    </div>
+                    <div class="setting-control-group">
+                      <label class="studio-switch">
+                        <input type="checkbox" id="settingAutostartCheck">
+                        <span class="switch-slider"></span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Aba Geral -->

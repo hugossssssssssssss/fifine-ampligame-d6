@@ -110,6 +110,10 @@ def test_server_router():
     router = create_app_router()
     assert "/api/state" in router._get_routes, "GET /api/state deve estar registrado"
     assert "/api/connect" in router._get_routes, "GET /api/connect deve estar registrado"
+    assert "/api/startup_screen" in router._get_routes, "GET /api/startup_screen deve estar registrado"
+    assert "/api/startup_screen" in router._post_routes, "POST /api/startup_screen deve estar registrado"
+    assert "/api/autostart" in router._get_routes, "GET /api/autostart deve estar registrado"
+    assert "/api/autostart" in router._post_routes, "POST /api/autostart deve estar registrado"
     assert "/api/key/update" in router._post_routes, "POST /api/key/update deve estar registrado"
     assert "/api/page/select" in router._post_routes, "POST /api/page/select deve estar registrado"
     assert "/api/obs/status" in router._get_routes, "GET /api/obs/status deve estar registrado"

@@ -24,6 +24,9 @@ def register_system_routes(router: Router):
             "rotation": engine.config.get("rotation", 0),
             "is_asleep": getattr(engine, "is_asleep", False),
             "idle_seconds": int(time.time() - getattr(engine, "_last_activity_time", time.time())),
+            "startup_screen_mode": engine.config.get("startup_screen_mode", "black"),
+            "startup_screen_path": engine.config.get("startup_screen_path", ""),
+            "autostart_enabled": engine.is_autostart_enabled() if hasattr(engine, "is_autostart_enabled") else False,
             "last_pressed_slot": getattr(engine, "_last_pressed_slot", None),
             "last_pressed_ts": getattr(engine, "_last_pressed_ts", 0.0),
             "pages": engine.config.get("pages", {})
@@ -175,3 +178,40 @@ def register_system_routes(router: Router):
                     pass
 
         router.send_json(handler, 200, {"success": True, "pages": engine.config.get("pages", {})})
+
+    @router.get("/api/startup_screen")
+    def get_startup_screen(handler, engine, query):
+        """Returns startup screen status and current mode."""
+        info = engine.get_startup_screen_info() if hasattr(engine, "get_startup_screen_info") else {
+            "mode": engine.config.get("startup_screen_mode", "black"),
+            "path": engine.config.get("startup_screen_path", ""),
+            "device_connected": engine.is_connected()
+        }
+        router.send_json(handler, 200, info)
+
+    @router.post("/api/startup_screen")
+    def set_startup_screen(handler, engine, body):
+        """Sets or resets the startup/standby background screen on the physical device."""
+        action = body.get("action", "reset")
+        path = body.get("path", None)
+        if action == "reset" or not path:
+            ok = engine.reset_startup_screen(persist=True)
+        else:
+            ok = engine.set_startup_screen(path, persist=True)
+        info = engine.get_startup_screen_info() if hasattr(engine, "get_startup_screen_info") else {}
+        router.send_json(handler, 200, {"success": ok, "info": info})
+
+    @router.get("/api/autostart")
+    def get_autostart(handler, engine, query):
+        """Returns whether the macOS user LaunchAgent autostart is enabled."""
+        enabled = engine.is_autostart_enabled() if hasattr(engine, "is_autostart_enabled") else False
+        router.send_json(handler, 200, {"enabled": enabled})
+
+    @router.post("/api/autostart")
+    def set_autostart(handler, engine, body):
+        """Enables or disables automatic startup on macOS user session login."""
+        enabled = bool(body.get("enabled", False))
+        ok = engine.set_autostart(enabled) if hasattr(engine, "set_autostart") else False
+        is_now_enabled = engine.is_autostart_enabled() if hasattr(engine, "is_autostart_enabled") else False
+        router.send_json(handler, 200, {"success": ok, "enabled": is_now_enabled})
+

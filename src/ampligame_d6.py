@@ -539,6 +539,49 @@ def cmd_studio(args):
     run_studio(auto_open=not args.no_open)
 
 
+def cmd_reset_boot(args):
+    """Resets the device startup / standby background to pure black."""
+    from d6_engine import D6Engine
+    engine = D6Engine()
+    if not engine.connect():
+        print("Erro: Nenhum Fifine AmpliGame D6 detectado via USB. Verifique o cabo ou feche o app oficial se estiver bloqueando.")
+        sys.exit(1)
+    if engine.reset_startup_screen(persist=True):
+        print("✓ Tela de inicialização (boot screen) do hardware resetada com sucesso para preto.")
+    else:
+        print("Erro ao resetar tela de inicialização.")
+        sys.exit(1)
+
+
+def cmd_set_boot(args):
+    """Sets a custom image as the hardware startup / standby background."""
+    from d6_engine import D6Engine
+    engine = D6Engine()
+    if not engine.connect():
+        print("Erro: Nenhum Fifine AmpliGame D6 detectado via USB. Verifique o cabo ou feche o app oficial se estiver bloqueando.")
+        sys.exit(1)
+    if engine.set_startup_screen(args.image, persist=True):
+        print(f"✓ Tela de inicialização atualizada com sucesso com a imagem: {args.image}")
+    else:
+        print("Erro ao atualizar tela de inicialização.")
+        sys.exit(1)
+
+
+def cmd_autostart(args):
+    """Manages macOS user LaunchAgent autostart."""
+    from d6_engine import D6Engine
+    engine = D6Engine()
+    if args.action == "enable":
+        ok = engine.set_autostart(True)
+        print(f"{'✓' if ok else '✗'} Inicialização automática com o macOS: ATIVADA")
+    elif args.action == "disable":
+        ok = engine.set_autostart(False)
+        print(f"{'✓' if ok else '✗'} Inicialização automática com o macOS: DESATIVADA")
+    else:
+        status = "ATIVADA" if engine.is_autostart_enabled() else "DESATIVADA"
+        print(f"Status da inicialização automática com o macOS: {status}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Fifine AmpliGame D6 Autonomous CLI Controller")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -572,6 +615,17 @@ def main():
     # daemon
     subparsers.add_parser("daemon", help="Inicia o serviço interativo com widgets e ações nos botões")
 
+    # reset-boot
+    subparsers.add_parser("reset-boot", help="Reseta a tela de inicialização do hardware para preto limpo")
+
+    # set-boot
+    p_sboot = subparsers.add_parser("set-boot", help="Define uma imagem personalizada para inicialização no hardware")
+    p_sboot.add_argument("--image", "-i", type=str, required=True, help="Caminho do arquivo de imagem (JPEG/PNG)")
+
+    # autostart
+    p_auto = subparsers.add_parser("autostart", help="Gerencia o serviço de inicialização automática com o login do macOS")
+    p_auto.add_argument("action", choices=["enable", "disable", "status"], default="status", nargs="?", help="enable, disable ou status")
+
     # studio / ui
     p_studio = subparsers.add_parser("studio", help="Inicia a interface visual Studio Pro no navegador")
     p_studio.add_argument("--no-open", action="store_true", help="Não abre automaticamente o navegador")
@@ -589,6 +643,9 @@ def main():
         "monitor": cmd_monitor,
         "demo": cmd_demo,
         "daemon": cmd_daemon,
+        "reset-boot": cmd_reset_boot,
+        "set-boot": cmd_set_boot,
+        "autostart": cmd_autostart,
         "studio": cmd_studio,
         "ui": cmd_studio,
     }

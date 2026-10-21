@@ -82,6 +82,8 @@ DEFAULT_PROFILES = {
     "led_sleep_follow": True,
     "screen_off_seconds": 0,
     "rotation": 0,
+    "startup_screen_mode": "black",
+    "startup_screen_path": "",
     "pages": {
         "principal": {
             "name": "Principal & Workspace",
@@ -773,6 +775,24 @@ class D6Engine:
             self.device.set_key_callback(self._on_hardware_key)
             self._is_open = True
             print("[Engine] AmpliGame D6 conectado e pronto.")
+
+            # Clear any stale icons from previous sessions/apps
+            try:
+                self.device.clearAllIcon()
+            except Exception as clear_err:
+                print(f"[Engine] Note: clearAllIcon during connect: {clear_err}")
+
+            # Apply startup background screen to override old vendor flash image
+            startup_mode = self.config.get("startup_screen_mode", "black")
+            startup_path = self.config.get("startup_screen_path")
+            try:
+                if startup_mode == "custom" and startup_path and os.path.exists(startup_path):
+                    self.set_startup_screen(startup_path, persist=False)
+                else:
+                    self.reset_startup_screen(persist=False)
+            except Exception as bg_err:
+                print(f"[Engine] Note: Error updating hardware background screen: {bg_err}")
+
             self._displayed_key_hashes.clear()
             self.sync_all_keys(force=True)
             return True
@@ -1228,6 +1248,129 @@ class D6Engine:
             return True
         except Exception as e:
             print(f"[Engine] Erro ao aplicar mural de wallpaper: {e}")
+            return False
+
+    def set_startup_screen(self, image_path: Optional[str] = None, persist: bool = True) -> bool:
+        """
+        Sets or flashes the full-screen (854x480) startup / standby image on the physical D6.
+        If image_path is None or 'black', a solid pure black image is generated and sent.
+        """
+        target_w, target_h = 854, 480
+        out_dir = Path(__file__).resolve().parent / "studio" / "user_images"
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        try:
+            if not image_path or image_path == "black":
+                canvas = Image.new("RGB", (target_w, target_h), (0, 0, 0))
+                saved_path = out_dir / "startup_screen_black.jpg"
+                canvas.save(saved_path, "JPEG", quality=95)
+                mode = "black"
+                stored_path = ""
+            else:
+                if not os.path.exists(image_path):
+                    print(f"[Engine] Startup screen image does not exist: {image_path}")
+                    return False
+                img = Image.open(image_path).convert("RGB")
+                img_ratio = img.width / img.height
+                target_ratio = target_w / target_h
+                if img_ratio > target_ratio:
+                    new_h = target_h
+                    new_w = int(target_h * img_ratio)
+                else:
+                    new_w = target_w
+                    new_h = int(target_w / img_ratio)
+                resized = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+                left = (new_w - target_w) // 2
+                top = (new_h - target_h) // 2
+                canvas = resized.crop((left, top, left + target_w, top + target_h))
+                saved_path = out_dir / "startup_screen_custom.jpg"
+                canvas.save(saved_path, "JPEG", quality=95)
+                mode = "custom"
+                stored_path = str(saved_path)
+
+            if persist:
+                self.config["startup_screen_mode"] = mode
+                self.config["startup_screen_path"] = stored_path
+                self.save_config()
+
+            if self.device and self._is_open:
+                try:
+                    self.device.set_touchscreen_image(str(saved_path))
+                    print(f"[Engine] Hardware startup/standby background updated ({mode})")
+                except Exception as dev_err:
+                    print(f"[Engine] Device set_touchscreen_image error: {dev_err}")
+            return True
+        except Exception as e:
+            print(f"[Engine] Failed to set startup screen: {e}")
+            return False
+
+    def reset_startup_screen(self, persist: bool = True) -> bool:
+        """Resets the startup screen to pure black, removing any old logo from hardware."""
+        return self.set_startup_screen(None, persist=persist)
+
+    def get_startup_screen_info(self) -> Dict[str, Any]:
+        """Returns the current startup screen settings."""
+        return {
+            "mode": self.config.get("startup_screen_mode", "black"),
+            "path": self.config.get("startup_screen_path", ""),
+            "device_connected": self.is_connected()
+        }
+
+    LAUNCH_AGENT_LABEL = "com.hugosilva.ampligame-d6"
+    LAUNCH_AGENT_FILE = Path.home() / "Library" / "LaunchAgents" / "com.hugosilva.ampligame-d6.plist"
+
+    def is_autostart_enabled(self) -> bool:
+        """Checks if the user LaunchAgent plist exists for automatic startup on login."""
+        return self.LAUNCH_AGENT_FILE.exists()
+
+    def set_autostart(self, enable: bool) -> bool:
+        """Enables or disables the macOS user LaunchAgent daemon for automatic startup on login."""
+        import subprocess
+
+        self.LAUNCH_AGENT_FILE.parent.mkdir(parents=True, exist_ok=True)
+        cli_path = Path(__file__).resolve().parent.parent / "run_cli.py"
+        repo_dir = Path(__file__).resolve().parent.parent
+
+        plist_str = f"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>{self.LAUNCH_AGENT_LABEL}</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>{sys.executable}</string>
+        <string>{cli_path}</string>
+        <string>studio</string>
+        <string>--no-open</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>WorkingDirectory</key>
+    <string>{repo_dir}</string>
+    <key>StandardOutPath</key>
+    <string>{Path.home() / "Library" / "Logs" / "ampligame-d6.log"}</string>
+    <key>StandardErrorPath</key>
+    <string>{Path.home() / "Library" / "Logs" / "ampligame-d6.log"}</string>
+</dict>
+</plist>
+"""
+        try:
+            if enable:
+                with open(self.LAUNCH_AGENT_FILE, "w", encoding="utf-8") as f:
+                    f.write(plist_str.strip() + "\n")
+                subprocess.run(["launchctl", "load", str(self.LAUNCH_AGENT_FILE)], check=False)
+                print(f"[Engine] LaunchAgent created and loaded at {self.LAUNCH_AGENT_FILE}")
+            else:
+                if self.LAUNCH_AGENT_FILE.exists():
+                    subprocess.run(["launchctl", "unload", str(self.LAUNCH_AGENT_FILE)], check=False)
+                    self.LAUNCH_AGENT_FILE.unlink(missing_ok=True)
+                    print(f"[Engine] LaunchAgent unloaded and removed")
+            return True
+        except Exception as e:
+            print(f"[Engine] Failed to set autostart to {enable}: {e}")
             return False
 
     def get_hw_key_for_slot(self, slot: int) -> int:

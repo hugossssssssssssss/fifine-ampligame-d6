@@ -229,6 +229,28 @@ async function loadServerState(isBackground = false) {
           selScreenOff.value = String(data.screen_off_seconds);
         }
       }
+      if (data.startup_screen_mode !== undefined) {
+        state.startupScreenMode = data.startup_screen_mode;
+        const badgeBoot = document.getElementById('badgeBootScreenMode');
+        if (badgeBoot) {
+          if (state.startupScreenMode === 'custom') {
+            badgeBoot.textContent = 'Personalizado';
+            badgeBoot.style.background = 'rgba(59, 130, 246, 0.2)';
+            badgeBoot.style.color = '#60a5fa';
+          } else {
+            badgeBoot.textContent = 'Preto (Limpo)';
+            badgeBoot.style.background = '#27272a';
+            badgeBoot.style.color = '#a1a1aa';
+          }
+        }
+      }
+      if (data.autostart_enabled !== undefined) {
+        state.autostartEnabled = !!data.autostart_enabled;
+        const chkAutostart = document.getElementById('settingAutostartCheck');
+        if (chkAutostart) {
+          chkAutostart.checked = state.autostartEnabled;
+        }
+      }
       if (data.is_asleep !== undefined) {
         state.isAsleep = !!data.is_asleep;
         const statusText = document.querySelector('.status-text');
@@ -3292,6 +3314,123 @@ function bindModalEvents() {
         showToast(enabled ? '✓ LED seguir suspensão ativado' : 'LED seguir suspensão desativado');
       } catch (err) {
         console.warn('Erro ao salvar led_sleep_follow:', err);
+      }
+    };
+  }
+
+  // Resetar Tela de Inicialização do Hardware para Preto Limpo
+  const btnResetBoot = document.getElementById('btnResetBootScreen');
+  if (btnResetBoot) {
+    btnResetBoot.onclick = async () => {
+      showToast('Resetando tela de inicialização para preto...');
+      try {
+        const res = await fetch('/api/startup_screen', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'reset' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          const badgeBoot = document.getElementById('badgeBootScreenMode');
+          if (badgeBoot) {
+            badgeBoot.textContent = 'Preto (Limpo)';
+            badgeBoot.style.background = '#27272a';
+            badgeBoot.style.color = '#a1a1aa';
+          }
+          const msg = document.getElementById('bootScreenStatusMsg');
+          if (msg) msg.textContent = '✓ Tela gravada no hardware como preto limpo';
+          showToast('✓ Logo resetado! Fundo preto gravado no hardware com sucesso.');
+        } else {
+          showToast('Falha ao resetar tela de inicialização');
+        }
+      } catch (err) {
+        console.warn('Erro ao resetar boot screen:', err);
+        showToast('Erro de conexão ao resetar boot screen');
+      }
+    };
+  }
+
+  // Upload e Gravação de Imagem de Inicialização Customizada
+  const btnUploadBoot = document.getElementById('btnUploadBootScreen');
+  const inputBootImage = document.getElementById('inputCustomBootImage');
+  if (btnUploadBoot && inputBootImage) {
+    btnUploadBoot.onclick = () => inputBootImage.click();
+
+    inputBootImage.onchange = async () => {
+      const file = inputBootImage.files && inputBootImage.files[0];
+      if (!file) return;
+
+      showToast('Gravando imagem de inicialização no teclado...');
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const upRes = await fetch('/api/upload_image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename: file.name,
+              base64: reader.result
+            })
+          });
+          const upData = await upRes.json();
+          if (!upData.success || !upData.path) {
+            showToast('Erro ao processar imagem para envio');
+            return;
+          }
+
+          const setRes = await fetch('/api/startup_screen', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'set',
+              path: upData.path
+            })
+          });
+          const setData = await setRes.json();
+          if (setData.success) {
+            const badgeBoot = document.getElementById('badgeBootScreenMode');
+            if (badgeBoot) {
+              badgeBoot.textContent = 'Personalizado';
+              badgeBoot.style.background = 'rgba(59, 130, 246, 0.2)';
+              badgeBoot.style.color = '#60a5fa';
+            }
+            const msg = document.getElementById('bootScreenStatusMsg');
+            if (msg) msg.textContent = `✓ Imagem gravada: ${file.name}`;
+            showToast('✓ Imagem de inicialização gravada com sucesso no hardware!');
+          } else {
+            showToast('Falha ao aplicar imagem no hardware');
+          }
+        } catch (err) {
+          console.warn('Erro ao configurar boot image:', err);
+          showToast('Erro de comunicação ao enviar imagem');
+        }
+      };
+      reader.readAsDataURL(file);
+    };
+  }
+
+  // Auto-start com login do macOS
+  const chkAutostart = document.getElementById('settingAutostartCheck');
+  if (chkAutostart) {
+    chkAutostart.onchange = async () => {
+      const enabled = chkAutostart.checked;
+      try {
+        const res = await fetch('/api/autostart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(enabled ? '✓ Inicialização com macOS ativada (LaunchAgent)' : 'Inicialização com macOS desativada');
+        } else {
+          showToast('Falha ao atualizar serviço de inicialização do macOS');
+          chkAutostart.checked = !enabled;
+        }
+      } catch (err) {
+        console.warn('Erro ao configurar autostart:', err);
+        showToast('Erro ao comunicar com o sistema');
+        chkAutostart.checked = !enabled;
       }
     };
   }

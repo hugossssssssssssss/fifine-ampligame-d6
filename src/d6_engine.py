@@ -477,6 +477,12 @@ class D6Engine:
                         name = p_dir.stem
 
                 # Identificador limpo e determinístico
+                if parent_dir:
+                    key_id = f"pasta_{p_dir.stem[:8].lower()}"
+                else:
+                    norm = name.lower().replace(" ", "_").replace("ã", "a").replace("á", "a")
+                    key_id = "principal" if norm in ("cena_padrao", "padrao", "default") else norm
+
                 # Se a página foi explicitamente excluída pelo usuário, não ressuscite
                 deleted_pages = config.get("deleted_pages", [])
                 if key_id in deleted_pages or p_dir.name in deleted_pages:
@@ -1169,6 +1175,34 @@ class D6Engine:
         act_type = str(act.get("type") or act.get("uuid") or "").lower()
         icon = str(key_data.get("icon") or "").lower()
 
+        # Layout Especial para Métricas / HUD (Números Gigantes de altíssima legibilidade)
+        if act_type in ("system_stats", "systemstats"):
+            f_header = self._resolve_font(font_family, 12, bold=True)
+            f_huge = self._resolve_font(font_family, 26, bold=True)
+            f_unit = self._resolve_font(font_family, 10, bold=False)
+
+            # 1. Cabeçalho limpo no topo (ex: "CPU", "RAM", "SSD", "PING", "VOL")
+            draw.text((cx, cy - 26), (title or "STAT").upper(), fill="#a1a1aa", font=f_header, anchor="mm")
+
+            # 2. Valor Principal Gigante e Colorido (ex: "34%", "73%", "43GB", "3ms")
+            val_text = subtitle or "--"
+            sub_unit = ""
+            if "livre" in val_text.lower():
+                parts = val_text.split()
+                val_text = parts[0]
+                sub_unit = " ".join(parts[1:])
+
+            accent_col = accent or "#38bdf8"
+            draw.text((cx, cy + (2 if not sub_unit else -2)), val_text, fill=accent_col, font=f_huge, anchor="mm")
+
+            if sub_unit:
+                draw.text((cx, cy + 20), sub_unit.upper(), fill="#71717a", font=f_unit, anchor="mm")
+
+            # 3. Barra de destaque moderna na base
+            bar_w = 24
+            draw.rounded_rectangle([(cx - bar_w, cy + 32), (cx + bar_w, cy + 34)], radius=1, fill=accent_col)
+            return img
+
         # Desenho de glifos vetorizados se não houver imagem customizada
         if not custom_image:
             # Se o título estiver oculto, desenha o ícone em modo ampliado/grande
@@ -1255,6 +1289,29 @@ class D6Engine:
                 f_color = accent or "#10b981"
                 draw.arc([(cx - 8, cy + glyph_offset_y - 8), (cx + 8, cy + glyph_offset_y + 8)], start=45, end=315, fill=f_color, width=2)
                 draw.polygon([(cx + 4, cy + glyph_offset_y - 11), (cx + 10, cy + glyph_offset_y - 8), (cx + 7, cy + glyph_offset_y - 3)], fill=f_color)
+            elif icon in ("headphones", "fone"):
+                f_color = accent or "#38bdf8"
+                draw.arc([(cx - 10, cy + glyph_offset_y - 10), (cx + 10, cy + glyph_offset_y + 10)], start=180, end=0, fill=f_color, width=2)
+                draw.rounded_rectangle([(cx - 12, cy + glyph_offset_y - 1), (cx - 7, cy + glyph_offset_y + 9)], radius=2, fill=f_color)
+                draw.rounded_rectangle([(cx + 7, cy + glyph_offset_y - 1), (cx + 12, cy + glyph_offset_y + 9)], radius=2, fill=f_color)
+            elif icon in ("speaker", "caixa"):
+                f_color = accent or "#f59e0b"
+                draw.polygon([(cx - 8, cy + glyph_offset_y - 5), (cx - 4, cy + glyph_offset_y - 5), (cx, cy + glyph_offset_y - 9), (cx, cy + glyph_offset_y + 9), (cx - 4, cy + glyph_offset_y + 5), (cx - 8, cy + glyph_offset_y + 5)], fill=f_color)
+                draw.arc([(cx - 2, cy + glyph_offset_y - 6), (cx + 6, cy + glyph_offset_y + 6)], start=300, end=60, fill=f_color, width=2)
+                draw.arc([(cx - 2, cy + glyph_offset_y - 10), (cx + 10, cy + glyph_offset_y + 10)], start=300, end=60, fill=f_color, width=2)
+            elif icon in ("volume-up", "volumedown", "volume-down", "vol_up", "vol_down"):
+                f_color = accent or "#f59e0b"
+                draw.polygon([(cx - 8, cy + glyph_offset_y - 5), (cx - 4, cy + glyph_offset_y - 5), (cx, cy + glyph_offset_y - 9), (cx, cy + glyph_offset_y + 9), (cx - 4, cy + glyph_offset_y + 5), (cx - 8, cy + glyph_offset_y + 5)], fill=f_color)
+                if "up" in icon or "vol_up" in icon:
+                    draw.line([(cx + 5, cy + glyph_offset_y), (cx + 11, cy + glyph_offset_y)], fill=f_color, width=2)
+                    draw.line([(cx + 8, cy + glyph_offset_y - 3), (cx + 8, cy + glyph_offset_y + 3)], fill=f_color, width=2)
+                else:
+                    draw.line([(cx + 5, cy + glyph_offset_y), (cx + 11, cy + glyph_offset_y)], fill=f_color, width=2)
+            elif icon in ("play-pause", "playpause", "play"):
+                f_color = accent or "#22c55e"
+                draw.polygon([(cx - 8, cy + glyph_offset_y - 7), (cx - 8, cy + glyph_offset_y + 7), (cx - 1, cy + glyph_offset_y)], fill=f_color)
+                draw.line([(cx + 4, cy + glyph_offset_y - 7), (cx + 4, cy + glyph_offset_y + 7)], fill=f_color, width=2)
+                draw.line([(cx + 8, cy + glyph_offset_y - 7), (cx + 8, cy + glyph_offset_y + 7)], fill=f_color, width=2)
             elif icon in ("alert-triangle", "force_quit"):
                 f_color = accent or "#ef4444"
                 draw.polygon([(cx, cy + glyph_offset_y - 10), (cx - 10, cy + glyph_offset_y + 8), (cx + 10, cy + glyph_offset_y + 8)], outline=f_color, width=2)
@@ -1892,45 +1949,15 @@ class D6Engine:
                 self.wake_device()
                 return  # Consome o primeiro clique como despertar (1:1 com StreamDeck oficial)
 
-            # Resolução resiliente de slot visual: prioriza o slot visual direto key_val
-            mapped_slot = self.get_slot_for_hw_key(key_val)
-            candidates = [key_val, mapped_slot]
+            # Converte com precisão o número da tecla física do hardware para o slot visual correspondente (1 a 15)
+            target_slot = self.get_slot_for_hw_key(key_val)
 
             page_id = self.config.get("active_page", "principal")
             page = self.config.get("pages", {}).get(page_id, {})
             keys_dict = page.get("keys", {})
+            key_data = keys_dict.get(str(target_slot))
 
-            def has_executable_action(k_dict):
-                if not k_dict or not isinstance(k_dict, dict):
-                    return False
-                act = k_dict.get("action")
-                if isinstance(act, dict):
-                    t = str(act.get("type") or act.get("uuid") or "").lower()
-                    if t and t not in ("none", "action"):
-                        return True
-                    if act.get("target") or act.get("path") or act.get("url") or act.get("keys") or act.get("text") or act.get("command"):
-                        return True
-                at = str(k_dict.get("actionType") or k_dict.get("type") or k_dict.get("uuid") or "").lower()
-                if at and at not in ("none", "action"):
-                    return True
-                if k_dict.get("path") or k_dict.get("target") or k_dict.get("url") or k_dict.get("hotkey") or k_dict.get("textPayload"):
-                    return True
-                return False
-
-            key_data = None
-            target_slot = key_val
-            for cand in candidates:
-                cand_data = keys_dict.get(str(cand))
-                if cand_data and has_executable_action(cand_data):
-                    key_data = cand_data
-                    target_slot = cand
-                    break
-
-            if key_data is None:
-                key_data = keys_dict.get(str(key_val)) or keys_dict.get(str(mapped_slot))
-                target_slot = key_val
-
-            print(f"[Hardware Click] Tecla física {key_val} -> Slot visual resolvido {target_slot} na página '{page_id}'")
+            print(f"[Hardware Click] Tecla física {key_val} -> Slot visual {target_slot} na página '{page_id}'")
 
             # Registra timestamp e slot para sincronização em tempo real com a Web UI
             self._last_pressed_slot = target_slot
@@ -2007,7 +2034,111 @@ class D6Engine:
         except Exception:
             metrics["ram"] = "--%"
 
+        # 4. Network Ping
+        try:
+            import subprocess, re
+            p_out = subprocess.check_output(["ping", "-c", "1", "-W", "600", "1.1.1.1"], timeout=1).decode()
+            m = re.search(r"time=([\d\.]+)\s*ms", p_out)
+            if m:
+                metrics["ping"] = f"{int(float(m.group(1)))}ms"
+            else:
+                metrics["ping"] = "OK"
+        except Exception:
+            metrics["ping"] = "Offline"
+
+        # 5. Output Volume
+        try:
+            import subprocess
+            v_out = subprocess.check_output(["osascript", "-e", "output volume of (get volume settings)"], timeout=1).decode().strip()
+            metrics["volume"] = f"{v_out}%"
+        except Exception:
+            metrics["volume"] = "--%"
+
         return metrics
+
+    def get_recent_unopened_apps(self, count: int = 5) -> List[Dict[str, Any]]:
+        """Identifies recently used user apps on macOS that are NOT currently running."""
+        import subprocess, os
+
+        try:
+            ps_out = subprocess.check_output(["ps", "-A", "-o", "comm"], timeout=1).decode()
+            running_exes = {os.path.basename(line.strip()).lower() for line in ps_out.splitlines()}
+        except Exception:
+            running_exes = set()
+
+        cmd = ['mdfind', '-onlyin', '/Applications', 'kMDItemContentType == "com.apple.application-bundle" && kMDItemLastUsedDate > $time.today(-30)']
+        try:
+            out = subprocess.check_output(cmd, timeout=2).decode().splitlines()
+        except Exception:
+            out = []
+
+        ignored = {
+            "hidden bar", "itsycal", "resetcamera", "cornerswitcher", "finetune",
+            "macspace", "finderhelper", "limpar caches", "abrir hub", "antigravity ide",
+            "ccxprocess", "coreauth", "safari"
+        }
+
+        candidates = []
+        for p in out:
+            p = p.strip()
+            if not p.endswith(".app") or not os.path.exists(p):
+                continue
+            if "/utilities/" in p.lower() or "contents/" in p.lower() or "/adobe creative cloud/" in p.lower():
+                continue
+            app_name = os.path.basename(p)[:-4]
+            if app_name.lower() in ignored:
+                continue
+
+            # Skip if already running
+            if any(app_name.lower() in exe for exe in running_exes):
+                continue
+
+            try:
+                md = subprocess.check_output(['mdls', '-name', 'kMDItemLastUsedDate', p], timeout=1).decode()
+                d_str = ""
+                for l in md.splitlines():
+                    if "kMDItemLastUsedDate" in l and "(null)" not in l:
+                        d_str = l.split("=")[1].strip()
+                if d_str:
+                    candidates.append((d_str, app_name, p))
+            except Exception:
+                pass
+
+        candidates.sort(reverse=True)
+        selected = candidates[:count]
+
+        # Extract/cache PNG icons using native sips
+        result = []
+        for _, name, path in selected:
+            clean_name = ''.join(c for c in name if c.isalnum())
+            icon_png = f"/tmp/d6_icon_{clean_name}.png"
+            if not os.path.exists(icon_png):
+                res_dir = os.path.join(path, "Contents", "Resources")
+                if os.path.exists(res_dir):
+                    icns_files = [f for f in os.listdir(res_dir) if f.endswith(".icns")]
+                    target_icns = None
+                    for cand in icns_files:
+                        if "appicon" in cand.lower() or clean_name.lower() in cand.lower():
+                            target_icns = cand
+                            break
+                    if not target_icns and icns_files:
+                        target_icns = icns_files[0]
+                    if target_icns:
+                        try:
+                            subprocess.run(
+                                ["sips", "-s", "format", "png", os.path.join(res_dir, target_icns), "--out", icon_png, "-Z", "96"],
+                                capture_output=True, timeout=2
+                            )
+                        except Exception:
+                            pass
+
+            result.append({
+                "name": name,
+                "path": path,
+                "imagePath": icon_png if os.path.exists(icon_png) else ""
+            })
+
+        return result
 
     def start_background_telemetry(self):
         """Loop de fundo para métricas dinâmicas (CPU, RAM), auto-troca de perfil e temporizador de inatividade."""
@@ -2063,7 +2194,7 @@ class D6Engine:
                         self._last_app_check_time = now
                         self.check_app_auto_switch()
 
-                    # 3. Métricas de CPU / RAM / Armazenamento (a cada 3.0s, apenas se acordado)
+                    # 3. Métricas de CPU / RAM / Armazenamento / Ping / Volume (a cada 3.0s, apenas se acordado)
                     if not self.is_asleep and (now - self._last_stats_update >= 3.0):
                         self._last_stats_update = now
                         page_id = self.config.get("active_page", "principal")
@@ -2086,10 +2217,46 @@ class D6Engine:
                                         new_subtitle = sys_metrics.get("ram")
                                     elif "disk" in tgt or "armazenamento" in tgt or "espaco" in tgt:
                                         new_subtitle = sys_metrics.get("disk")
+                                    elif tgt in ("ping", "rede", "net"):
+                                        new_subtitle = sys_metrics.get("ping")
+                                    elif tgt in ("volume", "vol", "audio"):
+                                        new_subtitle = sys_metrics.get("volume")
 
                                     if new_subtitle and k_data.get("subtitle") != new_subtitle:
                                         k_data["subtitle"] = new_subtitle
                                         self.sync_key(int(k_str), force=True, page_id=page_id)
+
+                    # 4. Rotação dinâmica de apps frequentes não-abertos (a cada 4.0s)
+                    if not self.is_asleep:
+                        page_id = self.config.get("active_page", "principal")
+                        page = self.config.get("pages", {}).get(page_id, {})
+                        if page.get("has_dynamic_apps") or page_id == "macos_monitor":
+                            now_dyn = time.time()
+                            if now_dyn - getattr(self, "_last_dyn_apps_check", 0) >= 4.0:
+                                self._last_dyn_apps_check = now_dyn
+                                recent_apps = self.get_recent_unopened_apps(5)
+                                for idx, app_info in enumerate(recent_apps):
+                                    slot_num = 6 + idx
+                                    slot_str = str(slot_num)
+                                    cur_k = page.get("keys", {}).get(slot_str, {})
+                                    if cur_k.get("title") != app_info["name"]:
+                                        page.setdefault("keys", {})[slot_str] = {
+                                            "title": app_info["name"],
+                                            "subtitle": "",
+                                            "bg": "#18181b",
+                                            "textColor": "#ffffff",
+                                            "accent": "#38bdf8",
+                                            "fontSize": 11,
+                                            "bold": True,
+                                            "fontFamily": "Helvetica",
+                                            "showTitle": True,
+                                            "imagePath": app_info["imagePath"],
+                                            "action": {
+                                                "type": "open_app",
+                                                "target": app_info["path"]
+                                            }
+                                        }
+                                        self.sync_key(slot_num, force=True, page_id=page_id)
                 except Exception as err:
                     pass
                 time.sleep(1.0)

@@ -10,7 +10,8 @@ from .app_action import OpenAppCommand, OpenUrlCommand
 from .hotkey_action import HotkeyCommand
 from .media_action import (
     VolumeUpCommand, VolumeDownCommand, MuteCommand,
-    PlayPauseCommand, NextTrackCommand, PrevTrackCommand, StopMusicCommand
+    PlayPauseCommand, NextTrackCommand, PrevTrackCommand, StopMusicCommand,
+    ToggleAudioOutputCommand, SmartPlayPauseCommand
 )
 from .system_action import (
     CloseWindowCommand, CloseAppCommand, MinimizeWindowCommand,
@@ -87,6 +88,11 @@ class ActionRegistry:
             "prev": PrevTrackCommand(),
             "multimedia_prev": NextTrackCommand(),
             "stop": StopMusicCommand(),
+            "toggle_audio": ToggleAudioOutputCommand(),
+            "toggle_audio_output": ToggleAudioOutputCommand(),
+            "switch_audio": ToggleAudioOutputCommand(),
+            "smart_play_pause": SmartPlayPauseCommand(),
+            "smartplaypause": SmartPlayPauseCommand(),
 
             # Controles de Janelas & Mac
             "close_window": CloseWindowCommand(),

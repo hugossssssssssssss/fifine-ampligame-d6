@@ -53,6 +53,41 @@ def register_keys_routes(router: Router):
         skins = engine.get_skins()
         router.send_json(handler, 200, skins)
 
+    @router.get("/api/deck/rendered_frames")
+    def get_deck_rendered_frames(handler, engine, query):
+        page_id = query.get("page", [engine.config.get("active_page", "principal")])[0]
+        frames = engine.get_rendered_frames_for_page(page_id)
+        router.send_json(handler, 200, {"page": page_id, "frames": frames})
+
+    @router.get("/api/key/rendered")
+    def get_key_rendered(handler, engine, query):
+        import io
+        page_id = query.get("page", [engine.config.get("active_page", "principal")])[0]
+        slot = query.get("slot", ["1"])[0]
+        page = engine.config.get("pages", {}).get(page_id, {})
+        k_data = page.get("keys", {}).get(str(slot), {})
+        try:
+            img = engine.render_key_image(k_data)
+            buf = io.BytesIO()
+            img.save(buf, format="JPEG", quality=90)
+            router.send_bytes(handler, 200, "image/jpeg", buf.getvalue())
+        except Exception as e:
+            router.send_json(handler, 500, {"error": str(e)})
+
+    @router.post("/api/key/preview")
+    def preview_key(handler, engine, body):
+        import io
+        import base64
+        k_data = body.get("key_data") or body.get("data") or {}
+        try:
+            img = engine.render_key_image(k_data)
+            buf = io.BytesIO()
+            img.save(buf, format="JPEG", quality=90)
+            b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+            router.send_json(handler, 200, {"success": True, "frame": f"data:image/jpeg;base64,{b64}"})
+        except Exception as e:
+            router.send_json(handler, 500, {"success": False, "error": str(e)})
+
     @router.post("/api/key/update")
     def update_key(handler, engine, body):
         page = body.get("page", engine.config.get("active_page", "principal"))

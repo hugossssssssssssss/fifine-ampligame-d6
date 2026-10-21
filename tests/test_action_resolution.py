@@ -114,6 +114,15 @@ class TestActionCatalogResolution(unittest.TestCase):
         cmd.execute(ActionModel(type="toggle_row2_mode"), slot=6, engine=dummy)
         self.assertEqual(dummy.config["pages"]["p1"]["row2_mode"], "apps")
 
+    def test_rendered_frames_generation(self):
+        from d6_engine import D6Engine
+        engine = D6Engine()
+        frames = engine.get_rendered_frames_for_page("macos_monitor")
+        self.assertEqual(len(frames), 15)
+        for s in range(1, 16):
+            self.assertIn(str(s), frames)
+            self.assertTrue(frames[str(s)].startswith("data:image/jpeg;base64,"))
+
 
 if __name__ == "__main__":
     unittest.main()

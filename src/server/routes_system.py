@@ -29,7 +29,8 @@ def register_system_routes(router: Router):
             "autostart_enabled": engine.is_autostart_enabled() if hasattr(engine, "is_autostart_enabled") else False,
             "last_pressed_slot": getattr(engine, "_last_pressed_slot", None),
             "last_pressed_ts": getattr(engine, "_last_pressed_ts", 0.0),
-            "pages": engine.config.get("pages", {})
+            "pages": engine.config.get("pages", {}),
+            "rendered_frames": engine.get_rendered_frames_for_page() if hasattr(engine, "get_rendered_frames_for_page") else {}
         }
         router.send_json(handler, 200, data)
 

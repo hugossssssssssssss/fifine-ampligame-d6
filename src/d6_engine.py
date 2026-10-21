@@ -1473,6 +1473,30 @@ class D6Engine:
 
         return img
 
+    def get_rendered_frames_for_page(self, page_id: Optional[str] = None) -> Dict[str, str]:
+        """Gera em memória os 15 frames JPEG em base64 idênticos ao hardware para a página solicitada."""
+        import io
+        import base64
+
+        if not page_id:
+            page_id = self.config.get("active_page", "principal")
+        page = self.config.get("pages", {}).get(page_id, {})
+        keys = page.get("keys", {})
+
+        frames = {}
+        for slot in range(1, 16):
+            slot_str = str(slot)
+            k_data = keys.get(slot_str, {})
+            try:
+                img = self.render_key_image(k_data)
+                buf = io.BytesIO()
+                img.save(buf, format="JPEG", quality=90)
+                b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+                frames[slot_str] = f"data:image/jpeg;base64,{b64}"
+            except Exception as e:
+                pass
+        return frames
+
     def apply_wallpaper_mural(self, image_path: str, page_id: Optional[str] = None) -> bool:
         """Divide uma imagem nos 15 slots da página (3x5) como um mural contínuo."""
         if not os.path.exists(image_path):

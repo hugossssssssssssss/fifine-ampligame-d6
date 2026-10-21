@@ -568,6 +568,97 @@
                         <input type="text" class="fifine-input" id="inputToggleKeysB" placeholder="Atalho B (ex: Cmd+Shift+M)">
                       </div>
                     </div>
+
+                    <!-- Contexto: Monitor de Métricas do Sistema macOS -->
+                    <div class="action-fields-context" id="fieldsContextSystemStats" style="display: none;">
+                      <div class="inspector-row">
+                        <label class="row-label">Métrica do Mac:</label>
+                        <select class="studio-select" id="selectMetricTarget" style="flex: 1;">
+                          <option value="cpu">Uso de CPU (%)</option>
+                          <option value="ram">Memória RAM (%)</option>
+                          <option value="disk">Armazenamento SSD (GB / %)</option>
+                          <option value="ping">Ping / Latência de Rede (ms)</option>
+                          <option value="volume">Volume do Sistema (%)</option>
+                        </select>
+                      </div>
+                      <div class="inspector-row">
+                        <label class="row-label">Estilo do Mostrador:</label>
+                        <div class="align-btn-group" style="flex: 1;">
+                          <button class="pop-btn active" id="btnGaugeArc" style="flex: 1; font-size: 11px;">Arco Radial</button>
+                          <button class="pop-btn" id="btnGaugeBar" style="flex: 1; font-size: 11px;">Barra</button>
+                        </div>
+                      </div>
+                      <div class="inspector-row">
+                        <label class="row-label">Cor do Mostrador:</label>
+                        <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                          <input type="color" class="color-picker-input" id="inputMetricAccent" value="#38bdf8" style="width: 32px; height: 32px; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; cursor: pointer;">
+                          <span id="metricAccentHex" style="font-size: 11px; font-family: var(--font-mono, monospace); color: #a1a1aa;">#38bdf8</span>
+                        </div>
+                      </div>
+                      <button class="fifine-btn secondary-sm" id="btnTestMetricAction" style="width: 100%; height: 36px; margin-top: 4px;">
+                        <span>Abrir Utilitário no Mac (Atividade/Disco)</span>
+                      </button>
+                    </div>
+
+                    <!-- Contexto: Slot Dinâmico de Apps / Sites -->
+                    <div class="action-fields-context" id="fieldsContextDynamicSlot" style="display: none;">
+                      <div class="inspector-row">
+                        <label class="row-label">Posição do Slot:</label>
+                        <select class="studio-select" id="selectDynamicSlotIndex" style="flex: 1;">
+                          <option value="1">Slot 1 (Primeiro Recente)</option>
+                          <option value="2">Slot 2 (Segundo Recente)</option>
+                          <option value="3">Slot 3 (Terceiro Recente)</option>
+                          <option value="4">Slot 4 (Quarto Recente)</option>
+                        </select>
+                      </div>
+                      <div style="font-size: 11.5px; color: #a1a1aa; line-height: 1.4; margin-top: 4px;">
+                        Exibe e abre dinamicamente o aplicativo recente ou site favorito de acordo com o modo ativo na linha.
+                      </div>
+                    </div>
+
+                    <!-- Contexto: Alternador de Modo de Linha -->
+                    <div class="action-fields-context" id="fieldsContextToggleRow2Mode" style="display: none;">
+                      <div style="font-size: 11.5px; color: #a1a1aa; line-height: 1.4;">
+                        Comuta a linha 2 instantaneamente entre <strong>Apps Recentes</strong> e <strong>Sites Favoritos do Safari</strong> com atualização visual no hardware.
+                      </div>
+                      <button class="fifine-btn secondary-sm" id="btnTestToggleRow2Mode" style="width: 100%; height: 36px; margin-top: 8px;">
+                        <span>Alternar Modo Agora (Apps ↔ Sites)</span>
+                      </button>
+                    </div>
+
+                    <!-- Contexto: Alternador de Áudio -->
+                    <div class="action-fields-context" id="fieldsContextToggleAudio" style="display: none;">
+                      <div style="font-size: 11.5px; color: #a1a1aa; line-height: 1.4;">
+                        Alterna a saída de áudio do macOS entre <strong>Fone de Ouvido</strong> e <strong>Alto-Falantes Internos</strong>, alterando o ícone no LCD físico em tempo real.
+                      </div>
+                      <button class="fifine-btn secondary-sm" id="btnTestToggleAudio" style="width: 100%; height: 36px; margin-top: 8px;">
+                        <span>Alternar Saída de Áudio Agora</span>
+                      </button>
+                    </div>
+
+                    <!-- Contexto: Play / Pause Inteligente -->
+                    <div class="action-fields-context" id="fieldsContextSmartMedia" style="display: none;">
+                      <div style="font-size: 11.5px; color: #a1a1aa; line-height: 1.4;">
+                        Comuta Play/Pause de forma contextual: detecta <strong>Safari</strong> (YouTube Music, vídeos da web) ou <strong>Apple Music</strong> automaticamente.
+                      </div>
+                      <button class="fifine-btn secondary-sm" id="btnTestSmartMedia" style="width: 100%; height: 36px; margin-top: 8px;">
+                        <span>Testar Play / Pause no Mac</span>
+                      </button>
+                    </div>
+
+                    <!-- Contexto: Ir Para Cena / Página -->
+                    <div class="action-fields-context" id="fieldsContextPageGoto" style="display: none;">
+                      <div class="inspector-row">
+                        <label class="row-label">Cena de Destino:</label>
+                        <select class="studio-select" id="selectPageGotoTarget" style="flex: 1;">
+                          <option value="principal">Cena Padrão</option>
+                          <option value="macos_monitor">Monitor macOS</option>
+                        </select>
+                      </div>
+                      <button class="fifine-btn secondary-sm" id="btnTestPageGoto" style="width: 100%; height: 36px; margin-top: 6px;">
+                        <span>Navegar para Esta Cena Agora</span>
+                      </button>
+                    </div>
                   </div>
 
                   <!-- CARD 4: Paleta de Cores de Fundo LCD e Borda -->
@@ -662,11 +753,46 @@
                 <button class="btn-mode-pill active">Botão</button>
               </div>
 
-              <!-- Os 6 Acordeões Oficiais da Fifine (1:1) -->
+              <!-- Os Acordeões Oficiais e Especializados -->
               <div class="catalog-accordions-list" id="accordionsList">
                 
+                <!-- 0. macOS & Sistema (Widgets Nativos de Hardware) -->
+                <div class="accordion-item open" data-cat="macos_system">
+                  <div class="accordion-header">
+                    <div class="acc-title-wrap">
+                      <svg class="acc-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                      <div class="acc-icon-square" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                      </div>
+                      <span class="acc-name">macOS & Sistema</span>
+                    </div>
+                  </div>
+                  <div class="accordion-content">
+                    <div class="action-item" draggable="true" data-uuid="system_stats.cpu" data-type="system_stats" data-target="cpu" data-name="Monitor de CPU">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                      <span class="act-name">Monitor de CPU</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="system_stats.ram" data-type="system_stats" data-target="ram" data-name="Monitor de Memória RAM">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                      <span class="act-name">Monitor de Memória RAM</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="system_stats.disk" data-type="system_stats" data-target="disk" data-name="Armazenamento SSD">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                      <span class="act-name">Armazenamento SSD</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="system_stats.ping" data-type="system_stats" data-target="ping" data-name="Ping / Rede">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+                      <span class="act-name">Ping / Rede</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="system_stats.volume" data-type="system_stats" data-target="volume" data-name="Volume do Sistema">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                      <span class="act-name">Volume do Sistema</span>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- 1. fifine Control Deck -->
-                <div class="accordion-item open" data-cat="fifine_control_deck">
+                <div class="accordion-item" data-cat="fifine_control_deck">
                   <div class="accordion-header">
                     <div class="acc-title-wrap">
                       <svg class="acc-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
@@ -724,6 +850,14 @@
                     </div>
                   </div>
                   <div class="accordion-content">
+                    <div class="action-item" draggable="true" data-uuid="system.toggle_row2_mode" data-name="Alternar Linha (Apps ↔ Sites)">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                      <span class="act-name">Alternar Linha (Apps ↔ Sites)</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="system.dynamic_slot" data-name="Slot Dinâmico (App/Site)">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                      <span class="act-name">Slot Dinâmico (App/Site)</span>
+                    </div>
                     <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.system.website" data-name="Site">
                       <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                       <span class="act-name">Site</span>
@@ -779,6 +913,14 @@
                     </div>
                   </div>
                   <div class="accordion-content">
+                    <div class="action-item" draggable="true" data-uuid="media.toggle_audio" data-name="Alternar Saída Áudio (Fone/Alto-falante)">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+                      <span class="act-name">Alternar Saída de Áudio</span>
+                    </div>
+                    <div class="action-item" draggable="true" data-uuid="media.smart_play_pause" data-name="Play / Pause Inteligente (Safari/Music)">
+                      <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+                      <span class="act-name">Play / Pause Inteligente</span>
+                    </div>
                     <div class="action-item" draggable="true" data-uuid="com.hotspot.streamdock.soundboard.playaudio" data-name="Reproduzir Áudio">
                       <svg class="act-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
                       <span class="act-name">Reproduzir Áudio</span>

@@ -185,3 +185,29 @@ class SleepMacCommand(ActionCommand):
         subprocess.run(["osascript", "-e", 'tell application "Finder" to sleep'], timeout=2)
         return True
 
+
+class DynamicSlotCommand(ActionCommand):
+    """Executa o aplicativo ou site dinâmico alocado no slot especificado (1 a 4)."""
+
+    def execute(self, action: ActionModel, slot: Optional[int] = None, engine: Any = None) -> bool:
+        if not engine:
+            return False
+        if action.target or action.path:
+            return engine.execute_action({"type": "open", "target": action.target or action.path})
+        try:
+            slot_idx = int(action.raw.get("slot_index", 1)) - 1
+        except Exception:
+            slot_idx = 0
+        page = engine.config.get("pages", {}).get(engine.config.get("active_page", "principal"), {})
+        mode = page.get("row2_mode", "apps").lower()
+        if mode == "sites":
+            sites = engine.get_favorite_safari_sites(4)
+            if 0 <= slot_idx < len(sites):
+                return engine.execute_action({"type": "open_url", "target": sites[slot_idx]["url"]})
+        else:
+            apps = engine.get_recent_unopened_apps(4)
+            if 0 <= slot_idx < len(apps):
+                return engine.execute_action({"type": "open_app", "target": apps[slot_idx]["path"]})
+        return False
+
+

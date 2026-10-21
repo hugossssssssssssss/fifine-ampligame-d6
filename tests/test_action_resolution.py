@@ -123,6 +123,48 @@ class TestActionCatalogResolution(unittest.TestCase):
             self.assertIn(str(s), frames)
             self.assertTrue(frames[str(s)].startswith("data:image/jpeg;base64,"))
 
+    def test_standardized_actions_resolution(self):
+        from actions.system_action import SystemStatsCommand, DynamicSlotCommand
+        from actions.media_action import ToggleAudioOutputCommand, SmartPlayPauseCommand
+
+        # system_stats
+        cmd_stats = ActionRegistry.resolve("system_stats")
+        self.assertIsInstance(cmd_stats, SystemStatsCommand)
+
+        # dynamic_slot
+        cmd_slot = ActionRegistry.resolve("dynamic_slot")
+        self.assertIsInstance(cmd_slot, DynamicSlotCommand)
+
+        # toggle_audio
+        cmd_audio = ActionRegistry.resolve("toggle_audio")
+        self.assertIsInstance(cmd_audio, ToggleAudioOutputCommand)
+
+        # smart_play_pause
+        cmd_play = ActionRegistry.resolve("smart_play_pause")
+        self.assertIsInstance(cmd_play, SmartPlayPauseCommand)
+
+    def test_system_stats_arc_and_bar_rendering(self):
+        from d6_engine import D6Engine
+        engine = D6Engine()
+        # Test arc rendering
+        img_arc = engine.render_key_image({
+            "title": "CPU",
+            "subtitle": "45%",
+            "accent": "#38bdf8",
+            "action": {"type": "system_stats", "target": "cpu", "style": "arc"}
+        })
+        self.assertEqual(img_arc.size, (100, 100))
+
+        # Test bar rendering
+        img_bar = engine.render_key_image({
+            "title": "SSD",
+            "subtitle": "50GB livre",
+            "accent": "#34d399",
+            "action": {"type": "system_stats", "target": "disk", "style": "bar"}
+        })
+        self.assertEqual(img_bar.size, (100, 100))
+
 
 if __name__ == "__main__":
     unittest.main()
+

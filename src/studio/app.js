@@ -168,6 +168,18 @@ async function loadServerState(isBackground = false) {
                   uiActionType = 'multiaction';
                 } else if (actType === 'obs' || actUuid.includes('obsstudio')) {
                   uiActionType = 'obs';
+                } else if (actType === 'system_stats' || actType === 'systemstats') {
+                  uiActionType = 'system_stats';
+                } else if (actType === 'dynamic_slot' || actType === 'dynamic_app') {
+                  uiActionType = 'dynamic_slot';
+                } else if (actType === 'toggle_row2_mode') {
+                  uiActionType = 'toggle_row2_mode';
+                } else if (actType === 'toggle_audio') {
+                  uiActionType = 'toggle_audio';
+                } else if (actType === 'smart_play_pause') {
+                  uiActionType = 'smart_play_pause';
+                } else if (actType === 'page.goto' || actType === 'goto') {
+                  uiActionType = 'page.goto';
                 }
 
                 newProfiles[pageId].keys[slotIdx] = {
@@ -179,6 +191,8 @@ async function loadServerState(isBackground = false) {
                   actionType: uiActionType,
                   actionUuid: kData.action?.uuid || '',
                   target: kData.action?.target || '',
+                  style: kData.action?.style || kData.gaugeStyle || '',
+                  slot_index: kData.action?.slot_index || 1,
                   folderId: kData.action?.target || '',
                   actionName: kData.title || 'Ação',
                   path: kData.action?.target || '',
@@ -1401,26 +1415,94 @@ function selectKey(slot) {
   const ctxSound = document.getElementById('fieldsContextSoundboard');
   const ctxShell = document.getElementById('fieldsContextShell');
   const ctxToggle = document.getElementById('fieldsContextToggle');
+  const ctxSystemStats = document.getElementById('fieldsContextSystemStats');
+  const ctxDynamicSlot = document.getElementById('fieldsContextDynamicSlot');
+  const ctxToggleRow2 = document.getElementById('fieldsContextToggleRow2Mode');
+  const ctxToggleAudio = document.getElementById('fieldsContextToggleAudio');
+  const ctxSmartMedia = document.getElementById('fieldsContextSmartMedia');
+  const ctxPageGoto = document.getElementById('fieldsContextPageGoto');
 
-  ctxText.style.display = 'none';
-  ctxOpen.style.display = 'none';
-  ctxHotkey.style.display = 'none';
-  ctxUrl.style.display = 'none';
+  if (ctxText) ctxText.style.display = 'none';
+  if (ctxOpen) ctxOpen.style.display = 'none';
+  if (ctxHotkey) ctxHotkey.style.display = 'none';
+  if (ctxUrl) ctxUrl.style.display = 'none';
   if (ctxObs) ctxObs.style.display = 'none';
   if (ctxSound) ctxSound.style.display = 'none';
   if (ctxShell) ctxShell.style.display = 'none';
   if (ctxToggle) ctxToggle.style.display = 'none';
+  if (ctxSystemStats) ctxSystemStats.style.display = 'none';
+  if (ctxDynamicSlot) ctxDynamicSlot.style.display = 'none';
+  if (ctxToggleRow2) ctxToggleRow2.style.display = 'none';
+  if (ctxToggleAudio) ctxToggleAudio.style.display = 'none';
+  if (ctxSmartMedia) ctxSmartMedia.style.display = 'none';
+  if (ctxPageGoto) ctxPageGoto.style.display = 'none';
 
-  if (keyData.actionType === 'text') {
-    ctxText.style.display = 'block';
-    const txt = document.getElementById('inputTextPayload');
-    txt.value = keyData.textPayload || '';
-    updateCharCounter(txt.value.length);
-    document.getElementById('chkPressEnter').checked = !!keyData.pressEnter;
-    document.getElementById('chkUseClipboard').checked = keyData.useClipboard !== false;
+  const actType = (keyData.actionType || keyData.action?.type || '').toLowerCase();
+  const actTarget = (keyData.action?.target || keyData.target || '').toLowerCase();
+
+  if (actType === 'system_stats' || actType === 'systemstats' || keyData.uuid?.startsWith('system_stats.')) {
+    if (ctxSystemStats) {
+      ctxSystemStats.style.display = 'block';
+      const selMetric = document.getElementById('selectMetricTarget');
+      if (selMetric) selMetric.value = actTarget || 'cpu';
+
+      const curStyle = (keyData.action?.style || keyData.style || (actTarget === 'disk' || actTarget === 'volume' || actTarget === 'ping' ? 'bar' : 'arc')).toLowerCase();
+      const btnArc = document.getElementById('btnGaugeArc');
+      const btnBar = document.getElementById('btnGaugeBar');
+      if (btnArc && btnBar) {
+        if (curStyle === 'bar') {
+          btnBar.classList.add('active');
+          btnArc.classList.remove('active');
+        } else {
+          btnArc.classList.add('active');
+          btnBar.classList.remove('active');
+        }
+      }
+
+      const inputAcc = document.getElementById('inputMetricAccent');
+      const hexSpan = document.getElementById('metricAccentHex');
+      const curAccent = keyData.accent || '#38bdf8';
+      if (inputAcc) inputAcc.value = curAccent;
+      if (hexSpan) hexSpan.innerText = curAccent;
+    }
+  } else if (actType === 'dynamic_slot' || keyData.uuid?.includes('dynamic_slot')) {
+    if (ctxDynamicSlot) {
+      ctxDynamicSlot.style.display = 'block';
+      const selSlot = document.getElementById('selectDynamicSlotIndex');
+      if (selSlot) selSlot.value = String(keyData.action?.slot_index || keyData.slot_index || 1);
+    }
+  } else if (actType === 'toggle_row2_mode') {
+    if (ctxToggleRow2) ctxToggleRow2.style.display = 'block';
+  } else if (actType === 'toggle_audio') {
+    if (ctxToggleAudio) ctxToggleAudio.style.display = 'block';
+  } else if (actType === 'smart_play_pause') {
+    if (ctxSmartMedia) ctxSmartMedia.style.display = 'block';
+  } else if (actType === 'page.goto' || actType === 'goto') {
+    if (ctxPageGoto) {
+      ctxPageGoto.style.display = 'block';
+      const selPage = document.getElementById('selectPageGotoTarget');
+      if (selPage && state.profiles) {
+        const curTarget = keyData.action?.target || keyData.target || 'principal';
+        selPage.innerHTML = Object.keys(state.profiles).map(pId => {
+          const pName = state.profiles[pId].name || pId;
+          return `<option value="${pId}" ${pId === curTarget ? 'selected' : ''}>${pName}</option>`;
+        }).join('');
+      }
+    }
+  } else if (keyData.actionType === 'text') {
+    if (ctxText) {
+      ctxText.style.display = 'block';
+      const txt = document.getElementById('inputTextPayload');
+      txt.value = keyData.textPayload || '';
+      updateCharCounter(txt.value.length);
+      document.getElementById('chkPressEnter').checked = !!keyData.pressEnter;
+      document.getElementById('chkUseClipboard').checked = keyData.useClipboard !== false;
+    }
   } else if (keyData.actionType === 'open') {
-    ctxOpen.style.display = 'block';
-    document.getElementById('inputOpenPath').value = keyData.path || '';
+    if (ctxOpen) {
+      ctxOpen.style.display = 'block';
+      document.getElementById('inputOpenPath').value = keyData.path || '';
+    }
   } else if (keyData.actionType === 'soundboard' || keyData.uuid?.includes('soundboard') || keyData.actionUuid?.includes('soundboard') || keyData.uuid?.includes('playaudio')) {
     if (ctxSound) {
       ctxSound.style.display = 'block';
@@ -1446,11 +1528,15 @@ function selectKey(slot) {
       if (kB) kB.value = keyData.keys_b || '';
     }
   } else if (keyData.actionType === 'hotkey') {
-    ctxHotkey.style.display = 'block';
-    document.getElementById('hotkeyBadge').innerText = keyData.hotkey || 'Pressione para gravar';
+    if (ctxHotkey) {
+      ctxHotkey.style.display = 'block';
+      document.getElementById('hotkeyBadge').innerText = keyData.hotkey || 'Pressione para gravar';
+    }
   } else if (keyData.actionType === 'url') {
-    ctxUrl.style.display = 'block';
-    document.getElementById('inputUrlTarget').value = keyData.url || '';
+    if (ctxUrl) {
+      ctxUrl.style.display = 'block';
+      document.getElementById('inputUrlTarget').value = keyData.url || '';
+    }
   } else if (keyData.actionType === 'obs' || keyData.uuid?.includes('obsstudio') || keyData.actionUuid?.includes('obsstudio')) {
     if (ctxObs) {
       ctxObs.style.display = 'block';
@@ -1527,6 +1613,186 @@ function assignActionToSlot(slot, action) {
     selectKey(slot);
     syncKeyToHardware(slot, profile.keys[slot]);
     showToast(`✓ Multi-Ação configurada no slot ${slot + 1}`);
+    return;
+  }
+
+  // 1. Monitor de Métricas do Sistema macOS (CPU, RAM, SSD, Ping, Volume)
+  if (actionType === 'system_stats' || action.uuid?.startsWith('system_stats.')) {
+    const tgt = action.target || action.uuid?.split('.')[1] || 'cpu';
+    let defTitle = 'CPU';
+    let defSub = '35%';
+    let defAccent = '#38bdf8';
+    let defStyle = 'arc';
+
+    if (tgt === 'ram') {
+      defTitle = 'RAM';
+      defSub = '67%';
+      defAccent = '#c084fc';
+      defStyle = 'arc';
+    } else if (tgt === 'disk') {
+      defTitle = 'SSD';
+      defSub = '38GB livre';
+      defAccent = '#34d399';
+      defStyle = 'bar';
+    } else if (tgt === 'ping') {
+      defTitle = 'PING';
+      defSub = '3ms';
+      defAccent = '#60a5fa';
+      defStyle = 'bar';
+    } else if (tgt === 'volume') {
+      defTitle = 'VOL';
+      defSub = '78%';
+      defAccent = '#f59e0b';
+      defStyle = 'bar';
+    }
+
+    profile.keys[slot] = {
+      title: defTitle,
+      subtitle: defSub,
+      bg: '#18181b',
+      textColor: '#ffffff',
+      accent: defAccent,
+      fontSize: 12,
+      fontFamily: 'Helvetica',
+      bold: true,
+      showTitle: true,
+      actionType: 'system_stats',
+      actionUuid: action.uuid || `system_stats.${tgt}`,
+      target: tgt,
+      style: defStyle,
+      action: {
+        type: 'system_stats',
+        target: tgt,
+        style: defStyle
+      }
+    };
+    renderDeckGrid();
+    selectKey(slot);
+    syncKeyToHardware(slot, profile.keys[slot]);
+    showToast(`✓ Monitor de ${defTitle} configurado no slot ${slot + 1}`);
+    return;
+  }
+
+  // 2. Alternador de Linha (Apps Recentes <-> Sites Favoritos)
+  if (actionType === 'toggle_row2_mode' || action.uuid?.includes('toggle_row2_mode')) {
+    profile.keys[slot] = {
+      title: 'APPS',
+      subtitle: 'MODO',
+      bg: '#18181b',
+      textColor: '#ffffff',
+      accent: '#38bdf8',
+      fontSize: 12,
+      fontFamily: 'Helvetica',
+      bold: true,
+      showTitle: true,
+      icon: 'apps',
+      actionType: 'toggle_row2_mode',
+      actionUuid: 'system.toggle_row2_mode',
+      action: { type: 'toggle_row2_mode' }
+    };
+    renderDeckGrid();
+    selectKey(slot);
+    syncKeyToHardware(slot, profile.keys[slot]);
+    showToast(`✓ Alternador de Linha configurado no slot ${slot + 1}`);
+    return;
+  }
+
+  // 3. Slot Dinâmico (App Recente / Site)
+  if (actionType === 'dynamic_slot' || action.uuid?.includes('dynamic_slot')) {
+    const sIdx = action.slot_index || 1;
+    profile.keys[slot] = {
+      title: `SLOT ${sIdx}`,
+      subtitle: 'Dinâmico',
+      bg: '#18181b',
+      textColor: '#ffffff',
+      accent: '#38bdf8',
+      fontSize: 11,
+      fontFamily: 'Helvetica',
+      bold: true,
+      showTitle: false,
+      icon: 'apps',
+      actionType: 'dynamic_slot',
+      actionUuid: 'system.dynamic_slot',
+      slot_index: sIdx,
+      action: { type: 'dynamic_slot', slot_index: sIdx }
+    };
+    renderDeckGrid();
+    selectKey(slot);
+    syncKeyToHardware(slot, profile.keys[slot]);
+    showToast(`✓ Slot Dinâmico ${sIdx} configurado no slot ${slot + 1}`);
+    return;
+  }
+
+  // 4. Alternador de Áudio macOS (Fone <-> Alto-falante)
+  if (actionType === 'toggle_audio' || action.uuid?.includes('toggle_audio')) {
+    profile.keys[slot] = {
+      title: 'FONE',
+      subtitle: 'Áudio',
+      bg: '#18181b',
+      textColor: '#ffffff',
+      accent: '#38bdf8',
+      fontSize: 14,
+      fontFamily: 'Helvetica',
+      bold: true,
+      showTitle: true,
+      icon: 'headphones',
+      actionType: 'toggle_audio',
+      actionUuid: 'media.toggle_audio',
+      action: { type: 'toggle_audio' }
+    };
+    renderDeckGrid();
+    selectKey(slot);
+    syncKeyToHardware(slot, profile.keys[slot]);
+    showToast(`✓ Alternador de Áudio configurado no slot ${slot + 1}`);
+    return;
+  }
+
+  // 5. Play / Pause Inteligente
+  if (actionType === 'smart_play_pause' || action.uuid?.includes('smart_play_pause')) {
+    profile.keys[slot] = {
+      title: 'PLAY / PAUSE',
+      subtitle: '',
+      bg: '#18181b',
+      textColor: '#ffffff',
+      accent: '#22c55e',
+      fontSize: 12,
+      fontFamily: 'Helvetica',
+      bold: true,
+      showTitle: true,
+      icon: 'play-pause',
+      actionType: 'smart_play_pause',
+      actionUuid: 'media.smart_play_pause',
+      action: { type: 'smart_play_pause' }
+    };
+    renderDeckGrid();
+    selectKey(slot);
+    syncKeyToHardware(slot, profile.keys[slot]);
+    showToast(`✓ Play / Pause Inteligente configurado no slot ${slot + 1}`);
+    return;
+  }
+
+  // 6. Navegação de Cena / Ir Para Página
+  if (actionType === 'page.goto' || action.uuid?.includes('page.goto') || actionType === 'goto') {
+    profile.keys[slot] = {
+      title: 'IR P/ CENA',
+      subtitle: 'Navegar',
+      bg: '#18181b',
+      textColor: '#ffffff',
+      accent: '#6366f1',
+      fontSize: 12,
+      fontFamily: 'Helvetica',
+      bold: true,
+      showTitle: true,
+      icon: 'activity',
+      actionType: 'page.goto',
+      actionUuid: 'com.hotspot.streamdock.page.goto',
+      target: 'principal',
+      action: { type: 'page.goto', target: 'principal' }
+    };
+    renderDeckGrid();
+    selectKey(slot);
+    syncKeyToHardware(slot, profile.keys[slot]);
+    showToast(`✓ Navegação de Cena configurada no slot ${slot + 1}`);
     return;
   }
 
@@ -1969,6 +2235,12 @@ function addStepToCurrentMultiAction(actionData) {
 
 function getActionTypeFromUuid(uuid) {
   if (!uuid) return 'text';
+  if (uuid.includes('system_stats')) return 'system_stats';
+  if (uuid.includes('dynamic_slot')) return 'dynamic_slot';
+  if (uuid.includes('toggle_row2_mode')) return 'toggle_row2_mode';
+  if (uuid.includes('toggle_audio')) return 'toggle_audio';
+  if (uuid.includes('smart_play_pause')) return 'smart_play_pause';
+  if (uuid.includes('page.goto') || uuid.includes('goto')) return 'page.goto';
   if (uuid.includes('obsstudio') || uuid.startsWith('obs_')) return 'obs';
   if (uuid.includes('routine') || uuid.includes('multiaction') || uuid.includes('macro')) return 'multiaction';
   if (uuid.includes('openchild') || uuid.includes('folder')) return 'folder';
@@ -2614,14 +2886,183 @@ function bindEvents() {
     };
   }
 
+  // Controles de Métricas do Sistema macOS
+  const selMetricTarget = document.getElementById('selectMetricTarget');
+  if (selMetricTarget) {
+    selMetricTarget.addEventListener('change', (e) => {
+      const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
+      if (!keyData) return;
+      const tgt = e.target.value;
+      keyData.target = tgt;
+      if (!keyData.action) keyData.action = {};
+      keyData.action.target = tgt;
+      if (tgt === 'cpu') { keyData.title = 'CPU'; keyData.subtitle = '35%'; keyData.accent = '#38bdf8'; }
+      else if (tgt === 'ram') { keyData.title = 'RAM'; keyData.subtitle = '67%'; keyData.accent = '#c084fc'; }
+      else if (tgt === 'disk') { keyData.title = 'SSD'; keyData.subtitle = '38GB livre'; keyData.accent = '#34d399'; }
+      else if (tgt === 'ping') { keyData.title = 'PING'; keyData.subtitle = '3ms'; keyData.accent = '#60a5fa'; }
+      else if (tgt === 'volume') { keyData.title = 'VOL'; keyData.subtitle = '78%'; keyData.accent = '#f59e0b'; }
+      const inputTitle = document.getElementById('inputKeyTitle');
+      if (inputTitle) inputTitle.value = keyData.title;
+      const inputSub = document.getElementById('inputKeySubtitle');
+      if (inputSub) inputSub.value = keyData.subtitle;
+      const inputAcc = document.getElementById('inputMetricAccent');
+      if (inputAcc) inputAcc.value = keyData.accent;
+      const hexSpan = document.getElementById('metricAccentHex');
+      if (hexSpan) hexSpan.innerText = keyData.accent;
+      updateSlotVisual(state.selectedSlot, keyData);
+      syncKeyToHardware(state.selectedSlot, keyData);
+    });
+  }
+
+  const btnArc = document.getElementById('btnGaugeArc');
+  const btnBar = document.getElementById('btnGaugeBar');
+  if (btnArc && btnBar) {
+    btnArc.onclick = () => {
+      btnArc.classList.add('active');
+      btnBar.classList.remove('active');
+      const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
+      if (keyData) {
+        keyData.style = 'arc';
+        if (!keyData.action) keyData.action = {};
+        keyData.action.style = 'arc';
+        updateSlotVisual(state.selectedSlot, keyData);
+        syncKeyToHardware(state.selectedSlot, keyData);
+      }
+    };
+    btnBar.onclick = () => {
+      btnBar.classList.add('active');
+      btnArc.classList.remove('active');
+      const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
+      if (keyData) {
+        keyData.style = 'bar';
+        if (!keyData.action) keyData.action = {};
+        keyData.action.style = 'bar';
+        updateSlotVisual(state.selectedSlot, keyData);
+        syncKeyToHardware(state.selectedSlot, keyData);
+      }
+    };
+  }
+
+  const inputMetricAccent = document.getElementById('inputMetricAccent');
+  if (inputMetricAccent) {
+    inputMetricAccent.addEventListener('input', (e) => {
+      const color = e.target.value;
+      const hexSpan = document.getElementById('metricAccentHex');
+      if (hexSpan) hexSpan.innerText = color;
+      const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
+      if (keyData) {
+        keyData.accent = color;
+        updateSlotVisual(state.selectedSlot, keyData);
+        syncKeyToHardware(state.selectedSlot, keyData);
+      }
+    });
+  }
+
+  const btnTestMetric = document.getElementById('btnTestMetricAction');
+  if (btnTestMetric) {
+    btnTestMetric.onclick = async () => {
+      const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
+      const tgt = keyData?.action?.target || keyData?.target || 'cpu';
+      await fetch('/api/key/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: { type: 'system_stats', target: tgt } })
+      });
+      showToast('▶ Abrindo utilitário de diagnóstico no macOS...');
+    };
+  }
+
+  const selDynamicSlot = document.getElementById('selectDynamicSlotIndex');
+  if (selDynamicSlot) {
+    selDynamicSlot.addEventListener('change', (e) => {
+      const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
+      if (!keyData) return;
+      const idx = parseInt(e.target.value) || 1;
+      keyData.slot_index = idx;
+      if (!keyData.action) keyData.action = {};
+      keyData.action.slot_index = idx;
+      keyData.title = `SLOT ${idx}`;
+      updateSlotVisual(state.selectedSlot, keyData);
+      syncKeyToHardware(state.selectedSlot, keyData);
+    });
+  }
+
+  const btnTestToggleRow2 = document.getElementById('btnTestToggleRow2Mode');
+  if (btnTestToggleRow2) {
+    btnTestToggleRow2.onclick = async () => {
+      await fetch('/api/key/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: { type: 'toggle_row2_mode' } })
+      });
+      showToast('⚡ Alternando linha (Apps ↔ Sites)...');
+      setTimeout(loadServerState, 300);
+    };
+  }
+
+  const btnTestToggleAudio = document.getElementById('btnTestToggleAudio');
+  if (btnTestToggleAudio) {
+    btnTestToggleAudio.onclick = async () => {
+      await fetch('/api/key/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: { type: 'toggle_audio' } })
+      });
+      showToast('⚡ Alternando saída de áudio macOS...');
+      setTimeout(loadServerState, 300);
+    };
+  }
+
+  const btnTestSmartMedia = document.getElementById('btnTestSmartMedia');
+  if (btnTestSmartMedia) {
+    btnTestSmartMedia.onclick = async () => {
+      await fetch('/api/key/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: { type: 'smart_play_pause' } })
+      });
+      showToast('▶ Disparando Play / Pause inteligente...');
+    };
+  }
+
+  const selPageGoto = document.getElementById('selectPageGotoTarget');
+  if (selPageGoto) {
+    selPageGoto.addEventListener('change', (e) => {
+      const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
+      if (!keyData) return;
+      const tgt = e.target.value;
+      keyData.target = tgt;
+      if (!keyData.action) keyData.action = {};
+      keyData.action.target = tgt;
+      syncKeyToHardware(state.selectedSlot, keyData);
+    });
+  }
+
+  const btnTestPageGoto = document.getElementById('btnTestPageGoto');
+  if (btnTestPageGoto) {
+    btnTestPageGoto.onclick = async () => {
+      const keyData = state.profiles[state.activeProfile]?.keys[state.selectedSlot];
+      const tgt = keyData?.action?.target || keyData?.target || 'principal';
+      await fetch('/api/page/select', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page: tgt })
+      });
+      selectPage(tgt);
+      showToast(`✓ Mudou para cena: ${state.profiles[tgt]?.name || tgt}`);
+    };
+  }
+
   // Drag-and-drop e Clique Direto dos itens da biblioteca de ações
   document.querySelectorAll('.action-item').forEach(item => {
     item.ondragstart = (e) => {
       const uuid = item.dataset.uuid;
       const name = item.dataset.name;
+      const type = item.dataset.type || '';
+      const target = item.dataset.target || '';
       const category = item.closest('.accordion-item')?.querySelector('.acc-name')?.innerText || 'Geral';
       const icon = item.querySelector('.act-icon')?.src || '';
-      e.dataTransfer.setData('application/json', JSON.stringify({ uuid, name, category, icon }));
+      e.dataTransfer.setData('application/json', JSON.stringify({ uuid, name, type, target, category, icon }));
     };
 
     // Clique direto: aplica imediatamente a ação ao slot selecionado e abre as Propriedades
@@ -2630,9 +3071,11 @@ function bindEvents() {
       const slot = (state.selectedSlot !== null && state.selectedSlot !== undefined) ? state.selectedSlot : 0;
       const uuid = item.dataset.uuid;
       const name = item.dataset.name;
+      const type = item.dataset.type || '';
+      const target = item.dataset.target || '';
       const category = item.closest('.accordion-item')?.querySelector('.acc-name')?.innerText || 'Geral';
       const icon = item.querySelector('.act-icon')?.src || '';
-      assignActionToSlot(slot, { uuid, name, category, icon });
+      assignActionToSlot(slot, { uuid, name, type, target, category, icon });
       switchRightTab('tabPaneInspector');
       showToast(`✓ Ação "${name}" aplicada à tecla ${slot + 1}`);
     };
@@ -4067,6 +4510,47 @@ function applySceneColor(color) {
 function buildActionPayload(keyData) {
   if (!keyData) return null;
   const actType = keyData.actionType || getActionTypeFromUuid(keyData.uuid || keyData.actionUuid);
+
+  if (actType === 'system_stats' || keyData.uuid?.startsWith('system_stats.')) {
+    return {
+      type: 'system_stats',
+      target: keyData.target || 'cpu',
+      style: keyData.style || 'arc',
+      uuid: keyData.uuid || `system_stats.${keyData.target || 'cpu'}`
+    };
+  }
+  if (actType === 'dynamic_slot') {
+    return {
+      type: 'dynamic_slot',
+      slot_index: parseInt(keyData.slot_index || 1),
+      uuid: 'system.dynamic_slot'
+    };
+  }
+  if (actType === 'toggle_row2_mode') {
+    return {
+      type: 'toggle_row2_mode',
+      uuid: 'system.toggle_row2_mode'
+    };
+  }
+  if (actType === 'toggle_audio') {
+    return {
+      type: 'toggle_audio',
+      uuid: 'media.toggle_audio'
+    };
+  }
+  if (actType === 'smart_play_pause') {
+    return {
+      type: 'smart_play_pause',
+      uuid: 'media.smart_play_pause'
+    };
+  }
+  if (actType === 'page.goto' || actType === 'goto') {
+    return {
+      type: 'page.goto',
+      target: keyData.target || 'principal',
+      uuid: 'com.hotspot.streamdock.page.goto'
+    };
+  }
 
   if (actType === 'open' || keyData.path) {
     return {

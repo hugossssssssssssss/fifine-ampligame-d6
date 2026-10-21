@@ -18,7 +18,8 @@ from .system_action import (
     FullscreenToggleCommand, LockScreenCommand, ShowDesktopCommand,
     LaunchpadCommand, MissionControlCommand, SiriCommand, ScreenshotCommand,
     EmoticonsCommand, TextInputCommand, ShellCommand, MouseEventCommand,
-    SystemStatsCommand, ForceQuitCommand, EmptyTrashCommand, SleepMacCommand
+    SystemStatsCommand, ForceQuitCommand, EmptyTrashCommand, SleepMacCommand,
+    DynamicSlotCommand
 )
 from .navigation_action import NavigationCommand
 from .device_action import BrightnessCommand, SleepDeviceCommand, ToggleStateCommand
@@ -77,6 +78,10 @@ class ActionRegistry:
             "system.toggle": toggle_cmd,
             "toggle_row2_mode": ToggleRow2ModeCommand(),
             "toggle_mode": ToggleRow2ModeCommand(),
+            "dynamic_slot": DynamicSlotCommand(),
+            "dynamic_app": DynamicSlotCommand(),
+            "recent_app": DynamicSlotCommand(),
+            "system.dynamic_slot": DynamicSlotCommand(),
 
             # Multimídia
             "volumeup": VolumeUpCommand(),

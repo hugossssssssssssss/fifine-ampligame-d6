@@ -1185,10 +1185,6 @@ class D6Engine:
             f_header = self._resolve_font(font_family, 11, bold=True)
             f_huge = self._resolve_font(font_family, 24, bold=True)
 
-            # 1. Cabeçalho limpo no topo (ex: "CPU", "RAM", "SSD", "PING", "VOL")
-            draw.text((cx, 16), (title or "STAT").upper(), fill="#94a3b8", font=f_header, anchor="mm")
-
-            # 2. Valor Principal Gigante e Colorido (ex: "34%", "73%", "43GB", "3ms")
             val_text = subtitle or "--"
             sub_unit = ""
             if "livre" in val_text.lower():
@@ -1197,12 +1193,7 @@ class D6Engine:
                 sub_unit = " ".join(parts[1:])
 
             accent_col = accent or "#38bdf8"
-            draw.text((cx, 44), val_text, fill=accent_col, font=f_huge, anchor="mm")
-
-            # 3. Barra visual do total baseado no que está sendo utilizado (ex: 32% de 100%)
-            track_w = 74
-            x1, x2 = cx - track_w // 2, cx + track_w // 2
-            y1, y2 = 70, 80
+            txt_col = text_color or "#ffffff"
 
             pct = 0
             try:
@@ -1221,6 +1212,36 @@ class D6Engine:
                         pct = min(100, max(0, val_int))
             except Exception:
                 pct = 50
+
+            gauge_style = str(act.get("style") or key_data.get("gaugeStyle") or "").lower()
+            if not gauge_style:
+                tgt_l = str(act.get("target", "")).lower()
+                gauge_style = "arc" if tgt_l in ("cpu", "ram") else "bar"
+
+            if gauge_style == "arc":
+                # Mostrador Radial Circular de Alta Resolução
+                arc_bbox = [(14, 12), (86, 84)]
+                # Fundo do arco (270 graus: 135 a 405)
+                draw.arc(arc_bbox, start=135, end=405, fill="#27272a", width=6)
+                # Arco preenchido proporcional
+                arc_end = 135 + int(270 * (pct / 100.0))
+                if pct > 0:
+                    draw.arc(arc_bbox, start=135, end=arc_end, fill=accent_col, width=6)
+                # Título compacto no topo
+                f_arc_title = self._resolve_font(font_family, 10, bold=True)
+                draw.text((cx, 32), (title or "STAT").upper(), fill="#94a3b8", font=f_arc_title, anchor="mm")
+                # Valor central
+                f_arc_val = self._resolve_font(font_family, 18, bold=True)
+                draw.text((cx, 54), val_text, fill=txt_col, font=f_arc_val, anchor="mm")
+                return img
+
+            # Estilo Barra Horizontal (com marcadores e visual de alta fidelidade)
+            draw.text((cx, 16), (title or "STAT").upper(), fill="#94a3b8", font=f_header, anchor="mm")
+            draw.text((cx, 44), val_text, fill=accent_col, font=f_huge, anchor="mm")
+
+            track_w = 74
+            x1, x2 = cx - track_w // 2, cx + track_w // 2
+            y1, y2 = 70, 80
 
             fill_w = int(track_w * (pct / 100.0))
             # Track com contorno visível definindo a capacidade total (100%)
